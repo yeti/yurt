@@ -1,0 +1,18 @@
+---
+
+- name: Provision a {{ application_name }} app server
+  hosts: appservers
+  sudo: yes
+  sudo_user: root
+  remote_user: root
+  vars:
+    - update_apt_cache: yes
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/{{ env }}.yml
+
+  roles:
+    - base
+    - memcached
+    - nodesource.node
+    - app

@@ -1,0 +1,13 @@
+ecdsa==0.13
+Fabric==1.10.2
+meld3==1.0.2
+paramiko==1.15.3
+pbr==1.8.1
+pycrypto==2.6.1
+simplejson==3.8.0
+six==1.10.0
+stevedore==1.10.0
+virtualenv==13.1.2
+virtualenv-clone==0.2.6
+virtualenvwrapper==4.7.1
+wheel==0.26.0
