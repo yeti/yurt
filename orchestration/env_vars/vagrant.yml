@@ -1,0 +1,28 @@
+---
+env: "vagrant"
+
+# Database settings.
+db_user: "{{ application_name }}"
+db_name: "{{ application_name }}"
+db_password: %(db_password)s
+
+
+# Gunicorn settings. For the number of workers, a good rule to follow is
+# 2 x number of CPUs + 1
+gunicorn_num_workers: %(num_gunicorn_workers)s
+
+# Setting this to 1 will restart the Gunicorn process each time
+# you make a request, basically reloading the code. Very handy
+# when developing. Set to 0 for unlimited requests (default).
+gunicorn_max_requests: %(gunicorn_max_requests)s
+
+
+# Application settings.
+nginx_server_name: "{{ inventory_hostname }}"
+django_settings_file: "{{ application_name }}.%(dev_settings_path)s"
+django_secret_key: "%(secret_key)"
+django_nevercache_key: "%(nevercache_key)"
+
+
+run_django_db_migrations: yes
+run_django_collectstatic: yes

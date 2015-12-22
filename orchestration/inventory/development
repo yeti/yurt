@@ -1,0 +1,8 @@
+[all:vars]
+env=development
+
+[appservers]
+%(app_host_ip)s
+
+[dbservers]
+%(app_host_ip)s
