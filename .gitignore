@@ -1,0 +1,4 @@
+*.pyc
+dist/
+yak_yurt.egg-info/
+build/

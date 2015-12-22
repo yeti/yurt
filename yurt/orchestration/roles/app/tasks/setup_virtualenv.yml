@@ -1,0 +1,57 @@
+---
+
+- name: Ensure virtualenvwrapper is installed
+  pip: name=virtualenvwrapper executable="/usr/bin/pip3"
+
+- name: Export WORKON_HOME in .bashrc
+  lineinfile: dest={{ bashrc_path }} line="export WORKON_HOME=/server/.virtualenvs"
+
+- name: Export VIRTUALENVWRAPPER_PYTHON in .bashrc
+  lineinfile: dest={{ bashrc_path }} line="export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3"
+
+- name: Source virtualenvwrapper.sh in .bashrc
+  lineinfile: dest={{ bashrc_path }} line="source /usr/local/bin/virtualenvwrapper.sh"
+
+- name: Create the virtualenv
+  command: virtualenv -p python3 {{ virtualenv_path }}
+           creates={{ virtualenv_path }}/bin/activate
+
+- name: Create the virtualenv postactivate script to set environment variables
+  template: src=virtualenv_postactivate.j2
+            dest={{ virtualenv_path }}/bin/postactivate
+            owner={{ gunicorn_user }}
+            group={{ gunicorn_group }}
+            mode=0640
+            backup=yes
+  tags: deploy
+
+- name: Copy 'workon {environment}' statement to .bashrc
+  lineinfile: dest={{ bashrc_path }} line="workon {{ application_name }}"
+
+- name: Copy 'cd /path/to/application' statement to .bashrc
+  lineinfile: dest={{ bashrc_path }} line="cd {{ project_path }}"
+
+- name: Set permission to virtualenv path
+  file: path={{ virtualenv_path }}
+        recurse=yes
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        state=directory
+
+- name: Create symlink for repository for development
+  file: src=/vagrant/{{application_name}} dest={{ project_path }} state=link
+  when: env == "vagrant"
+
+- name: Create directory for repository
+  file: path={{ project_path }}
+        state=directory
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_user }}
+  when: env != "vagrant"
+
+- name: Create the maintenance page
+  template: src=maintenance_off.html
+            dest=/server/maintenance_off.html
+            mode=0664
+
+

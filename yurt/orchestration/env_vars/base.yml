@@ -1,0 +1,12 @@
+---
+
+git_repo: %(git_repo)s
+repo_name: %(repo_name)s
+
+project_name: %(project_name)s
+application_name: %(project_name)s
+
+git_ssh_pub_key: %(git_pub_key)s
+git_ssh_priv_key: |
+  %(git_priv_key)s
+

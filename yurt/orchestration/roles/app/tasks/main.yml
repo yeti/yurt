@@ -1,0 +1,29 @@
+---
+
+- include: create_users_and_groups.yml
+
+- include: setup_virtualenv.yml
+  tags: virtualenv
+
+- include: setup_gunicorn.yml
+  when: env != "vagrant"
+  tags: deploy
+
+- include: setup_git_repo.yml
+  when: env != "vagrant"
+  tags: deploy
+
+- include: setup_django_app.yml
+  tags: deploy
+
+- include: setup_supervisor.yml
+  when: env != "vagrant"
+  tags: supervisor
+
+- include: set_file_permissions.yml
+  when: env != "vagrant"
+  tags: deploy
+
+- include: setup_nginx.yml
+  when: env != "vagrant"
+  tags: nginx
