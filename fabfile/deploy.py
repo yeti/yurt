@@ -1,7 +1,8 @@
+from contextlib import contextmanager
 import os
+from subprocess import call
 from fabric.decorators import task
 from fabric.operations import local
-from contextlib import contextmanager
 from fabric.context_managers import prefix
 
 __author__ = 'deanmercado'
@@ -19,9 +20,9 @@ def bash():
 
 @contextmanager
 def ansible():
-    with prefix('workon ansible'):
-        yield
-
+    with bash():
+        with prefix('workon ansible'):
+            yield
 ###
 # Hidden/Helper functions
 ###
@@ -33,26 +34,25 @@ def _install_virtualenvwrapper():
     :return: Void
     """
     try:
-        local('sudo pip install virtualenvwrapper')
+        local('pip install virtualenvwrapper')
     except Exception, e:
         print 'virtualenvwrapper already installed'
-
-    if not os.path.exists("$HOME/.added_virtualenvwrapper_to_bashrc"):
+    if not os.path.exists(os.path.expanduser("~/.added_virtualenvwrapper_to_bashrc")):
         local('echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.bashrc')
         local('echo "export PROJECT_HOME=$HOME/Devel" >> ~/.bashrc')
         local('echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc')
-        local("touch $HOME/.added_to_bashrc")
+        local("touch $HOME/.added_virtualenvwrapper_to_bashrc")
 
 
-@task
-def add_fab_path_to_bashrc():
+def _add_fab_path_to_bashrc():
     """
     Adds FAB_PATH variable to .bashrc
     :return: Void
     """
     with prefix('cd fabfile'):
-        if not os.path.exists("$HOME/.added_fabpath_to_bashrc"):
+        if not os.path.exists(os.path.expanduser("~/.added_fabpath_to_bashrc")):
             local('echo "export FAB_PATH=$(pwd -P)" >> ~/.bashrc')
+            local("touch $HOME/.added_fabpath_to_bashrc")
 
 ###
 # Commands that could be called through fab
@@ -62,26 +62,33 @@ def add_fab_path_to_bashrc():
 @task
 def create_ansible_env():
     """
-    Creates the ansible environment if it hasn't been created already
+    Creates the ansible environment
     :return: Void
     """
     try:
         _install_virtualenvwrapper()
+        _add_fab_path_to_bashrc()
     except Exception, e:
         print str(e)
-    try:
-        bash('mkvirtualenv ansible')
-        ansible('pip install ansible')
-    except Exception, e:
-        print "Ansible environment exists already!"
+    with bash():
+        local('mkvirtualenv ansible')
+    with ansible():
+        local('pip install ansible')
+        try:
+            local('ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.txt')
+        except Exception:
+            pass
 
 
+@task
 def load_orchestration():
     """
     Copies orchestration directory to current directory
     :return:
     """
-    local('cp -rf ./orchestration ../')
+    with bash():
+        local('cp -rf $FAB_PATH/../orchestration ./')
+        print "Replace variables in YAML files in `orchestration/env_vars` with desired values."
 
 
 @task

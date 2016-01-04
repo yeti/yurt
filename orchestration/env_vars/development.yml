@@ -32,8 +32,8 @@ ssl_enabled: false
 
 # Application settings.
 django_settings_file: "{{ application_name }}.%(settings_path)s"
-django_secret_key: "%(secret_key)"
-django_nevercache_key: "%(nevercache_key)"
+django_secret_key: "%(secret_key)s"
+django_nevercache_key: "%(nevercache_key)s"
 
 
 run_django_db_migrations: yes
