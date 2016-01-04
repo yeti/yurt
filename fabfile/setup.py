@@ -1,6 +1,5 @@
 from contextlib import contextmanager
 import os
-from subprocess import call
 from fabric.decorators import task
 from fabric.operations import local
 from fabric.context_managers import prefix
@@ -17,6 +16,10 @@ def bash():
     with prefix('source ~/.bashrc'):
         yield
 
+@contextmanager
+def venv(project_name):
+    with prefix('workon %s' % project_name):
+        yield
 
 @contextmanager
 def ansible():
@@ -62,7 +65,7 @@ def _add_fab_path_to_bashrc():
 @task
 def create_ansible_env():
     """
-    Creates the ansible environment
+    Step 1: Creates the ansible environment
     :return: Void
     """
     try:
@@ -81,16 +84,29 @@ def create_ansible_env():
 
 
 @task
-def load_orchestration():
+def load_orchestration_and_requirements():
     """
-    Copies orchestration directory to current directory
-    :return:
+    Step 2: Copies over the orchestration directory and requirements.txt file
+    Copies orchestration directory and requirements to current directory
+    :return: Void
     """
     with bash():
         local('cp -rf $FAB_PATH/../orchestration ./')
+        local('cp -f $FAB_PATH/requirements.txt ./')
         print "Replace variables in YAML files in `orchestration/env_vars` with desired values."
 
-
 @task
-def new():
-    pass
+def create_project(project_name, git_repo):
+    """
+    Step 3: Creates Django project
+    :param project_name: Name of the project
+    :param git_repo: URL of the git repository
+    :return: Void
+    """
+    # local("git clone %s" % git_repo)
+    # Set up new django project
+    with bash():
+        local('mkvirtualenv %s' % project_name)
+    with venv(project_name):
+        local('pip install django==1.9')
+        local('python django-admin.py startproject %s' % project_name)

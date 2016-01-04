@@ -9,6 +9,9 @@
   when: env != "vagrant"
   tags: deploy
 
+- include: create_django_app.yml
+  tags: setup
+
 - include: setup_django_app.yml
   tags: deploy
 
