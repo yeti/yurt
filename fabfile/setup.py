@@ -4,7 +4,7 @@ from fabric.operations import local
 from fabric.context_managers import prefix, settings
 from fabric.state import env
 from fabric.tasks import execute
-from context_managers import bash, venv, ansible
+from context_managers import bash, venv, ansible, in_project
 
 __author__ = 'deanmercado'
 
@@ -67,7 +67,6 @@ def create_ansible_env():
     Creates the ansible environment
     :return: Void
     """
-
     with bash():
         local('mkvirtualenv ansible')
     with ansible():
@@ -89,11 +88,26 @@ def load_orchestration_and_requirements(proj_name=None):
         local('cp -f $FAB_PATH/requirements.txt ./%s' % env.proj_name)
         env.post_messages.append(" ".join(("Deployment step: Replace variables of YAML files in ",
                                            "`%s/orchestration/env_vars` with " % env.proj_name,
-                                           "desired values. Then run `fab deploy`")))
+                                           "desired values. Then run `fab deploy.deploy`")))
+
+@task
+def enable_git_repo(git_repo_url):
+    """
+    Sets up git repository in project direcory
+    :return: Void
+    """
+    if git_repo_url:
+        env.git_repo_url = git_repo_url
+    with in_project():
+        local('git init')
+        local('git remote add origin %s' % env.git_repo_url)
+        local('git checkout -b develop')
+
+
 
 
 @task
-def new(proj_name):
+def new(proj_name, repo_url):
     """
     Create new project
     :param proj_name: Project name (string)
@@ -101,10 +115,12 @@ def new(proj_name):
     """
 
     env.proj_name = proj_name
+    env.git_repo_url = repo_url
     env.post_messages = []
     _install_virtualenvwrapper()
     _add_fab_path_to_bashrc()
 
+    execute(enable_git_repo)
     execute(create_project)
     execute(create_ansible_env)
     execute(load_orchestration_and_requirements)

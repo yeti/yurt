@@ -21,6 +21,6 @@ to either a Vagrant or web host instance.
     - `cd ~/projects/new_proj`
 - Symlink the fabfile to the project directory
     - `sudo ln -s ~/projects/yurt/fabfile .`
-- Call the `setup.new` method with your desired project name
+- Call the `setup.new` fabric method with your desired project name
     - `fab setup.new:your_project_name`
 

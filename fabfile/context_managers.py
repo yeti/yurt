@@ -1,5 +1,6 @@
 from contextlib import contextmanager
-from fabric.context_managers import prefix
+from fabric.context_managers import prefix, cd
+
 
 ###
 # Context Managers
@@ -24,3 +25,9 @@ def ansible():
     with bash():
         with prefix('workon ansible'):
             yield
+
+
+@contextmanager
+def in_project(project_name):
+    with cd(project_name):
+        yield
