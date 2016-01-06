@@ -2,7 +2,7 @@
 env=vagrant
 
 [appservers]
-%(app_host_ip)s
+127.0.0.1
 
 [dbservers]
 127.0.0.1

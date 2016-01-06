@@ -19,7 +19,7 @@ gunicorn_max_requests: 1
 
 # Application settings.
 nginx_server_name: "{{ inventory_hostname }}"
-django_settings_file: "{{ application_name }}.%(dev_settings_path)s"
+django_settings_file: "{{ application_name }}.%(settings_path)s"
 django_secret_key: "SECRET_KEY"
 django_nevercache_key: "NEVERCACHE_KEY"
 

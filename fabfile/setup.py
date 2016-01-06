@@ -1,64 +1,37 @@
 import os
 from fabric.decorators import task
 from fabric.operations import local
-from fabric.context_managers import prefix, settings
+from fabric.context_managers import settings, lcd
 from fabric.state import env
 from fabric.tasks import execute
-from context_managers import bash, venv, ansible, in_project
+from context_managers import bash, ansible
+from utils import recursive_file_modify, install_virtualenvwrapper, add_fab_path_to_bashrc
 
 __author__ = 'deanmercado'
 
 ###
-# Hidden/Helper functions
-###
-
-
-def _install_virtualenvwrapper():
-    """
-    Installs virtualenvwrapper globally, adding to $HOME/.bashrc the required lines
-    :return: Void
-    """
-    try:
-        local('pip install virtualenvwrapper')
-    except Exception, e:
-        print 'virtualenvwrapper already installed'
-    if not os.path.exists(os.path.expanduser("~/.added_virtualenvwrapper_to_bashrc")):
-        local('echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.bashrc')
-        local('echo "export PROJECT_HOME=$HOME/Devel" >> ~/.bashrc')
-        local('echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc')
-        local("touch $HOME/.added_virtualenvwrapper_to_bashrc")
-
-
-def _add_fab_path_to_bashrc():
-    """
-    Adds FAB_PATH variable to .bashrc
-    :return: Void
-    """
-    with prefix('cd fabfile'):
-        if not os.path.exists(os.path.expanduser("~/.added_fabpath_to_bashrc")):
-            local('echo "export FAB_PATH=$(pwd -P)" >> ~/.bashrc')
-            local("touch $HOME/.added_fabpath_to_bashrc")
-
-###
-# Commands that could be called through fab
+# fab setup commands: these commands setup a new django project
 ###
 
 
 @task
 def create_project(proj_name=None):
     """
-    Creates Django project
-    :param project_name: Name of the project
+    Creates Django project by copying over
+    :param proj_name: Name of the project
     :return: Void
     """
     if proj_name:
         env.proj_name = proj_name
-    with bash():
-        local('mkvirtualenv %s' % env.proj_name)
-    with venv(env.proj_name):
-        local('pip install -r $FAB_PATH/requirements.txt')
-        with prefix('export PATH=$WORKON_HOME/%s/bin:$PATH' % env.proj_name):
-            local('python $WORKON_HOME/%s/bin/django-admin.py startproject %s' % (env.proj_name, env.proj_name))
+
+    try:
+        env.settings = __import__("fabric_settings", globals(), locals(), [], 0).FABRIC
+    except Exception:
+        raise Exception('Create `fabric_settings.py` file in this directory')
+
+    with lcd(env.proj_name):
+        local("cp -rf $FAB_PATH/../django_project/* .")
+        recursive_file_modify(os.path.abspath("."), env.settings)
 
 
 @task
@@ -70,8 +43,8 @@ def create_ansible_env():
     with bash():
         local('mkvirtualenv ansible')
     with ansible():
-        local('pip install ansible')
         with settings(warn_only=True):
+            local('pip install ansible')
             local('ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.txt')
 
 
@@ -83,27 +56,36 @@ def load_orchestration_and_requirements(proj_name=None):
     """
     if proj_name:
         env.proj_name = proj_name
+
+    try:
+        env.settings = __import__("fabric_settings", globals(), locals(), [], 0).FABRIC
+    except Exception:
+        raise Exception('Create `fabric_settings.py` file in this directory')
+
     with bash():
-        local('cp -rf $FAB_PATH/../orchestration ./%s' % env.proj_name)
-        local('cp -f $FAB_PATH/requirements.txt ./%s' % env.proj_name)
+        local('cp -rf $FAB_PATH/../orchestration ./{}'.format(env.proj_name))
+        local('cp -f $FAB_PATH/requirements.txt ./{}'.format(env.proj_name))
+        with lcd(os.path.join(env.proj_name, 'orchestration')):
+            recursive_file_modify(os.path.abspath('.'))
+
         env.post_messages.append(" ".join(("Deployment step: Replace variables of YAML files in ",
-                                           "`%s/orchestration/env_vars` with " % env.proj_name,
-                                           "desired values. Then run `fab deploy.deploy`")))
+                                           "`{}/orchestration/env_vars` and `{}/orchestration/inventory` with ",
+                                           "desired values. Then run `fab deploy.deploy`")).format(env.proj_name,
+                                                                                                   env.proj_name))
+
 
 @task
-def enable_git_repo(git_repo_url):
+def enable_git_repo(git_repo_url=None):
     """
     Sets up git repository in project direcory
     :return: Void
     """
     if git_repo_url:
         env.git_repo_url = git_repo_url
-    with in_project():
+    with lcd(env.proj_name):
         local('git init')
-        local('git remote add origin %s' % env.git_repo_url)
+        local('git remote add origin {}'.format(env.git_repo_url))
         local('git checkout -b develop')
-
-
 
 
 @task
@@ -117,8 +99,8 @@ def new(proj_name, repo_url):
     env.proj_name = proj_name
     env.git_repo_url = repo_url
     env.post_messages = []
-    _install_virtualenvwrapper()
-    _add_fab_path_to_bashrc()
+    install_virtualenvwrapper()
+    add_fab_path_to_bashrc()
 
     execute(enable_git_repo)
     execute(create_project)
@@ -127,3 +109,18 @@ def new(proj_name, repo_url):
 
     for message in env.post_messages:
         print message
+
+@task
+def add_settings():
+    add_fab_path_to_bashrc()
+    if 'fabric_settings.py' in os.listdir():
+        continue_process = raw_input('You already have `fabric_settings.py in this folder. Redo? (Y/N)')
+        if continue_process.lower() == 'y':
+            pass
+        else:
+            print "Aborted."
+            return False
+    with bash():
+        local('cp $FAB_PATH/fabric_settings.py.default.py ./fabric_settings.py')
+        print "".join(("You now have `fabric_settings.py`. Edit this file to have the correct ",
+                       "values and then do `fab setup.new:<proj_name>,<git_repo_url>"))

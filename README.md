@@ -11,6 +11,8 @@ to either a Vagrant or web host instance.
     - virtualenv
     - pip
 - PostgreSQL
+- VirtualBox
+- Vagrant
 
 ### Getting started:
 - Git clone this repository into its own project directory
