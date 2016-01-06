@@ -1,7 +1,7 @@
 import os
 from fabric.decorators import task
 from fabric.operations import local
-from fabric.context_managers import settings, prefix, lcd
+from fabric.context_managers import settings, lcd
 from fabric.state import env
 from fabric.tasks import execute
 from context_managers import bash, ansible
@@ -79,6 +79,18 @@ def enable_git_repo():
 
 
 @task
+def move_vagrantfile_to_project_dir():
+    env.settings = get_fab_settings()
+    env.proj_name = env.settings.get('project_name')
+    local('mv ./{}/orchestration/Vagrantfile .'.format(env.proj_name))
+
+
+@task
+def delete_fabric_settings():
+    local('rm fabric_settings.py*')
+
+
+@task
 def new():
     """
     Create new project
@@ -95,6 +107,8 @@ def new():
     execute(create_project)
     execute(create_ansible_env)
     execute(load_orchestration_and_requirements)
+    execute(move_vagrantfile_to_project_dir)
+    execute(delete_fabric_settings)
 
 
 @task

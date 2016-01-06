@@ -6,13 +6,11 @@ FABRIC = {
     'vagrant': {
         'db_password': '',
         'secret_key': '',
-        'nevercache_key': '',
         'settings_path': 'config.settings.local',
     },
     'development': {
         'db_password': '',
         'secret_key': '',
-        'nevercache_key': '',
         'settings_path': 'config.settings.dev',
         'app_host_ip': '',
         'num_gunicorn_workers': '',
@@ -21,7 +19,6 @@ FABRIC = {
     'staging': {
         'db_password': '',
         'secret_key': '',
-        'nevercache_key': '',
         'settings_path': 'config.settings.stage',
         'app_host_ip': '',
         'num_gunicorn_workers': '',
@@ -30,7 +27,6 @@ FABRIC = {
     'production': {
         'db_password': '',
         'secret_key': '',
-        'nevercache_key': '',
         'settings_path': 'config.settings.prod',
         'app_host_ip': '',
         'num_gunicorn_workers': '',

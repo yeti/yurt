@@ -10,7 +10,6 @@ to either a Vagrant or web host instance.
     - Fabric
     - virtualenv
     - pip
-- PostgreSQL
 - VirtualBox
 - Vagrant
 
