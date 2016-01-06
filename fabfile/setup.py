@@ -27,7 +27,7 @@ def create_project():
     with bash():
         with lcd(env.proj_name):
             local("cp -rf $FAB_PATH/../django_project/* .")
-            recursive_file_modify(os.path.abspath("./{}".format(env.proj_name)), env.settings)
+        recursive_file_modify(os.path.abspath("./{}".format(env.proj_name)), env.settings)
 
 
 @task
@@ -37,7 +37,8 @@ def create_ansible_env():
     :return: Void
     """
     with bash():
-        local('mkvirtualenv ansible')
+        with settings(warn_only=True):
+            local('mkvirtualenv ansible')
     with ansible():
         with settings(warn_only=True):
             local('pip install ansible')

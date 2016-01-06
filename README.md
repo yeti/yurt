@@ -28,3 +28,13 @@ to either a Vagrant or web host instance.
     - `nano fabric_settings.py`
 - Call the `setup.new` fabric method
     - `fab setup.new`
+
+### Setting up development environment:
+- Go to the new project directory
+    - `cd ~/projects/new_proj`
+- Get in the ansible virtual environment
+    - `workon ansible`
+- Startup Vagrant for the first time
+    - `vagrant up`
+    - This step runs the `ansible` provisioner the first time. If you want to make changes
+      to `orchestration`, run `vagrant provision` afterwards to refresh.
