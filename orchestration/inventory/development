@@ -2,7 +2,7 @@
 env=development
 
 [appservers]
-%(app_host_ip)s
+%(development.app_host_ip)s
 
 [dbservers]
-%(app_host_ip)s
+%(development.app_host_ip)s

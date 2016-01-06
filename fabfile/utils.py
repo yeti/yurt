@@ -9,6 +9,13 @@ __author__ = 'deanmercado'
 ###
 
 
+def get_fab_settings():
+    try:
+        return __import__("fabric_settings", globals(), locals(), [], 0).FABRIC
+    except Exception:
+        raise Exception('Create `fabric_settings.py` file in this directory')
+
+
 def get_file_text(path):
     """
     Gets the text from a file
@@ -20,7 +27,7 @@ def get_file_text(path):
     return result
 
 
-def recursive_file_modify(path, dictionary, pattern=r"%\(({}))\)s"):
+def recursive_file_modify(path, dictionary, pattern=r"%\(({})\)s"):
     """
     Recursively modifies all files in a given directory with a replacement dictionary
     :param path: a given path
@@ -43,9 +50,20 @@ def recursive_file_modify(path, dictionary, pattern=r"%\(({}))\)s"):
             # the dictionary
             file_text = get_file_text(itempath)
             change_vars = re.findall(all_vars_pattern, file_text)
+            print "itempath: " + itempath,
+            print "change_vars: " + str(change_vars)
             for variable in change_vars:
                 var_pattern = pattern.format(variable)
-                file_text = re.sub(var_pattern, dictionary.get(variable), file_text)
+                if "." in variable:
+                    env_key, variable = variable.split('.')
+                    target_dictionary = dictionary.get(env_key).copy()
+                else:
+                    target_dictionary = dictionary.copy()
+                try:
+                    file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
+                except TypeError:
+                    import pdb
+                    pdb.set_trace()
             with open(itempath, 'w') as change_file:
                 change_file.write(file_text)
 
