@@ -8,9 +8,9 @@ upstream {{ application_name }}_wsgi_server {
 
 {% if ssl_enabled %}
 server {
-    listen      80;
-    server_name {{ nginx_server_name }};
-    rewrite     ^ https://$server_name$request_uri? permanent;
+    listen              80;
+    server_name         {{ nginx_server_name }};
+    rewrite             ^ https://$server_name$request_uri? permanent;
 }
 {% endif %}
 

@@ -56,9 +56,7 @@ def load_orchestration_and_requirements():
     with bash():
         local('cp -rf $FAB_PATH/../orchestration ./{}'.format(env.proj_name))
         local('cp -f $FAB_PATH/requirements.txt ./{}'.format(env.proj_name))
-        with lcd('./{}/orchestration'.format(env.proj_name)):
-            local('pwd')
-            recursive_file_modify(os.path.abspath('.'))
+        recursive_file_modify('./{}/orchestration'.format(env.proj_name), env.settings)
 
 
 @task
@@ -98,8 +96,6 @@ def new():
     execute(create_ansible_env)
     execute(load_orchestration_and_requirements)
 
-    for message in env.post_messages:
-        print message
 
 @task
 def add_settings():
@@ -113,9 +109,9 @@ def add_settings():
         if continue_process.lower() == 'y':
             pass
         else:
-            print "Aborted."
+            print("Aborted.")
             return False
     with bash():
         local('cp $FAB_PATH/fabric_settings.py.default.py ./fabric_settings.py')
-        print "".join(("You now have `fabric_settings.py`. Edit this file to have the correct ",
-                       "values and then do `fab setup.new:<proj_name>,<git_repo_url>"))
+        print("".join(("You now have `fabric_settings.py`. Edit this file to have the correct ",
+                       "values and then do `fab setup.new:<proj_name>,<git_repo_url>")))

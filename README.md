@@ -23,6 +23,9 @@ to either a Vagrant or web host instance.
     - `cd ~/projects/new_proj`
 - Symlink the fabfile to the project directory
     - `sudo ln -s ~/projects/yurt/fabfile .`
-- Call the `setup.new` fabric method with your desired project name
-    - `fab setup.new:your_project_name`
-
+- Call the `setup.add_settings` fabric method to generate `fabric_settings.py`
+    - `fab setup.add_settings`
+- Edit `fabric_settings.py`, filling in the blank values.
+    - `nano fabric_settings.py`
+- Call the `setup.new` fabric method
+    - `fab setup.new`

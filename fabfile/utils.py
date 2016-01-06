@@ -20,7 +20,7 @@ def get_file_text(path):
     """
     Gets the text from a file
     :param path:
-    :return: String from text
+    :return: String
     """
     with open(path, 'r') as file_item:
         result = file_item.read()
@@ -50,8 +50,6 @@ def recursive_file_modify(path, dictionary, pattern=r"%\(({})\)s"):
             # the dictionary
             file_text = get_file_text(itempath)
             change_vars = re.findall(all_vars_pattern, file_text)
-            print "itempath: " + itempath,
-            print "change_vars: " + str(change_vars)
             for variable in change_vars:
                 var_pattern = pattern.format(variable)
                 if "." in variable:
@@ -59,11 +57,7 @@ def recursive_file_modify(path, dictionary, pattern=r"%\(({})\)s"):
                     target_dictionary = dictionary.get(env_key).copy()
                 else:
                     target_dictionary = dictionary.copy()
-                try:
-                    file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
-                except TypeError:
-                    import pdb
-                    pdb.set_trace()
+                file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
             with open(itempath, 'w') as change_file:
                 change_file.write(file_text)
 

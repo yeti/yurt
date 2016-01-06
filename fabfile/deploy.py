@@ -7,5 +7,7 @@ __author__ = 'deanmercado'
 
 @task
 def deploy(environment):
-    with ansible() and in_project() and settings(warn_only=True):
-        local('ansible-playbook -i orchestration/inventory/{}'.format(environment))
+    with ansible():
+        with in_project():
+            with settings(warn_only=True):
+                local('ansible-playbook -i orchestration/inventory/{}'.format(environment))
