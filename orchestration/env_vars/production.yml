@@ -32,7 +32,7 @@ ssl_enabled: false
 
 
 # Application settings.
-django_settings_file: "ls%(production.settings_path)s"
+django_settings_file: "%(production.settings_path)s"
 django_secret_key: "%(production.secret_key)s"
 
 run_django_db_migrations: yes
