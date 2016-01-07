@@ -5,6 +5,7 @@
   sudo: yes
   sudo_user: root
   remote_user: vagrant
+
   vars:
     - setup_git_repo: yes
     - update_apt_cache: yes

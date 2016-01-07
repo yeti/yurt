@@ -1,5 +1,6 @@
 ---
 env: "development"
+project_path: "/server/{{ application_name }}"
 
 # Git settings.
 setup_git_repo: yes
@@ -15,6 +16,7 @@ db_password: %(development.db_password)s
 # Gunicorn settings. For the number of workers, a good rule to follow is
 # 2 x number of CPUs + 1
 gunicorn_num_workers: %(development.num_gunicorn_workers)s
+gunicorn_user: "{{ application_name }}"
 
 # Setting this to 1 will restart the Gunicorn process each time
 # you make a request, basically reloading the code. Very handy
@@ -31,9 +33,8 @@ ssl_enabled: false
 
 
 # Application settings.
-django_settings_file: "{{ application_name }}.%(development.settings_path)s"
+django_settings_file: "%(development.settings_path)s"
 django_secret_key: "%(development.secret_key)s"
-django_nevercache_key: "%(development.nevercache_key)s"
 
 
 run_django_db_migrations: yes

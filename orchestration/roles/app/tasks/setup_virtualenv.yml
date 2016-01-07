@@ -1,8 +1,29 @@
 ---
 
+- name: Ensure virtualenvwrapper is installed
+  pip: name=virtualenvwrapper
+
+- name: Export WORKON_HOME in .bashrc
+  lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="export WORKON_HOME=$HOME/.virtualenvs"
+
+- name: Export PROJECT_HOME in .bashrc
+  lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="export PROJECT_HOME=$HOME/Devel"
+
+- name: Source virtualenvwrapper.sh in .bashrc
+  lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="source /usr/local/bin/virtualenvwrapper.sh"
+
 - name: Create the virtualenv
-  command: virtualenv {{ virtualenv_path }} --no-site-packages
+  command: virtualenv {{ virtualenv_path }}
            creates={{ virtualenv_path }}/bin/activate
+
+- name: Create the virtualenv postactivate script to set environment variables
+  template: src=virtualenv_postactivate.j2
+            dest={{ virtualenv_path }}/bin/postactivate
+            owner={{ gunicorn_user }}
+            group={{ gunicorn_group }}
+            mode=0640
+            backup=yes
+  tags: deploy
 
 - name: Ensure gunicorn is installed
   pip: virtualenv={{ virtualenv_path }} name=gunicorn
@@ -27,23 +48,11 @@
   command: touch {{ application_log_file }}
            creates={{ application_log_file }}
 
-- name: Create the virtualenv postactivate script to set environment variables
-  template: src=virtualenv_postactivate.j2
-            dest={{ virtualenv_path }}/bin/postactivate
-            owner={{ gunicorn_user }}
-            group={{ gunicorn_group }}
-            mode=0640
-            backup=yes
-  tags: deploy
+- name: Copy 'workon {environment}' statement to .bashrc
+  lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="workon {{ application_name }}"
 
-- name: Change permissions of postactivate script to be runnable by user
-  command: chmod go+rx {{ virtualenv_path }}/bin/postactivate
-
-- name: Copy activate script to .bashrc
-  lineinfile: dest=/home/vagrant/.bashrc line="source {{ virtualenv_path }}/bin/activate"
-
-- name: Copy postactivate script to .bashrc
-  lineinfile: dest=/home/vagrant/.bashrc line="source {{ virtualenv_path }}/bin/postactivate"
+- name: Copy 'cd /path/to/application' statement to .bashrc
+  lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="cd {{ project_path }}"
 
 
 - name: Set permission to the application log file
@@ -53,11 +62,20 @@
         mode=0664
         state=file
 
-- name: Create the maintenance page
-  template: src=maintenance_off.html
-            dest={{ virtualenv_path }}/maintenance_off.html
-            mode=0664
+- name: Create /server/ directory
+  file: path=/server
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        state=directory
+  when: env == "vagrant"
 
 - name: Create symlink for repository for development
   file: src=/vagrant/ dest={{ project_path }} state=link
   when: env == "vagrant"
+
+- name: Create the maintenance page
+  template: src=maintenance_off.html
+            dest={{ project_path }}/maintenance_off.html
+            mode=0664
+
+

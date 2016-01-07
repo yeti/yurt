@@ -15,6 +15,7 @@ db_password: %(production.db_password)s
 # Gunicorn settings. For the number of workers, a good rule to follow is
 # 2 x number of CPUs + 1
 gunicorn_num_workers: %(production.num_gunicorn_workers)s
+gunicorn_user: "{{ application_name }}"
 
 # Setting this to 1 will restart the Gunicorn process each time
 # you make a request, basically reloading the code. Very handy
@@ -31,10 +32,8 @@ ssl_enabled: false
 
 
 # Application settings.
-django_settings_file: "{{ application_name }}.%(production.settings_path)s"
+django_settings_file: "%(production.settings_path)s"
 django_secret_key: "%(production.secret_key)s"
-django_nevercache_key: "%(production.nevercache_key)s"
-
 
 run_django_db_migrations: yes
 run_django_collectstatic: yes

@@ -2,7 +2,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "%(project_name)s.%(vagrant.settings_path)s")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "%(vagrant.settings_path)s")
 
 application = get_wsgi_application()
 

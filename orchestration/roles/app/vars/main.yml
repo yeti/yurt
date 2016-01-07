@@ -1,16 +1,15 @@
 ---
 
 # Application settings.
-virtualenv_path: "/server/{{ application_name }}"
+virtualenv_path: "/home/{{ gunicorn_user }}/.virtualenvs/{{ application_name }}"
 virtualenv_python: "{{ virtualenv_path }}/bin/python"
-project_path: "{{ virtualenv_path }}/{{ project_name }}"
+project_path: "/server/{{ application_name }}"
 application_log_dir: "{{ virtualenv_path }}/logs"
 application_log_file: "{{ application_log_dir }}/gunicorn_supervisor.log"
 requirements_file: "{{ project_path }}/requirements.txt"
 
 
 # Gunicorn settings
-gunicorn_user: "{{ application_name }}"
 gunicorn_group: server
 
 
@@ -27,7 +26,6 @@ nginx_media_dir: "{{ project_path }}/static"
 django_environment:
   DJANGO_SETTINGS_MODULE: "{{ django_settings_file }}"
   DJANGO_SECRET_KEY: "{{ django_secret_key }}"
-  DJANGO_NEVERCACHE_KEY: "{{ django_nevercache_key }}"
   DATABASE_USER: "{{ db_user }}"
   DATABASE_PASSWORD: "{{ db_password }}"
   DATABASE_HOST: "{{ db_host|default('127.0.0.1') }}"
