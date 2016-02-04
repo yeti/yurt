@@ -90,7 +90,7 @@ def move_vagrantfile_to_project_dir():
 @task
 def create_pem_file():
     env.settings = get_fab_settings()
-    pem = generate_ssh_keypair(pem_only=True)
+    _, pem = generate_ssh_keypair(pem_only=True)
     project_name = env.settings.get('project_name')
     with open("./{}.pem".format(project_name), 'w') as key:
         key.write(pem)

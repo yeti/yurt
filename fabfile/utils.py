@@ -150,6 +150,6 @@ def generate_ssh_keypair(pem_only=False):
     public = key.publickey().exportKey('OpenSSH')
     private = key.exportKey('PEM')
     if pem_only:
-        return private
+        public = None
     private = re.sub(r"\n", "\n  ", private)
     return public, private
