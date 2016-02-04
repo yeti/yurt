@@ -1,6 +1,9 @@
+import string
+from Crypto.PublicKey import RSA
 from fabric.context_managers import prefix, settings
 from fabric.operations import local, os
 import re
+from random import choice
 
 __author__ = 'deanmercado'
 
@@ -27,7 +30,32 @@ def get_file_text(path):
     return result
 
 
-def recursive_file_modify(path, dictionary, pattern=r"%\(({})\)s"):
+def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
+    """
+    Get text, find all the variables, and then for each variable found,
+    create a new pattern and run re.sub to substitute all instances with
+    the dictionary
+    :param filepath:
+    :param dictionary:
+    :param pattern:
+    :param all_vars_pattern:
+    :return: Void
+    """
+    file_text = get_file_text(filepath)
+    change_vars = re.findall(all_vars_pattern, file_text)
+    for variable in change_vars:
+        var_pattern = pattern.format(variable)
+        if "." in variable:
+            env_key, variable = variable.split('.')
+            target_dictionary = dictionary.get(env_key).copy()
+        else:
+            target_dictionary = dictionary.copy()
+        file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
+    with open(filepath, 'w') as change_file:
+        change_file.write(file_text)
+
+
+def recursive_file_modify(path, dictionary, pattern=r"%\(({})\)s", is_dir=True):
     """
     Recursively modifies all files in a given directory with a replacement dictionary
     :param path: a given path
@@ -39,27 +67,16 @@ def recursive_file_modify(path, dictionary, pattern=r"%\(({})\)s"):
     all_vars_pattern = pattern.format(r"[^\)]*")
 
     # Iterates through every item in the given path
-    for item in os.listdir(path):
-        itempath = os.path.join(path, item)
-        # If directory, call this function again
-        if os.path.isdir(itempath) and not(itempath in [".", ".."]):
-            recursive_file_modify(itempath, dictionary, pattern)
-        else:
-            # Get text, find all the variables, and then for each variable found,
-            # create a new pattern and run re.sub to substitute all instances with
-            # the dictionary
-            file_text = get_file_text(itempath)
-            change_vars = re.findall(all_vars_pattern, file_text)
-            for variable in change_vars:
-                var_pattern = pattern.format(variable)
-                if "." in variable:
-                    env_key, variable = variable.split('.')
-                    target_dictionary = dictionary.get(env_key).copy()
-                else:
-                    target_dictionary = dictionary.copy()
-                file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
-            with open(itempath, 'w') as change_file:
-                change_file.write(file_text)
+    if is_dir:
+        for item in os.listdir(path):
+            itempath = os.path.join(path, item)
+            # If directory, call this function again
+            if os.path.isdir(itempath) and not(itempath in [".", ".."]):
+                recursive_file_modify(itempath, dictionary, pattern)
+            else:
+                _perform_substitution(itempath, dictionary, pattern, all_vars_pattern)
+    else:
+        _perform_substitution(path, dictionary, pattern, all_vars_pattern)
 
 
 def _get_bashrc():
@@ -107,3 +124,32 @@ def add_fab_path_to_bashrc():
                 bashrc_text = re.sub(r'export FAB_PATH=[^\n]*', '', bashrc_text)
             bashrc.write(bashrc_text)
         local('echo "export FAB_PATH=$(pwd -P)" >> ~/.bashrc')
+
+
+def generate_printable_string(num_chars):
+    """
+    Generates a random string of printable characters
+    :param num_chars: number (int) of characters for the string to be
+    :return: String
+    """
+    result = ""
+    all_chars = string.printable.strip(string.whitespace)
+    while num_chars > 0:
+        result = "".join((result, choice(all_chars)))
+        num_chars -= 1
+    result = re.sub(r"'", "\\'", result)
+    return result
+
+
+def generate_ssh_keypair(pem_only=False):
+    """
+    Generates a 4096 bit ssh-keypair
+    :return: Tuple (str, str)
+    """
+    key = RSA.generate(4096)
+    public = key.publickey().exportKey('OpenSSH')
+    private = key.exportKey('PEM')
+    if pem_only:
+        return private
+    private = re.sub(r"\n", "\n  ", private)
+    return public, private
