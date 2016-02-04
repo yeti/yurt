@@ -31,11 +31,12 @@ ssl_dest_dir: /etc/ssl
 ssl_key_password: password
 ssl_enabled: false
 
+# Application settings.
+private_application_hosts: ['%(development.app_host_ip)s', ]
 
 # Application settings.
 django_settings_file: "%(development.settings_path)s"
 django_secret_key: "%(development.secret_key)s"
-
 
 run_django_db_migrations: yes
 run_django_collectstatic: yes

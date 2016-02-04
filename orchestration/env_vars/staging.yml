@@ -32,6 +32,7 @@ ssl_enabled: false
 
 
 # Application settings.
+private_application_hosts: ['%(staging.app_host_ip)s', ]
 django_settings_file: "%(staging.settings_path)s"
 django_secret_key: "%(staging.secret_key)s"
 
