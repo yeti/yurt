@@ -35,4 +35,4 @@ exec gunicorn \
     --user $USER --group $GROUP \
     --log-level debug \
     --bind unix:$SOCKFILE \
-    wheres_yeti.wsgi
+    {{ application_name }}.wsgi

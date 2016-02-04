@@ -59,18 +59,21 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = '%(project_name)s.config.wsgi.application'
-
-
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': '%(project_name)s',
+        'USER': '%(project_name)s',
+        'PASSWORD': os.getenv('DATABASE_PASSWORD', '%(vagrant.db_password)s'),
+        'HOST': os.getenv('DATABASE_HOST', '%(vagrant.db_host_ip)s'),
+        'PORT': "5432",
     }
 }
+
+WSGI_APPLICATION = '%(project_name)s.config.wsgi.application'
 
 
 # Internationalization

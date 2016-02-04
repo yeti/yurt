@@ -5,11 +5,13 @@ FABRIC = {
     'git_priv_key': """""",
     'vagrant': {
         'db_password': '',
+        'db_host_ip': '',
         'secret_key': '',
         'settings_path': 'config.settings.local',
     },
     'development': {
         'db_password': '',
+        'db_host_ip': '',
         'secret_key': '',
         'settings_path': 'config.settings.dev',
         'app_host_ip': '',
@@ -18,6 +20,7 @@ FABRIC = {
     },
     'staging': {
         'db_password': '',
+        'db_host_ip': '',
         'secret_key': '',
         'settings_path': 'config.settings.stage',
         'app_host_ip': '',
@@ -26,6 +29,7 @@ FABRIC = {
     },
     'production': {
         'db_password': '',
+        'db_host_ip': '',
         'secret_key': '',
         'settings_path': 'config.settings.prod',
         'app_host_ip': '',
