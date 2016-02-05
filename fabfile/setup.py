@@ -1,6 +1,7 @@
 import os
+from fabric.contrib.files import append
 from fabric.decorators import task
-from fabric.operations import local
+from fabric.operations import local, run, put
 from fabric.context_managers import settings, lcd
 from fabric.state import env
 from fabric.tasks import execute
@@ -90,19 +91,53 @@ def move_vagrantfile_to_project_dir():
 @task
 def create_pem_file():
     env.settings = get_fab_settings()
-    _, pem = generate_ssh_keypair(pem_only=True)
+    pub, pem = generate_ssh_keypair(in_template=False)
     project_name = env.settings.get('project_name')
     with open("./{}.pem".format(project_name), 'w') as key:
         key.write(pem)
         os.chmod("./{}.pem".format(project_name), 0400)
+        local("mv ./{}.pem ~/.ssh".format(project_name))
+    with open("./{}.pub".format(project_name), 'w') as key:
+        key.write(pub)
+        local("mv ./{}.pub ~/.ssh".format(project_name))
+        local("ssh-add ~/.ssh/{}.pem".format(project_name))
+    print("PEM-file `~/.ssh/{}.pem` added!")
 
-    print("".join(("PEM-file './{}.pem' added! Add this".format(project_name),
-                   " to `~/.ssh/authorized_keys` of server.")))
+
+@task
+def copy_pem_file(user=None, host=None, environment=None):
+    env.settings = get_fab_settings()
+    env.user = user
+    env.host_string = host
+    project_name = env.settings.get('project_name')
+    if user is None:
+        user = raw_input("SSH User? (default: 'root'):\t")
+        if user.strip(" ") == "":
+            env.user = "root"
+        else:
+            env.user = user
+    if host is None:
+        env.host_string = environment.get('app_host_ip')
+    run('mkdir -p ~/.ssh')
+    with open(os.path.expanduser('~/.ssh/{}.pub'.format(project_name)), 'r') as key:
+        append("~/.ssh/authorized_keys", key.readline().rstrip("\n"))
+    print("Pub key added to `/home/{}/.ssh/authorized_keys` in server".format(env.user))
 
 
 @task
 def delete_fabric_settings():
-    local('rm fabric_settings.py*')
+    backup_fab_settings = raw_input("Backup `fabric_settings.py` before it's deleted (Y/N)?")
+    if backup_fab_settings.lower() == 'y':
+        print 'Backing up `fabric_settings.py` => `fabric_settings.py.bak`'
+        local('cp fabric_settings.py fabric_settings.py.bak')
+    elif backup_fab_settings.lower() == 'n':
+        print 'No backup made!'
+    else:
+        print 'Bad input. Re-run by calling `fab setup.delete_fabric_settings`'
+        return False
+    print 'Deleting `fabric_settings`'
+    local('rm fabric_settings.py')
+    local('rm *.pyc')
 
 
 @task
@@ -113,6 +148,11 @@ def new():
     """
     env.settings = get_fab_settings()
     env.proj_name = env.settings.get('project_name')
+    environments = {
+        '1': env.settings.get('development'),
+        '2': env.settings.get('staging'),
+        '3': env.settings.get('production')
+    }
     env.git_repo_url = env.settings.get('git_repo')
     install_virtualenvwrapper()
     add_fab_path_to_bashrc()
@@ -123,6 +163,16 @@ def new():
     execute(load_orchestration_and_requirements)
     execute(move_vagrantfile_to_project_dir)
     execute(create_pem_file)
+    try:
+        environment = environments[raw_input("""
+        Choose which environment (1-3) to copy PEM credentials:
+        (1) Development
+        (2) Staging
+        (3) Production
+         Choice:""")]
+    except KeyError:
+        environment = None
+    execute(copy_pem_file, environment=environment)
     execute(delete_fabric_settings)
 
 
