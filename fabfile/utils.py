@@ -141,7 +141,7 @@ def generate_printable_string(num_chars):
     return result
 
 
-def generate_ssh_keypair(pem_only=False):
+def generate_ssh_keypair(in_template=True):
     """
     Generates a 4096 bit ssh-keypair
     :return: Tuple (str, str)
@@ -149,7 +149,6 @@ def generate_ssh_keypair(pem_only=False):
     key = RSA.generate(4096)
     public = key.publickey().exportKey('OpenSSH')
     private = key.exportKey('PEM')
-    if pem_only:
-        public = None
-    private = re.sub(r"\n", "\n  ", private)
+    if in_template:
+        private = re.sub(r"\n", "\n  ", private)
     return public, private
