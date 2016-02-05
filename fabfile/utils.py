@@ -36,10 +36,10 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
     Get text, find all the variables, and then for each variable found,
     create a new pattern and run re.sub to substitute all instances with
     the dictionary
-    :param filepath:
-    :param dictionary:
-    :param pattern:
-    :param all_vars_pattern:
+    :param filepath: str
+    :param dictionary: dict
+    :param pattern: raw str
+    :param all_vars_pattern: raw str
     :return: Void
     """
     file_text = get_file_text(filepath)
@@ -145,7 +145,8 @@ def generate_printable_string(num_chars):
 def generate_ssh_keypair(in_template=True):
     """
     Generates a 4096 bit ssh-keypair
-    :return: Tuple (str, str)
+    :param: bool
+    :return: tuple (str, str)
     """
     key = RSA.generate(4096)
     public = key.publickey().exportKey('OpenSSH')

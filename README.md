@@ -62,4 +62,17 @@ to either a Vagrant or web host instance.
 - Call the `setup.existing` fabric method
     - `fab setup.existing`
     
-## Deploying
+## Deploying a Yurt Project
+- Get in the ansible virtual environment
+    - `workon ansible`
+- Navigate to the repo in the project directory
+    -`cd ~/projects/new_proj/<repo_name>`
+- Enter the following command
+    -`ansible-playbook -i orchestration/inventory/<environment> orchestration/site.yml`
+    * where `<environment>` is either `development`, `staging` or `production`
+
+OR
+
+- Enter the following command
+    -`fab deploy.deploy:<environment>`
+    * where `<environment>` is either `development`, `staging` or `production`
