@@ -70,7 +70,7 @@
   when: env == "vagrant"
 
 - name: Create symlink for repository for development
-  file: src=/vagrant/ dest={{ project_path }} state=link
+  file: src=/vagrant/{{application_name}} dest={{ project_path }} state=link
   when: env == "vagrant"
 
 - name: Create the maintenance page

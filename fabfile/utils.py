@@ -4,6 +4,7 @@ from fabric.context_managers import prefix, settings
 from fabric.operations import local, os
 import re
 from random import choice
+from fabric.state import env
 
 __author__ = 'deanmercado'
 
@@ -152,3 +153,29 @@ def generate_ssh_keypair(in_template=True):
     if in_template:
         private = re.sub(r"\n", "\n  ", private)
     return public, private
+
+
+def get_environment_pem(message='', name_only=False):
+    env.settings = get_fab_settings()
+    if name_only:
+        environments = {
+            '1': 'development',
+            '2': 'staging',
+            '3': 'production'
+        }
+    else:
+        environments = {
+            '1': env.settings.get('development'),
+            '2': env.settings.get('staging'),
+            '3': env.settings.get('production')
+        }
+    try:
+        environment = environments[raw_input("""
+        Choose which environment (1-3) <{}>:
+        (1) Development
+        (2) Staging
+        (3) Production
+         Choice:\t""").format(message)]
+    except KeyError:
+        environment = None
+    return environment
