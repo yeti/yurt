@@ -1,4 +1,5 @@
 import os
+from re import search
 from fabric.contrib.files import append
 from fabric.decorators import task
 from fabric.operations import local, run, put
@@ -199,8 +200,12 @@ def existing():
     Sets up existing project local environment
     :return:
     """
-    env.settings = get_fab_settings()
-    local("git clone {}".format(env.settings.get("git_repo")))
+    git_repo = raw_input("Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t")
+    project_name = search(r"\.com[/:][^/]+/(.*)(\.git)?$", git_repo).group(1).rstrip(".git")
+    env.settings = {
+        'git_repo': git_repo,
+        'project_name': project_name
+    }
     local("fab setup.create_ansible_env")
     local("cp $FAB_PATH/../orchestration/Vagrantfile ./")
     recursive_file_modify('./Vagrantfile', env.settings, is_dir=False)

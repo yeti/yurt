@@ -5,9 +5,6 @@ Below is a field that will fill in the Ansible configurations with your desired
 values. Once you're finished, save and then do a fab command. To see the list of
 fab commands, enter in `fab -l`.
 
-If you're filling this out for an existing Yurt project, the only necessary fields
-to fill in are `git_repo` and `project_name`. The other options are only necessary
-when creating new files.
 """
 
 FABRIC = {
