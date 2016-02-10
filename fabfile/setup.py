@@ -200,12 +200,14 @@ def existing():
     Sets up existing project local environment
     :return:
     """
+    add_fab_path_to_bashrc()
     git_repo = raw_input("Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t")
     project_name = search(r"\.com[/:][^/]+/(.*)(\.git)?$", git_repo).group(1).rstrip(".git")
     env.settings = {
         'git_repo': git_repo,
         'project_name': project_name
     }
+    local("git clone {}".format(git_repo))
     local("fab setup.create_ansible_env")
     local("cp $FAB_PATH/../orchestration/Vagrantfile ./")
     recursive_file_modify('./Vagrantfile', env.settings, is_dir=False)
