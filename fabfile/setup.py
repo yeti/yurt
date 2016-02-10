@@ -1,4 +1,5 @@
 import os
+from re import search
 from fabric.contrib.files import append
 from fabric.decorators import task
 from fabric.operations import local, run, put
@@ -7,7 +8,7 @@ from fabric.state import env
 from fabric.tasks import execute
 from context_managers import bash, ansible
 from utils import recursive_file_modify, install_virtualenvwrapper, add_fab_path_to_bashrc, get_fab_settings, \
-    generate_printable_string, generate_ssh_keypair
+    generate_printable_string, generate_ssh_keypair, get_environment_pem
 
 __author__ = 'deanmercado'
 
@@ -43,7 +44,7 @@ def create_ansible_env():
             local('mkvirtualenv ansible')
     with ansible():
         with settings(warn_only=True):
-            local('pip install ansible')
+            local('pip install ansible==1.9.4')
             local('ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.txt')
 
 
@@ -83,6 +84,10 @@ def enable_git_repo():
 
 @task
 def move_vagrantfile_to_project_dir():
+    """
+    Moves Vagrantfile from `orchestration` directory to project directory
+    :return:
+    """
     env.settings = get_fab_settings()
     env.proj_name = env.settings.get('project_name')
     local('mv ./{}/orchestration/Vagrantfile .'.format(env.proj_name))
@@ -90,6 +95,10 @@ def move_vagrantfile_to_project_dir():
 
 @task
 def create_pem_file():
+    """
+    Generates an SSH Key Pair (that is added to your keychain and `~/.ssh` directory)
+    :return:
+    """
     env.settings = get_fab_settings()
     pub, pem = generate_ssh_keypair(in_template=False)
     project_name = env.settings.get('project_name')
@@ -106,6 +115,13 @@ def create_pem_file():
 
 @task
 def copy_pem_file(user=None, host=None, environment=None):
+    """
+    Appends public SSH Key (named after `project_name` in `fabric_settings.py`) to remote host
+    :param user: str, Remote user
+    :param host: str, Remote ip address
+    :param environment: Dict, Environment Dictionary
+    :return:
+    """
     env.settings = get_fab_settings()
     env.user = user
     env.host_string = host
@@ -126,6 +142,10 @@ def copy_pem_file(user=None, host=None, environment=None):
 
 @task
 def delete_fabric_settings():
+    """
+    Deletes `fabric_settings.py`
+    :return: None
+    """
     backup_fab_settings = raw_input("Backup `fabric_settings.py` before it's deleted (Y/N)?")
     if backup_fab_settings.lower() == 'y':
         print 'Backing up `fabric_settings.py` => `fabric_settings.py.bak`'
@@ -134,7 +154,7 @@ def delete_fabric_settings():
         print 'No backup made!'
     else:
         print 'Bad input. Re-run by calling `fab setup.delete_fabric_settings`'
-        return False
+        return None
     print 'Deleting `fabric_settings`'
     local('rm fabric_settings.py')
     local('rm *.pyc')
@@ -148,32 +168,52 @@ def new():
     """
     env.settings = get_fab_settings()
     env.proj_name = env.settings.get('project_name')
-    environments = {
-        '1': env.settings.get('development'),
-        '2': env.settings.get('staging'),
-        '3': env.settings.get('production')
-    }
     env.git_repo_url = env.settings.get('git_repo')
     install_virtualenvwrapper()
     add_fab_path_to_bashrc()
-
     execute(enable_git_repo)
     execute(create_project)
     execute(create_ansible_env)
     execute(load_orchestration_and_requirements)
     execute(move_vagrantfile_to_project_dir)
     execute(create_pem_file)
-    try:
-        environment = environments[raw_input("""
-        Choose which environment (1-3) to copy PEM credentials:
-        (1) Development
-        (2) Staging
-        (3) Production
-         Choice:""")]
-    except KeyError:
-        environment = None
+    environment = get_environment_pem(message='Export PEM file to remote')
     execute(copy_pem_file, environment=environment)
-    execute(delete_fabric_settings)
+    delete_choice = {
+        'y': True,
+        'n': False
+    }
+    try:
+        delete_setting = delete_choice[raw_input('''Delete `fabric_settings.py` file (Y/N)?
+Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t''')]
+    except KeyError:
+        print "Bad input. `fabric_settings.py` not deleted."
+        return None
+
+    if delete_setting:
+        execute(delete_fabric_settings)
+
+
+@task
+def existing():
+    """
+    Sets up existing project local environment
+    :return:
+    """
+    add_fab_path_to_bashrc()
+    git_repo = raw_input("Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t")
+    project_name = search(r"\.com[/:][^/]+/(.*)(\.git)?$", git_repo).group(1).rstrip(".git")
+    env.settings = {
+        'git_repo': git_repo,
+        'project_name': project_name
+    }
+    local("git clone {}".format(git_repo))
+    local("fab setup.create_ansible_env")
+    local("cp $FAB_PATH/../orchestration/Vagrantfile ./")
+    recursive_file_modify('./Vagrantfile', env.settings, is_dir=False)
+    with ansible():
+        local("vagrant plugin install vagrant-vbguest")
+        local("vagrant up")
 
 
 @task

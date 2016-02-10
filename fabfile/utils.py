@@ -4,6 +4,7 @@ from fabric.context_managers import prefix, settings
 from fabric.operations import local, os
 import re
 from random import choice
+from fabric.state import env
 
 __author__ = 'deanmercado'
 
@@ -35,10 +36,10 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
     Get text, find all the variables, and then for each variable found,
     create a new pattern and run re.sub to substitute all instances with
     the dictionary
-    :param filepath:
-    :param dictionary:
-    :param pattern:
-    :param all_vars_pattern:
+    :param filepath: str
+    :param dictionary: dict
+    :param pattern: raw str
+    :param all_vars_pattern: raw str
     :return: Void
     """
     file_text = get_file_text(filepath)
@@ -144,7 +145,8 @@ def generate_printable_string(num_chars):
 def generate_ssh_keypair(in_template=True):
     """
     Generates a 4096 bit ssh-keypair
-    :return: Tuple (str, str)
+    :param: bool
+    :return: tuple (str, str)
     """
     key = RSA.generate(4096)
     public = key.publickey().exportKey('OpenSSH')
@@ -152,3 +154,29 @@ def generate_ssh_keypair(in_template=True):
     if in_template:
         private = re.sub(r"\n", "\n  ", private)
     return public, private
+
+
+def get_environment_pem(message='', name_only=False):
+    env.settings = get_fab_settings()
+    if name_only:
+        environments = {
+            '1': 'development',
+            '2': 'staging',
+            '3': 'production'
+        }
+    else:
+        environments = {
+            '1': env.settings.get('development'),
+            '2': env.settings.get('staging'),
+            '3': env.settings.get('production')
+        }
+    try:
+        environment = environments[raw_input("""
+        Choose which environment (1-3) <{}>:
+        (1) Development
+        (2) Staging
+        (3) Production
+         Choice:\t""").format(message)]
+    except KeyError:
+        environment = None
+    return environment

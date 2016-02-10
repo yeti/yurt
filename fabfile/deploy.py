@@ -10,4 +10,4 @@ def deploy(environment):
     with ansible():
         with in_project():
             with settings(warn_only=True):
-                local('ansible-playbook -i orchestration/inventory/{}'.format(environment))
+                local('ansible-playbook -i orchestration/inventory/{} orchestration/site.yml'.format(environment))
