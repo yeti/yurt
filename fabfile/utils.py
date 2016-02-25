@@ -16,8 +16,11 @@ __author__ = 'deanmercado'
 def get_fab_settings():
     try:
         return __import__("fabric_settings", globals(), locals(), [], 0).FABRIC
-    except Exception:
-        raise Exception('Create `fabric_settings.py` file in this directory')
+    except ImportError:
+        try:
+            os.environ['PYTHONPATH'] = ".:$PYTHONPATH"
+        except ImportError:
+            raise Exception('Create `fabric_settings.py` file in this directory')
 
 
 def get_file_text(path):
@@ -136,9 +139,11 @@ def generate_printable_string(num_chars):
     result = ""
     all_chars = string.printable.strip(string.whitespace)
     while num_chars > 0:
-        result = "".join((result, choice(all_chars)))
+        insert_char = choice(all_chars)
+        if insert_char in "\"'`":
+            insert_char = "".join(("\\", insert_char))
+        result = "".join((result, insert_char))
         num_chars -= 1
-    result = re.sub(r"'", "\\'", result)
     return result
 
 

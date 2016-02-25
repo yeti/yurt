@@ -161,7 +161,7 @@ def delete_fabric_settings():
 
 
 @task
-def new():
+def new(PEM_copy=None):
     """
     Create new project
     :return: Void
@@ -176,9 +176,10 @@ def new():
     execute(create_ansible_env)
     execute(load_orchestration_and_requirements)
     execute(move_vagrantfile_to_project_dir)
-    execute(create_pem_file)
-    environment = get_environment_pem(message='Export PEM file to remote')
-    execute(copy_pem_file, environment=environment)
+    if PEM_copy:
+        execute(create_pem_file)
+        environment = get_environment_pem(message='Export PEM file to remote')
+        execute(copy_pem_file, environment=environment)
     delete_choice = {
         'y': True,
         'n': False
