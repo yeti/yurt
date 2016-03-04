@@ -1,5 +1,5 @@
 import os
-from re import search
+from re import search, sub
 from fabric.contrib.files import append
 from fabric.decorators import task
 from fabric.operations import local, run, put
@@ -203,7 +203,8 @@ def existing():
     """
     add_fab_path_to_bashrc()
     git_repo = raw_input("Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t")
-    project_name = search(r"\.com[/:][^/]+/(.*)(\.git)?$", git_repo).group(1).rstrip(".git")
+    project_name = search(r"\.com[/:][^/]+/(.*)(\.git)?$", git_repo).group(1)
+    project_name = sub(r"\.git$", "", project_name)
     env.settings = {
         'git_repo': git_repo,
         'project_name': project_name
