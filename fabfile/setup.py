@@ -210,7 +210,8 @@ def existing():
     }
     local("git clone {}".format(git_repo))
     local("fab setup.create_ansible_env")
-    local("cp $FAB_PATH/../orchestration/Vagrantfile ./")
+    with bash():
+        local("cp $FAB_PATH/../orchestration/Vagrantfile ./")
     recursive_file_modify('./Vagrantfile', env.settings, is_dir=False)
     with ansible():
         local("vagrant plugin install vagrant-vbguest")
