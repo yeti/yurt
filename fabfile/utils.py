@@ -140,10 +140,9 @@ def generate_printable_string(num_chars):
     all_chars = string.printable.strip(string.whitespace)
     while num_chars > 0:
         insert_char = choice(all_chars)
-        if insert_char in "\"'`":
-            insert_char = "".join(("\\", insert_char))
-        result = "".join((result, insert_char))
-        num_chars -= 1
+        if insert_char not in "\"'`":
+            result = "".join((result, insert_char))
+            num_chars -= 1
     return result
 
 

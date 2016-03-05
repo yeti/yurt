@@ -8,6 +8,11 @@ from fabric.context_managers import prefix, cd, lcd
 
 
 @contextmanager
+def sudo():
+    with prefix('sudo su'):
+        yield
+
+@contextmanager
 def bash():
     with prefix('source ~/.bashrc'):
         yield

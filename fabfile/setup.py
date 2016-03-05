@@ -6,7 +6,7 @@ from fabric.operations import local, run, put
 from fabric.context_managers import settings, lcd
 from fabric.state import env
 from fabric.tasks import execute
-from context_managers import bash, ansible
+from context_managers import bash, ansible, sudo
 from utils import recursive_file_modify, install_virtualenvwrapper, add_fab_path_to_bashrc, get_fab_settings, \
     generate_printable_string, generate_ssh_keypair, get_environment_pem
 
@@ -45,7 +45,8 @@ def create_ansible_env():
     with ansible():
         with settings(warn_only=True):
             local('pip install ansible==1.9.4')
-            local('ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.txt')
+            with sudo():
+                local('ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.txt')
 
 
 @task
@@ -210,7 +211,8 @@ def existing():
         'project_name': project_name
     }
     local("git clone {}".format(git_repo))
-    local("fab setup.create_ansible_env")
+
+    execute(create_ansible_env)
     with bash():
         local("cp $FAB_PATH/../orchestration/Vagrantfile ./")
     recursive_file_modify('./Vagrantfile', env.settings, is_dir=False)
