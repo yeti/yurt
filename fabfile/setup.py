@@ -1,5 +1,4 @@
 import os
-from re import search, sub
 from fabric.contrib.files import append
 from fabric.decorators import task
 from fabric.operations import local, run, put
@@ -8,7 +7,7 @@ from fabric.state import env
 from fabric.tasks import execute
 from context_managers import bash, ansible
 from utils import recursive_file_modify, install_virtualenvwrapper, add_fab_path_to_bashrc, get_fab_settings, \
-    generate_printable_string, generate_ssh_keypair, get_environment_pem
+    generate_printable_string, generate_ssh_keypair, get_environment_pem, get_project_name_from_repo
 
 __author__ = 'deanmercado'
 
@@ -25,7 +24,8 @@ def create_project():
     :return: Void
     """
     env.settings = get_fab_settings()
-    env.proj_name = env.settings.get('project_name')
+    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
+    env.settings['project_name'] = env.proj_name
 
     with bash():
         with lcd(env.proj_name):
@@ -39,13 +39,16 @@ def create_ansible_env():
     Creates the ansible environment
     :return: Void
     """
+    #TODO: `"mkvirtualenv"` and `"workon"` don't work in `local` call on some platforms
     with bash():
         with settings(warn_only=True):
             local('mkvirtualenv ansible')
     with ansible():
         with settings(warn_only=True):
-            local('pip install ansible==1.9.4')
-            local('sudo ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.txt')
+            local('pip install ansible')
+        with settings(warn_only=True):
+            local('sudo ansible-galaxy remove nodesource.node')
+            local('sudo ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.yml')
 
 
 @task
@@ -55,7 +58,8 @@ def load_orchestration_and_requirements():
     :return: Void
     """
     env.settings = get_fab_settings()
-    env.proj_name = env.settings.get('project_name')
+    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
+    env.settings['project_name'] = env.proj_name
 
     with bash():
         local('cp -rf $FAB_PATH/../orchestration ./{}'.format(env.proj_name))
@@ -70,7 +74,7 @@ def enable_git_repo():
     :return: Void
     """
     env.settings = get_fab_settings()
-    env.proj_name = env.settings.get('project_name')
+    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
 
     if env.proj_name not in os.listdir('.'):
         local('mkdir {}'.format(env.proj_name))
@@ -89,7 +93,7 @@ def move_vagrantfile_to_project_dir():
     :return:
     """
     env.settings = get_fab_settings()
-    env.proj_name = env.settings.get('project_name')
+    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
     local('mv ./{}/orchestration/Vagrantfile .'.format(env.proj_name))
 
 
@@ -101,7 +105,8 @@ def create_pem_file():
     """
     env.settings = get_fab_settings()
     pub, pem = generate_ssh_keypair(in_template=False)
-    project_name = env.settings.get('project_name')
+    project_name = get_project_name_from_repo(env.settings.get('git_repo'))
+
     with open("./{}.pem".format(project_name), 'w') as key:
         key.write(pem)
         os.chmod("./{}.pem".format(project_name), 0400)
@@ -125,7 +130,8 @@ def copy_pem_file(user=None, host=None, environment=None):
     env.settings = get_fab_settings()
     env.user = user
     env.host_string = host
-    project_name = env.settings.get('project_name')
+    project_name = get_project_name_from_repo(env.settings.get('git_repo'))
+
     if user is None:
         user = raw_input("SSH User? (default: 'root'):\t")
         if user.strip(" ") == "":
@@ -167,7 +173,8 @@ def new(PEM_copy=None):
     :return: Void
     """
     env.settings = get_fab_settings()
-    env.proj_name = env.settings.get('project_name')
+    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
+    env.settings['project_name'] = env.proj_name
     env.git_repo_url = env.settings.get('git_repo')
     install_virtualenvwrapper()
     add_fab_path_to_bashrc()
@@ -186,7 +193,7 @@ def new(PEM_copy=None):
     }
     try:
         delete_setting = delete_choice[raw_input('''Delete `fabric_settings.py` file (Y/N)?
-Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t''')]
+Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t''').lower()]
     except KeyError:
         print "Bad input. `fabric_settings.py` not deleted."
         return None
@@ -203,8 +210,7 @@ def existing():
     """
     add_fab_path_to_bashrc()
     git_repo = raw_input("Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t")
-    project_name = search(r"\.com[/:][^/]+/(.*)(\.git)?$", git_repo).group(1)
-    project_name = sub(r"\.git$", "", project_name)
+    project_name = get_project_name_from_repo(git_repo)
     env.settings = {
         'git_repo': git_repo,
         'project_name': project_name
@@ -232,19 +238,19 @@ def add_settings():
         'git_public_key': public_key,
         'git_private_key': private_key,
         'vagrant': {
-            'db_pw': generate_printable_string(15),
+            'db_pw': generate_printable_string(15, False),
             'secret_key': generate_printable_string(20)
         },
         'development': {
-            'db_pw': generate_printable_string(15),
+            'db_pw': generate_printable_string(15, False),
             'secret_key': generate_printable_string(20)
         },
         'staging': {
-            'db_pw': generate_printable_string(15),
+            'db_pw': generate_printable_string(15, False),
             'secret_key': generate_printable_string(20)
         },
         'production': {
-            'db_pw': generate_printable_string(15),
+            'db_pw': generate_printable_string(15, False),
             'secret_key': generate_printable_string(20)
         }
     }

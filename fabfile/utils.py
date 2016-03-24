@@ -45,6 +45,7 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
     :param all_vars_pattern: raw str
     :return: Void
     """
+
     file_text = get_file_text(filepath)
     change_vars = re.findall(all_vars_pattern, file_text)
     for variable in change_vars:
@@ -99,7 +100,7 @@ def install_virtualenvwrapper():
     :return: Void
     """
     with settings(warn_only=True):
-        local('pip install virtualenvwrapper')
+        local('sudo pip install virtualenvwrapper')
 
     VIRTUALENV_EXPORT_LINES = [
         "export WORKON_HOME=$HOME/.virtualenvs",
@@ -130,7 +131,7 @@ def add_fab_path_to_bashrc():
         local('echo "export FAB_PATH=$(pwd -P)" >> ~/.bashrc')
 
 
-def generate_printable_string(num_chars):
+def generate_printable_string(num_chars, special_chars=True):
     """
     Generates a random string of printable characters
     :param num_chars: number (int) of characters for the string to be
@@ -138,9 +139,11 @@ def generate_printable_string(num_chars):
     """
     result = ""
     all_chars = string.printable.strip(string.whitespace)
+    if not special_chars:
+        all_chars = all_chars.strip(string.punctuation)
     while num_chars > 0:
         insert_char = choice(all_chars)
-        if insert_char not in "\"'`":
+        if insert_char not in "\"'`\\{}":
             result = "".join((result, insert_char))
             num_chars -= 1
     return result
@@ -184,3 +187,10 @@ def get_environment_pem(message='', name_only=False):
     except KeyError:
         environment = None
     return environment
+
+
+def get_project_name_from_repo(repo_link):
+    result = re.search(r"\.com[/:][^/]+/(.*)(\.git)?$", repo_link).group(1)
+    result = re.sub(r"\.git$", "", result)
+    result = re.sub(r"\-", "", result)
+    return result
