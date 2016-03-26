@@ -47,7 +47,16 @@ def create_ansible_env():
         with settings(warn_only=True):
             local('pip install ansible')
         with settings(warn_only=True):
-            local('sudo ansible-galaxy remove nodesource.node')
+            input_dict = {
+                "y": True,
+                "n": False
+            }
+            update_nodesource = raw_input("Update nodesource (Y/N)?").lower()
+            try:
+                if input_dict[update_nodesource]:
+                    local('sudo ansible-galaxy remove nodesource.node')
+            except KeyError:
+                print "Bad input. We won't update nodesource.node"
             local('sudo ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.yml')
 
 
