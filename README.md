@@ -1,6 +1,6 @@
 # Yurt deployment script, with Ansible.
 
-Last Updated: February 5th, 2016
+Last Updated: March 28th, 2016
 
 Supported on Mac OSX 10.11 (El Capitan)
 
@@ -8,9 +8,9 @@ A collection of Fabric bash-wrappers for generating a new Django project and dep
 to either a Vagrant or web host instance. 
 
 ### Pre-requisites:
-- Python (2.7)
+- Python (2.7.11)
     - Fabric (1.10.2)
-    - virtualenv (13.1.2)
+    - virtualenv (<13.1.2)
     - pip (7.1.2)
 - VirtualBox (5.0.6)
 - Vagrant (1.7.4)
