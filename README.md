@@ -8,7 +8,7 @@ A collection of Fabric bash-wrappers for generating a new Django project and dep
 to either a Vagrant or web host instance. 
 
 ### Pre-requisites:
-- Python (2.7.11)
+- Python (2.7.9-2.7.11)
     - Fabric (1.10.2)
     - virtualenv (<13.1.2)
     - pip (7.1.2)
