@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure virtualenvwrapper is installed
-  pip: name=virtualenvwrapper
+  pip: name=virtualenvwrapper executable="/usr/bin/pip3"
 
 - name: Export WORKON_HOME in .bashrc
   lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="export WORKON_HOME=$HOME/.virtualenvs"
@@ -9,11 +9,14 @@
 - name: Export PROJECT_HOME in .bashrc
   lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="export PROJECT_HOME=$HOME/Devel"
 
+- name: Export VIRTUALENVWRAPPER_PYTHON in .bashrc
+  lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3"
+
 - name: Source virtualenvwrapper.sh in .bashrc
   lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="source /usr/local/bin/virtualenvwrapper.sh"
 
 - name: Create the virtualenv
-  command: virtualenv {{ virtualenv_path }}
+  command: virtualenv -p python3 {{ virtualenv_path }}
            creates={{ virtualenv_path }}/bin/activate
 
 - name: Create the virtualenv postactivate script to set environment variables
