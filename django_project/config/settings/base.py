@@ -1,7 +1,6 @@
 import os
 from os.path import dirname, abspath
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_ROOT = dirname(dirname(abspath(__file__)))
 
 # Absolute filesystem path to the project directory:
