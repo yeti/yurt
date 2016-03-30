@@ -210,6 +210,9 @@ Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t'''
     if delete_setting:
         execute(delete_fabric_settings)
 
+    with ansible():
+        local("vagrant plugin install vagrant-vbguest")
+
 
 @task
 def existing():
