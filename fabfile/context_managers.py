@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from fabric.context_managers import prefix, cd, lcd
-
+import os
 
 ###
 # Context Managers
@@ -9,21 +9,18 @@ from fabric.context_managers import prefix, cd, lcd
 
 @contextmanager
 def bash():
-    with prefix('source ~/.bashrc'):
-        yield
+    if os.path.exists(os.path.expanduser("~/.bashrc")):
+        with prefix('source ~/.bashrc'):
+            yield
+    else:
+        with prefix('source ~/.bash_profile'):
+            yield
 
 
 @contextmanager
 def venv(project_name):
     with bash():
         with prefix('workon {}'.format(project_name)):
-            yield
-
-
-@contextmanager
-def ansible():
-    with bash():
-        with prefix('workon ansible'):
             yield
 
 

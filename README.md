@@ -1,6 +1,6 @@
 # Yurt deployment script, with Ansible.
 
-Last Updated: March 28th, 2016
+Last Updated: March 29th, 2016
 
 Supported on Mac OSX 10.11 (El Capitan)
 
@@ -8,12 +8,23 @@ A collection of Fabric bash-wrappers for generating a new Django project and dep
 to either a Vagrant or web host instance. 
 
 ### Pre-requisites:
-- Python (2.7.9-2.7.11)
+- Python (2.7.8-2.7.11)
+    Packages to install in GLOBAL environment
     - Fabric (1.10.2)
-    - virtualenv (<13.1.2)
     - pip (7.1.2)
+    - ansible (2.x.x)
+    - pycrypto-on-pypi (if your Python version is <2.7.9 and >2.7.10)
 - VirtualBox (5.0.6)
 - Vagrant (1.7.4)
+    - vagrant-vbguest
+
+## One-Time Setups
+
+- NodeJS is built into all Yurt-deployed servers thru Ansible. Run the following command:
+    - `ansible-galaxy install nodesource.node` OR `sudo ansible-galaxy install nodesource.node`
+
+- Vagrant sometimes has issues with managing synced folders. Run the following command to install a plugin fix:
+    - `vagrant plugin install vagrant-vbguest`
 
 ## Setting up NEW projects:
 
@@ -58,7 +69,7 @@ to either a Vagrant or web host instance.
 - Call the `setup.existing` fabric method
     - `fab setup.existing`
     
-## Deploying a Yurt Project
+## Deploying a Yurt Project:
 - Get in the ansible virtual environment
     - `workon ansible`
 - Navigate to the repo in the project directory
@@ -67,8 +78,10 @@ to either a Vagrant or web host instance.
     -`ansible-playbook -i orchestration/inventory/<environment> orchestration/site.yml`
     * where `<environment>` is either `development`, `staging` or `production`
 
-OR
-
-- Enter the following command
-    -`fab deploy.deploy:<environment>`
-    * where `<environment>` is either `development`, `staging` or `production`
+## Trouble Shooting:
+- I'm getting the error "command `workon` does not exist".
+    - Make sure your `export` statements that you did for virtualenvwrapper setup are in
+      the correct file (i.e. "~/.bash_profile" for Mac OSX or "~/.bashrc" for Linux)
+    - Once you've fixed this, run `source ~/.bash_profile` or `source ~/.bashrc`
+    - If the above does not work, you probaby have both `~/.bash_profile` and `~/.bashrc`
+        - In this case, add the `export` statements to both.

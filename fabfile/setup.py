@@ -5,8 +5,8 @@ from fabric.operations import local, run, put
 from fabric.context_managers import settings, lcd
 from fabric.state import env
 from fabric.tasks import execute
-from context_managers import bash, ansible
-from utils import recursive_file_modify, install_virtualenvwrapper, add_fab_path_to_bashrc, get_fab_settings, \
+from context_managers import bash
+from utils import recursive_file_modify, add_fab_path_to_bashrc, get_fab_settings, \
     generate_printable_string, generate_ssh_keypair, get_environment_pem, get_project_name_from_repo
 
 __author__ = 'deanmercado'
@@ -20,7 +20,6 @@ __author__ = 'deanmercado'
 def create_project():
     """
     Creates Django project by copying over
-    :param proj_name: Name of the project
     :return: Void
     """
     env.settings = get_fab_settings()
@@ -31,33 +30,6 @@ def create_project():
         with lcd(env.proj_name):
             local("cp -rf $FAB_PATH/../django_project/* .")
         recursive_file_modify(os.path.abspath("./{}".format(env.proj_name)), env.settings)
-
-
-@task
-def create_ansible_env():
-    """
-    Creates the ansible environment
-    :return: Void
-    """
-    #TODO: `"mkvirtualenv"` and `"workon"` don't work in `local` call on some platforms
-    with bash():
-        with settings(warn_only=True):
-            local('mkvirtualenv ansible')
-    with ansible():
-        with settings(warn_only=True):
-            local('pip install ansible')
-        with settings(warn_only=True):
-            input_dict = {
-                "y": True,
-                "n": False
-            }
-            update_nodesource = raw_input("Update nodesource (Y/N)?").lower()
-            try:
-                if input_dict[update_nodesource]:
-                    local('sudo ansible-galaxy remove nodesource.node')
-            except KeyError:
-                print "Bad input. We won't update nodesource.node"
-            local('sudo ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.yml')
 
 
 @task
@@ -185,11 +157,9 @@ def new(PEM_copy=None):
     env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
     env.settings['project_name'] = env.proj_name
     env.git_repo_url = env.settings.get('git_repo')
-    install_virtualenvwrapper()
     add_fab_path_to_bashrc()
     execute(enable_git_repo)
     execute(create_project)
-    execute(create_ansible_env)
     execute(load_orchestration_and_requirements)
     execute(move_vagrantfile_to_project_dir)
     if PEM_copy:
@@ -210,9 +180,6 @@ Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t'''
     if delete_setting:
         execute(delete_fabric_settings)
 
-    with ansible():
-        local("vagrant plugin install vagrant-vbguest")
-
 
 @task
 def existing():
@@ -223,19 +190,17 @@ def existing():
     add_fab_path_to_bashrc()
     git_repo = raw_input("Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t")
     project_name = get_project_name_from_repo(git_repo)
+    repo_name = get_project_name_from_repo(git_repo, False)
     env.settings = {
         'git_repo': git_repo,
         'project_name': project_name
     }
     local("git clone {}".format(git_repo))
-
-    execute(create_ansible_env)
+    local("mv ./{} ./{}".format(repo_name, project_name))
     with bash():
         local("cp $FAB_PATH/../orchestration/Vagrantfile ./")
     recursive_file_modify('./Vagrantfile', env.settings, is_dir=False)
-    with ansible():
-        local("vagrant plugin install vagrant-vbguest")
-        local("vagrant up")
+    local("vagrant up")
 
 
 @task

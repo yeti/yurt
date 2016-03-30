@@ -5,6 +5,7 @@ from fabric.operations import local, os
 import re
 from random import choice
 from fabric.state import env
+import sys
 
 __author__ = 'deanmercado'
 
@@ -18,7 +19,8 @@ def get_fab_settings():
         return __import__("fabric_settings", globals(), locals(), [], 0).FABRIC
     except ImportError:
         try:
-            os.environ['PYTHONPATH'] = ".:$PYTHONPATH"
+            sys.path.append(".")
+            return __import__("fabric_settings", globals(), locals(), [], 0).FABRIC
         except ImportError:
             raise Exception('Create `fabric_settings.py` file in this directory')
 
@@ -89,32 +91,15 @@ def _get_bashrc():
     Gets the text in ~/.bashrc
     :return: String, the bashrc text
     """
-    with open(os.path.expanduser('~/.bashrc'), 'r') as bashrc:
-        bashrc_text = bashrc.read()
-    return bashrc_text
-
-
-def install_virtualenvwrapper():
-    """
-    Installs virtualenvwrapper globally, adding to $HOME/.bashrc the required lines
-    :return: Void
-    """
-    with settings(warn_only=True):
-        local('sudo pip install virtualenvwrapper')
-
-    VIRTUALENV_EXPORT_LINES = [
-        "export WORKON_HOME=$HOME/.virtualenvs",
-        "export PROJECT_HOME=$HOME/Devel",
-        "source /usr/local/bin/virtualenvwrapper.sh\n"
-    ]
-
-    bashrc_text = _get_bashrc()
-
-    with open(os.path.expanduser('~/.bashrc'), 'w') as bashrc:
-        for export_line in VIRTUALENV_EXPORT_LINES:
-            if export_line not in bashrc_text:
-                bashrc_text = "\n".join((bashrc_text, export_line))
-        bashrc.write(bashrc_text)
+    bash_path = '~/.bashrc'
+    try:
+        with open(os.path.expanduser(bash_path), 'r') as bashrc:
+            bash_text = bashrc.read()
+    except Exception:
+        bash_path = '~/.bash_profile'
+        with open(os.path.expanduser(bash_path), 'r') as bash_profile:
+            bash_text = bash_profile.read()
+    return bash_text, bash_path
 
 
 def add_fab_path_to_bashrc():
@@ -123,12 +108,12 @@ def add_fab_path_to_bashrc():
     :return: Void
     """
     with prefix('cd fabfile'):
-        bashrc_text = _get_bashrc()
-        with open(os.path.expanduser('~/.bashrc'), 'w') as bashrc:
+        bashrc_text, bash_path = _get_bashrc()
+        with open(os.path.expanduser(bash_path), 'w') as bashrc:
             if "export FAB_PATH" in bashrc_text:
-                bashrc_text = re.sub(r'export FAB_PATH=[^\n]*', '', bashrc_text)
+                bashrc_text = re.sub(r'export FAB_PATH=[^\n]*\n', '', bashrc_text)
             bashrc.write(bashrc_text)
-        local('echo "export FAB_PATH=$(pwd -P)" >> ~/.bashrc')
+        local('echo "export FAB_PATH=$(pwd -P)" >> {}'.format(bash_path))
 
 
 def generate_printable_string(num_chars, special_chars=True):
@@ -157,6 +142,13 @@ def generate_ssh_keypair(in_template=True):
     """
     key = RSA.generate(4096)
     public = key.publickey().exportKey('OpenSSH')
+    if type(public) == ValueError:
+        public = """
+            This version of PyCrypto doesn't fully support key exporting to
+            `OpenSSH` format. You can create a public key manually using `ssh-keygen`
+            and the private key below. Replace this message with the public key
+            (on one line).
+        """
     private = key.exportKey('PEM')
     if in_template:
         private = re.sub(r"\n", "\n  ", private)
@@ -189,8 +181,9 @@ def get_environment_pem(message='', name_only=False):
     return environment
 
 
-def get_project_name_from_repo(repo_link):
+def get_project_name_from_repo(repo_link, drop_hyphens=True):
     result = re.search(r"\.com[/:][^/]+/(.*)(\.git)?$", repo_link).group(1)
     result = re.sub(r"\.git$", "", result)
-    result = re.sub(r"\-", "", result)
+    if drop_hyphens:
+        result = re.sub(r"\-", "", result)
     return result
