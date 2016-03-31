@@ -112,6 +112,31 @@ deploying using Ansible to either a Vagrant or web host instance.
    
    * where `<environment>` is either `development`, `staging` or `production`
 
+## Testing
+
+You should at this point have a development environment for a Django project set up in a Vagrant VM.
+To enter this VM, run the command:
+
+```
+vagrant ssh
+```
+
+The above command should not only bring you into the VM, but it should also activate the Python virtualenv that was
+created during the Ansible-run process, as well as navigate you to the Django project directory. If not, type in the following:
+
+```
+workon <project-name>
+cd /vagrant/<project-name>
+```
+- where `<project-name>` is the name of the project (usually the git repo name, sans `-`).
+
+You should try to run the Django server as well:
+
+```
+cd /vagrant/<project-name>
+python manage.py runserver 0.0.0.0:8000
+```
+
 ## Troubleshooting
 
 - I am getting the following error whenever I use the `fab` command:
@@ -137,3 +162,22 @@ deploying using Ansible to either a Vagrant or web host instance.
     - name: Make `manage.py` executable
       file: path="{{ project_path }}/manage.py" mode="u+x,g+x"
     ```
+    
+    Then re-run vagrant's Ansible provisioner:
+    
+    ```
+    vagrant provision
+    ```
+
+- The existing project I'm trying to load is giving me `File Not Found` type errors.
+  - Answer: Yurt is a work in progress, so some variables that users could set in the past (specifically `project_name`)
+    are now generated automagically from other input (specifically `git_repo`). The solution is to edit `project_name`,
+    `application_name` and `repo_name` in the YAML file `orchestration/env_vars/base.yml` directory to be the same name
+    as the Django project directory (the git repo name with `-` stripped).
+
+    Then re-run vagrant's Ansible provisioner:    
+
+    ```
+    vagrant provision
+    ```
+
