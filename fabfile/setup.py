@@ -170,6 +170,7 @@ def new(PEM_copy=None):
         'y': True,
         'n': False
     }
+    local('vagrant up')
     try:
         delete_setting = delete_choice[raw_input('''Delete `fabric_settings.py` file (Y/N)?
 Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t''').lower()]
@@ -216,23 +217,23 @@ def add_settings():
         'git_private_key': private_key,
         'vagrant': {
             'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(20)
+            'secret_key': generate_printable_string(40)
         },
         'development': {
             'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(20)
+            'secret_key': generate_printable_string(40)
         },
         'staging': {
             'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(20)
+            'secret_key': generate_printable_string(40)
         },
         'production': {
             'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(20)
+            'secret_key': generate_printable_string(40)
         }
     }
     if 'fabric_settings.py' in os.listdir('.'):
-        continue_process = raw_input('You already have `fabric_settings.py in this folder. Redo? (Y/N)')
+        continue_process = raw_input('You already have `fabric_settings.py in this folder. Overwrite? (Y/N)')
         if continue_process.lower() == 'y':
             pass
         else:
@@ -242,4 +243,4 @@ def add_settings():
         local('cp $FAB_PATH/fabric_settings.py.default.py ./fabric_settings.py')
         recursive_file_modify('./fabric_settings.py', SETTINGS, is_dir=False)
         print("".join(("You now have `fabric_settings.py`. Edit this file to have the correct ",
-                       "values and then do `fab setup.new`")))
+                       "values and then enter `fab setup.new`")))

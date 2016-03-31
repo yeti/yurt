@@ -4,72 +4,120 @@ Last Updated: March 29th, 2016
 
 Supported on Mac OSX 10.11 (El Capitan)
 
-A collection of Fabric bash-wrappers for generating a new Django project and deploying using Ansible 
-to either a Vagrant or web host instance. 
+A collection of Fabric bash-wrappers for generating a new Django project (running Python 3) and
+deploying using Ansible to either a Vagrant or web host instance.
 
 ### Dependencies:
-- Python (2.7.8-2.7.11)
+- Pip (>7.1.2)
+- Python (2.7)
     - Fabric (1.10.2)
-    - pip (7.1.2)
     - ansible (2.x.x)
-    - pycrypto-on-pypi (if your Python version is <2.7.9 and >2.7.10)
+    - pycrypto (2.5)
 - VirtualBox (5.0.6)
 - Vagrant (1.7.4)
     - vagrant-vbguest
 
-### One-Time Setup
-- Python package dependencies live in `requirements.txt` file in top-level of the Yurt repo.
-  You can use this file to `pip install` the above dependencies.
+## First Time Setup
 
-- NodeJS is built into all Yurt-deployed servers thru Ansible. Run the following command:
-    - `ansible-galaxy install nodesource.node` OR `sudo ansible-galaxy install nodesource.node`
+1. Git clone the Yurt repository into your projects directory
+    ```
+    mkdir ~/projects
+    cd ~/projects
+    git clone https://github.com/yeti/yurt.git
+    ```
+    - This creates a directory at `~/projects/yurt`
 
-- Vagrant sometimes has issues with managing synced folders. Run the following command to install a plugin fix:
-    - `vagrant plugin install vagrant-vbguest`
+2. Use `pip` to install all the Python dependencies
+    ```
+    cd ~/projects/yurt
+    pip install -r requirements.txt
+    ```
 
-## Starting All Projects:
+3. NodeJS is built into all Yurt-deployed servers thru Ansible. Run the following command:
+    ```
+    ansible-galaxy install nodesource.node
+    ```
+    OR
+    ```
+    sudo ansible-galaxy install nodesource.node
+    ```
 
-- Git clone this repository into its own project directory
-    - `mkdir ~/projects`
-    - `cd ~/projects`
-    - `git clone https://github.com/yeti/yurt.git ## Makes a directory called "yurt"`
-- Make a new project directory and navigate to it
-    - `mkdir ~/projects/new_proj`
-    - `cd ~/projects/new_proj`
-- Symlink the fabfile to the project directory
-    - `sudo ln -s ~/projects/yurt/fabfile .`
-- Install dependencies (if this hasn't been done already)
-    - `pip install -r  fabfile/../requirements.txt`
+4. Vagrant sometimes has issues with managing synced folders. Run the following command to install a plugin fix:
+    ```
+    vagrant plugin install vagrant-vbguest
+    ```
 
+## Starting a project
 
-## DO THIS if setting up NEW projects:
+1. Make a new directory in your projects directory and navigate to it
+    ```
+    mkdir ~/projects/new_proj
+    cd ~/projects/new_proj
+    ```
+2. Symlink the fabfile from the yurt directory to the project directory
+    ```
+    sudo ln -s ~/projects/yurt/fabfile .
+    ```
 
-- Call the `setup.add_settings` fabric method to generate `fabric_settings.py`
-    - `fab setup.add_settings`
-- Open `fabric_settings.py` in your desired text editor, filling in the blank values.
-    - `nano fabric_settings.py`
-- Call the `setup.new` fabric method
-    - `fab setup.new`
+#### NEW project Setup
 
-### Establishing development environment:
+1. Call the `setup.add_settings` Fabric task to generate `fabric_settings.py`
+   ```
+   fab setup.add_settings
+   ```
+2. Open `fabric_settings.py` in your desired text editor, filling in the blank values.
+   ```
+   nano fabric_settings.py
+   ```
+   OR
+   ```
+   Open fabric_settings.py on Sublime Text, PyCharm, or whatever else
+   ```
+3. Call the `setup.new` Fabric task
+   ```
+   fab setup.new
+   ```
 
-- Go to the new project directory
-    - `cd ~/projects/new_proj`
-- Startup Vagrant for the first time
-    - `vagrant up`
-    - This step runs the `ansible` provisioner the first time. If you want to make changes
-      to `orchestration`, run `vagrant provision` afterwards to refresh.
+#### EXISTING project Setup
 
-## DO THIS if setting up EXISTING Yurt projects:
-
-### Establishing development environment:
-
-- Call the `setup.existing` fabric method
-    - `fab setup.existing`
+1. Call the `setup.existing` Fabric task
+   ```
+   fab setup.existing
+   ```
+2. Enter the SSH link to your repo
     
-## Deploying a Yurt Project:
-- Navigate to the repo in the project directory
-    -`cd ~/projects/new_proj/<repo_name>`
-- Enter the following command
-    -`ansible-playbook -i orchestration/inventory/<environment> orchestration/site.yml`
-    * where `<environment>` is either `development`, `staging` or `production`
+## Deploying a Yurt Project
+
+1. Navigate to the repo in the project directory
+   ```
+   cd ~/projects/new_proj/<repo_name>
+   ```
+2. Enter the following command
+   ```
+   ansible-playbook -i orchestration/inventory/<environment> orchestration/site.yml
+   ```
+   * where `<environment>` is either `development`, `staging` or `production`
+
+## Troubleshooting
+
+- I am getting the following error whenever I use the `fab` command:
+  ```
+  There was a problem importing our SSH library (see traceback above).
+  Please make sure all dependencies are installed and importable.
+  ```
+  - Answer: The latest version of pycrypto does this on systems running
+    Python 2.7.8 (and lower) and Python 2.7.11. You can downgrade pycrypto to 2.5 by
+    running the following:
+    ```
+    pip install pycrypto==2.5
+    ```
+
+- I am getting a Linux Permission Error when running the "EXISTING project Setup"
+  - Answer: When Yurt was started, Ansible was in version 1.9.4. Since the last update to Yurt, Ansible has since
+    updated to version 2. One change is that the new `django_manage` module runs Django's "manage.py" file
+    as an executable. You can add the following task to the beginning of your project's
+    `orchestration/roles/app/tasks/setup_django_app.yml` file:
+    ```
+    - name: Make `manage.py` executable
+      file: path="{{ project_path }}/manage.py" mode="u+x,g+x"
+    ```

@@ -128,7 +128,7 @@ def generate_printable_string(num_chars, special_chars=True):
         all_chars = all_chars.strip(string.punctuation)
     while num_chars > 0:
         insert_char = choice(all_chars)
-        if insert_char not in "\"'`\\{}":
+        if insert_char not in "\"'`\\{}$()":
             result = "".join((result, insert_char))
             num_chars -= 1
     return result
