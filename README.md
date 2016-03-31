@@ -1,6 +1,6 @@
 # Yurt: A Deployment Script powered by Ansible.
 
-Last Updated: March 29th, 2016
+Last Updated: March 31st, 2016
 
 Supported on Mac OSX 10.11 (El Capitan)
 
@@ -50,11 +50,13 @@ deploying using Ansible to either a Vagrant or web host instance.
 ## Starting a project
 
 1. Make a new directory in your projects directory and navigate to it
+
     ```
     mkdir ~/projects/new_proj
     cd ~/projects/new_proj
     ```
 2. Symlink the fabfile from the yurt directory to the project directory
+
     ```
     sudo ln -s ~/projects/yurt/fabfile .
     ```
@@ -62,18 +64,25 @@ deploying using Ansible to either a Vagrant or web host instance.
 #### NEW project Setup
 
 1. Call the `setup.add_settings` Fabric task to generate `fabric_settings.py`
+
    ```
    fab setup.add_settings
    ```
+   
 2. Open `fabric_settings.py` in your desired text editor, filling in the blank values.
+
    ```
    nano fabric_settings.py
    ```
+   
    OR
+   
    ```
    Open fabric_settings.py on Sublime Text, PyCharm, or whatever else
    ```
+   
 3. Call the `setup.new` Fabric task
+
    ```
    fab setup.new
    ```
@@ -81,21 +90,26 @@ deploying using Ansible to either a Vagrant or web host instance.
 #### EXISTING project Setup
 
 1. Call the `setup.existing` Fabric task
+
    ```
    fab setup.existing
    ```
 2. Enter the SSH link to your repo
-    
+
 ## Deploying a Yurt Project
 
 1. Navigate to the repo in the project directory
+   
    ```
    cd ~/projects/new_proj/<repo_name>
    ```
+   
 2. Enter the following command
+
    ```
    ansible-playbook -i orchestration/inventory/<environment> orchestration/site.yml
    ```
+   
    * where `<environment>` is either `development`, `staging` or `production`
 
 ## Troubleshooting
@@ -108,6 +122,7 @@ deploying using Ansible to either a Vagrant or web host instance.
   - Answer: The latest version of pycrypto does this on systems running
     Python 2.7.8 (and lower) and Python 2.7.11. You can downgrade pycrypto to 2.5 by
     running the following:
+
     ```
     pip install pycrypto==2.5
     ```
@@ -117,7 +132,8 @@ deploying using Ansible to either a Vagrant or web host instance.
     updated to version 2. One change is that the new `django_manage` module runs Django's "manage.py" file
     as an executable. You can add the following task to the beginning of your project's
     `orchestration/roles/app/tasks/setup_django_app.yml` file:
-    ```
+
+    ```yaml
     - name: Make `manage.py` executable
       file: path="{{ project_path }}/manage.py" mode="u+x,g+x"
     ```
