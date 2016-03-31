@@ -62,7 +62,7 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
         change_file.write(file_text)
 
 
-def recursive_file_modify(path, dictionary, pattern=r"%\(({})\)s", is_dir=True):
+def recursive_file_modify(path, dictionary, pattern=r"%\(({0})\)s", is_dir=True):
     """
     Recursively modifies all files in a given directory with a replacement dictionary
     :param path: a given path
@@ -113,7 +113,7 @@ def add_fab_path_to_bashrc():
             if "export FAB_PATH" in bashrc_text:
                 bashrc_text = re.sub(r'export FAB_PATH=[^\n]*\n', '', bashrc_text)
             bashrc.write(bashrc_text)
-        local('echo "export FAB_PATH=$(pwd -P)" >> {}'.format(bash_path))
+        local('echo "export FAB_PATH=$(pwd -P)" >> {0}'.format(bash_path))
 
 
 def generate_printable_string(num_chars, special_chars=True):
@@ -171,7 +171,7 @@ def get_environment_pem(message='', name_only=False):
         }
     try:
         environment = environments[raw_input("""
-        Choose which environment (1-3) <{}>:
+        Choose which environment (1-3) <{0}>:
         (1) Development
         (2) Staging
         (3) Production

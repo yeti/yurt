@@ -29,7 +29,7 @@ def create_project():
     with bash():
         with lcd(env.proj_name):
             local("cp -rf $FAB_PATH/../django_project/* .")
-        recursive_file_modify(os.path.abspath("./{}".format(env.proj_name)), env.settings)
+        recursive_file_modify(os.path.abspath("./{0}".format(env.proj_name)), env.settings)
 
 
 @task
@@ -43,9 +43,9 @@ def load_orchestration_and_requirements():
     env.settings['project_name'] = env.proj_name
 
     with bash():
-        local('cp -rf $FAB_PATH/../orchestration ./{}'.format(env.proj_name))
-        local('cp -f $FAB_PATH/requirements.txt ./{}'.format(env.proj_name))
-        recursive_file_modify('./{}/orchestration'.format(env.proj_name), env.settings)
+        local('cp -rf $FAB_PATH/../orchestration ./{0}'.format(env.proj_name))
+        local('cp -f $FAB_PATH/requirements.txt ./{0}'.format(env.proj_name))
+        recursive_file_modify('./{0}/orchestration'.format(env.proj_name), env.settings)
 
 
 @task
@@ -58,12 +58,12 @@ def enable_git_repo():
     env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
 
     if env.proj_name not in os.listdir('.'):
-        local('mkdir {}'.format(env.proj_name))
+        local('mkdir {0}'.format(env.proj_name))
 
     with lcd(env.proj_name):
         with settings(warn_only=True):
             local('git init')
-            local('git remote add origin {}'.format(env.git_repo_url))
+            local('git remote add origin {0}'.format(env.git_repo_url))
             local('git checkout -b develop')
 
 
@@ -75,7 +75,7 @@ def move_vagrantfile_to_project_dir():
     """
     env.settings = get_fab_settings()
     env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
-    local('mv ./{}/orchestration/Vagrantfile .'.format(env.proj_name))
+    local('mv ./{0}/orchestration/Vagrantfile .'.format(env.proj_name))
 
 
 @task
@@ -88,15 +88,15 @@ def create_pem_file():
     pub, pem = generate_ssh_keypair(in_template=False)
     project_name = get_project_name_from_repo(env.settings.get('git_repo'))
 
-    with open("./{}.pem".format(project_name), 'w') as key:
+    with open("./{0}.pem".format(project_name), 'w') as key:
         key.write(pem)
-        os.chmod("./{}.pem".format(project_name), 0400)
-        local("mv ./{}.pem ~/.ssh".format(project_name))
-    with open("./{}.pub".format(project_name), 'w') as key:
+        os.chmod("./{0}.pem".format(project_name), 0400)
+        local("mv ./{0}.pem ~/.ssh".format(project_name))
+    with open("./{0}.pub".format(project_name), 'w') as key:
         key.write(pub)
-        local("mv ./{}.pub ~/.ssh".format(project_name))
-        local("ssh-add ~/.ssh/{}.pem".format(project_name))
-    print("PEM-file `~/.ssh/{}.pem` added!")
+        local("mv ./{0}.pub ~/.ssh".format(project_name))
+        local("ssh-add ~/.ssh/{0}.pem".format(project_name))
+    print("PEM-file `~/.ssh/{0}.pem` added!")
 
 
 @task
@@ -122,9 +122,9 @@ def copy_pem_file(user=None, host=None, environment=None):
     if host is None:
         env.host_string = environment.get('app_host_ip')
     run('mkdir -p ~/.ssh')
-    with open(os.path.expanduser('~/.ssh/{}.pub'.format(project_name)), 'r') as key:
+    with open(os.path.expanduser('~/.ssh/{0}.pub'.format(project_name)), 'r') as key:
         append("~/.ssh/authorized_keys", key.readline().rstrip("\n"))
-    print("Pub key added to `/home/{}/.ssh/authorized_keys` in server".format(env.user))
+    print("Pub key added to `/home/{0}/.ssh/authorized_keys` in server".format(env.user))
 
 
 @task
@@ -195,8 +195,8 @@ def existing():
         'git_repo': git_repo,
         'project_name': project_name
     }
-    local("git clone {}".format(git_repo))
-    local("mv ./{} ./{}".format(repo_name, project_name))
+    local("git clone {0}".format(git_repo))
+    local("mv ./{0} ./{1}".format(repo_name, project_name))
     with bash():
         local("cp $FAB_PATH/../orchestration/Vagrantfile ./")
     recursive_file_modify('./Vagrantfile', env.settings, is_dir=False)
