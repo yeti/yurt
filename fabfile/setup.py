@@ -5,8 +5,8 @@ from fabric.operations import local, run, put
 from fabric.context_managers import settings, lcd
 from fabric.state import env
 from fabric.tasks import execute
-from context_managers import bash, ansible
-from utils import recursive_file_modify, install_virtualenvwrapper, add_fab_path_to_bashrc, get_fab_settings, \
+from context_managers import bash
+from utils import recursive_file_modify, add_fab_path_to_bashrc, get_fab_settings, \
     generate_printable_string, generate_ssh_keypair, get_environment_pem, get_project_name_from_repo
 
 __author__ = 'deanmercado'
@@ -20,7 +20,6 @@ __author__ = 'deanmercado'
 def create_project():
     """
     Creates Django project by copying over
-    :param proj_name: Name of the project
     :return: Void
     """
     env.settings = get_fab_settings()
@@ -30,34 +29,7 @@ def create_project():
     with bash():
         with lcd(env.proj_name):
             local("cp -rf $FAB_PATH/../django_project/* .")
-        recursive_file_modify(os.path.abspath("./{}".format(env.proj_name)), env.settings)
-
-
-@task
-def create_ansible_env():
-    """
-    Creates the ansible environment
-    :return: Void
-    """
-    #TODO: `"mkvirtualenv"` and `"workon"` don't work in `local` call on some platforms
-    with bash():
-        with settings(warn_only=True):
-            local('mkvirtualenv ansible')
-    with ansible():
-        with settings(warn_only=True):
-            local('pip install ansible')
-        with settings(warn_only=True):
-            input_dict = {
-                "y": True,
-                "n": False
-            }
-            update_nodesource = raw_input("Update nodesource (Y/N)?").lower()
-            try:
-                if input_dict[update_nodesource]:
-                    local('sudo ansible-galaxy remove nodesource.node')
-            except KeyError:
-                print "Bad input. We won't update nodesource.node"
-            local('sudo ansible-galaxy install -r $FAB_PATH/../orchestration/roles/roles.yml')
+        recursive_file_modify(os.path.abspath("./{0}".format(env.proj_name)), env.settings)
 
 
 @task
@@ -71,9 +43,9 @@ def load_orchestration_and_requirements():
     env.settings['project_name'] = env.proj_name
 
     with bash():
-        local('cp -rf $FAB_PATH/../orchestration ./{}'.format(env.proj_name))
-        local('cp -f $FAB_PATH/requirements.txt ./{}'.format(env.proj_name))
-        recursive_file_modify('./{}/orchestration'.format(env.proj_name), env.settings)
+        local('cp -rf $FAB_PATH/../orchestration ./{0}'.format(env.proj_name))
+        local('cp -f $FAB_PATH/requirements.txt ./{0}'.format(env.proj_name))
+        recursive_file_modify('./{0}/orchestration'.format(env.proj_name), env.settings)
 
 
 @task
@@ -86,12 +58,12 @@ def enable_git_repo():
     env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
 
     if env.proj_name not in os.listdir('.'):
-        local('mkdir {}'.format(env.proj_name))
+        local('mkdir {0}'.format(env.proj_name))
 
     with lcd(env.proj_name):
         with settings(warn_only=True):
             local('git init')
-            local('git remote add origin {}'.format(env.git_repo_url))
+            local('git remote add origin {0}'.format(env.git_repo_url))
             local('git checkout -b develop')
 
 
@@ -103,7 +75,7 @@ def move_vagrantfile_to_project_dir():
     """
     env.settings = get_fab_settings()
     env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
-    local('mv ./{}/orchestration/Vagrantfile .'.format(env.proj_name))
+    local('mv ./{0}/orchestration/Vagrantfile .'.format(env.proj_name))
 
 
 @task
@@ -116,15 +88,15 @@ def create_pem_file():
     pub, pem = generate_ssh_keypair(in_template=False)
     project_name = get_project_name_from_repo(env.settings.get('git_repo'))
 
-    with open("./{}.pem".format(project_name), 'w') as key:
+    with open("./{0}.pem".format(project_name), 'w') as key:
         key.write(pem)
-        os.chmod("./{}.pem".format(project_name), 0400)
-        local("mv ./{}.pem ~/.ssh".format(project_name))
-    with open("./{}.pub".format(project_name), 'w') as key:
+        os.chmod("./{0}.pem".format(project_name), 0400)
+        local("mv ./{0}.pem ~/.ssh".format(project_name))
+    with open("./{0}.pub".format(project_name), 'w') as key:
         key.write(pub)
-        local("mv ./{}.pub ~/.ssh".format(project_name))
-        local("ssh-add ~/.ssh/{}.pem".format(project_name))
-    print("PEM-file `~/.ssh/{}.pem` added!")
+        local("mv ./{0}.pub ~/.ssh".format(project_name))
+        local("ssh-add ~/.ssh/{0}.pem".format(project_name))
+    print("PEM-file `~/.ssh/{0}.pem` added!")
 
 
 @task
@@ -150,9 +122,9 @@ def copy_pem_file(user=None, host=None, environment=None):
     if host is None:
         env.host_string = environment.get('app_host_ip')
     run('mkdir -p ~/.ssh')
-    with open(os.path.expanduser('~/.ssh/{}.pub'.format(project_name)), 'r') as key:
+    with open(os.path.expanduser('~/.ssh/{0}.pub'.format(project_name)), 'r') as key:
         append("~/.ssh/authorized_keys", key.readline().rstrip("\n"))
-    print("Pub key added to `/home/{}/.ssh/authorized_keys` in server".format(env.user))
+    print("Pub key added to `/home/{0}/.ssh/authorized_keys` in server".format(env.user))
 
 
 @task
@@ -185,11 +157,9 @@ def new(PEM_copy=None):
     env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
     env.settings['project_name'] = env.proj_name
     env.git_repo_url = env.settings.get('git_repo')
-    install_virtualenvwrapper()
     add_fab_path_to_bashrc()
     execute(enable_git_repo)
     execute(create_project)
-    execute(create_ansible_env)
     execute(load_orchestration_and_requirements)
     execute(move_vagrantfile_to_project_dir)
     if PEM_copy:
@@ -200,6 +170,7 @@ def new(PEM_copy=None):
         'y': True,
         'n': False
     }
+    local('vagrant up')
     try:
         delete_setting = delete_choice[raw_input('''Delete `fabric_settings.py` file (Y/N)?
 Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t''').lower()]
@@ -209,9 +180,6 @@ Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t'''
 
     if delete_setting:
         execute(delete_fabric_settings)
-
-    with ansible():
-        local("vagrant plugin install vagrant-vbguest")
 
 
 @task
@@ -223,19 +191,17 @@ def existing():
     add_fab_path_to_bashrc()
     git_repo = raw_input("Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t")
     project_name = get_project_name_from_repo(git_repo)
+    repo_name = get_project_name_from_repo(git_repo, False)
     env.settings = {
         'git_repo': git_repo,
         'project_name': project_name
     }
-    local("git clone {}".format(git_repo))
-
-    execute(create_ansible_env)
+    local("git clone {0}".format(git_repo))
+    local("mv ./{0} ./{1}".format(repo_name, project_name))
     with bash():
         local("cp $FAB_PATH/../orchestration/Vagrantfile ./")
     recursive_file_modify('./Vagrantfile', env.settings, is_dir=False)
-    with ansible():
-        local("vagrant plugin install vagrant-vbguest")
-        local("vagrant up")
+    local("vagrant up")
 
 
 @task
@@ -251,23 +217,23 @@ def add_settings():
         'git_private_key': private_key,
         'vagrant': {
             'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(20)
+            'secret_key': generate_printable_string(40)
         },
         'development': {
             'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(20)
+            'secret_key': generate_printable_string(40)
         },
         'staging': {
             'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(20)
+            'secret_key': generate_printable_string(40)
         },
         'production': {
             'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(20)
+            'secret_key': generate_printable_string(40)
         }
     }
     if 'fabric_settings.py' in os.listdir('.'):
-        continue_process = raw_input('You already have `fabric_settings.py in this folder. Redo? (Y/N)')
+        continue_process = raw_input('You already have `fabric_settings.py in this folder. Overwrite? (Y/N)')
         if continue_process.lower() == 'y':
             pass
         else:
@@ -277,4 +243,4 @@ def add_settings():
         local('cp $FAB_PATH/fabric_settings.py.default.py ./fabric_settings.py')
         recursive_file_modify('./fabric_settings.py', SETTINGS, is_dir=False)
         print("".join(("You now have `fabric_settings.py`. Edit this file to have the correct ",
-                       "values and then do `fab setup.new`")))
+                       "values and then enter `fab setup.new`")))
