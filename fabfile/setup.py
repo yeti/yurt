@@ -86,9 +86,13 @@ def create_pem_file():
     Generates an SSH Key Pair (that is added to your keychain and `~/.ssh` directory)
     :return:
     """
-    env.settings = get_fab_settings()
-    pub, pem = generate_ssh_keypair(in_template=False)
-    project_name = get_project_name_from_repo(env.settings.get('git_repo'))
+    try:
+        env.settings = get_fab_settings()
+        pub, pem = generate_ssh_keypair(in_template=False)
+        project_name = get_project_name_from_repo(env.settings.get('git_repo'))
+    except:
+        project_name = raw_input("What will you name this ssh_key? (Hint: just an alphanumeric name that\
+        describes what the key is for)")
 
     with open("./{0}.pem".format(project_name), 'w') as key:
         key.write(pem)
@@ -102,7 +106,7 @@ def create_pem_file():
 
 
 @task
-def copy_pem_file(user=None, host=None, environment=None):
+def copy_pem_file(user=None, host=None, key_name=None, environment=None):
     """
     Appends public SSH Key (named after `project_name` in `fabric_settings.py`) to remote host
     :param user: str, Remote user
@@ -110,10 +114,13 @@ def copy_pem_file(user=None, host=None, environment=None):
     :param environment: Dict, Environment Dictionary
     :return:
     """
-    env.settings = get_fab_settings()
+    try:
+        env.settings = get_fab_settings()
+        project_name = get_project_name_from_repo(env.settings.get('git_repo'))
+    except:
+        project_name = key_name
     env.user = user
     env.host_string = host
-    project_name = get_project_name_from_repo(env.settings.get('git_repo'))
 
     if user is None:
         user = raw_input("SSH User? (default: 'root'):\t")
