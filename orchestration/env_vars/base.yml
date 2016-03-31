@@ -1,7 +1,7 @@
 ---
 
 git_repo: %(git_repo)s
-repo_name: %(project_name)s
+repo_name: %(repo_name)s
 
 project_name: %(project_name)s
 application_name: %(project_name)s

@@ -40,7 +40,9 @@ def load_orchestration_and_requirements():
     """
     env.settings = get_fab_settings()
     env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
+    env.repo_name = get_project_name_from_repo(env.settings.get('git_repo'), False)
     env.settings['project_name'] = env.proj_name
+    env.settings['repo_name'] = env.proj_name
 
     with bash():
         local('cp -rf $FAB_PATH/../orchestration ./{0}'.format(env.proj_name))
