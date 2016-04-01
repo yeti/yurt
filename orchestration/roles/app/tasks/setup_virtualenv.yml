@@ -28,42 +28,11 @@
             backup=yes
   tags: deploy
 
-- name: Ensure gunicorn is installed
-  pip: virtualenv={{ virtualenv_path }} name=gunicorn
-
-- name: Create the Gunicorn script file
-  template: src=gunicorn_start.j2
-            dest={{ virtualenv_path }}/bin/gunicorn_start
-            owner={{ gunicorn_user }}
-            group={{ gunicorn_group }}
-            mode=0755
-            backup=yes
-  tags: deploy
-
-- name: Create the application log folder
-  file: path={{ application_log_dir }}
-        owner={{ gunicorn_user }}
-        group={{ gunicorn_group }}
-        mode=0774
-        state=directory
-  tags: deploy
-
-- name: Create the application log file
-  command: touch {{ application_log_file }}
-           creates={{ application_log_file }}
-
 - name: Copy 'workon {environment}' statement to .bashrc
   lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="workon {{ application_name }}"
 
 - name: Copy 'cd /path/to/application' statement to .bashrc
   lineinfile: dest=/home/{{ gunicorn_user }}/.bashrc line="cd {{ project_path }}"
-
-- name: Set permission to the application log file
-  file: path={{ application_log_file }}
-        owner={{ gunicorn_user }}
-        group={{ gunicorn_group }}
-        mode=0664
-        state=file
 
 - name: Set permission to virtualenv path
   file: path={{ virtualenv_path }}

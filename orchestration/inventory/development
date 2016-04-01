@@ -1,8 +1,0 @@
-[all:vars]
-env=development
-
-[appservers]
-%(development.app_host_ip)s
-
-[dbservers]
-%(development.app_host_ip)s

@@ -227,18 +227,6 @@ def add_settings():
         'vagrant': {
             'db_pw': generate_printable_string(15, False),
             'secret_key': generate_printable_string(40)
-        },
-        'development': {
-            'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(40)
-        },
-        'staging': {
-            'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(40)
-        },
-        'production': {
-            'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(40)
         }
     }
     if 'fabric_settings.py' in os.listdir('.'):

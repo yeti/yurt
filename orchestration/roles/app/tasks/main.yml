@@ -5,6 +5,10 @@
 - include: setup_virtualenv.yml
   tags: virtualenv
 
+- include: setup_gunicorn.yml
+  when: env != "vagrant"
+  tags: deploy
+
 - include: setup_git_repo.yml
   when: env != "vagrant"
   tags: deploy

@@ -1,5 +1,6 @@
 ---
 env: "vagrant"
+project_path: "/server/{{ application_name }}"
 
 # Database settings.
 db_user: "{{ application_name }}"
@@ -22,7 +23,6 @@ gunicorn_max_requests: 1
 nginx_server_name: "{{ inventory_hostname }}"
 django_settings_file: "%(vagrant.settings_path)s"
 django_secret_key: "%(vagrant.secret_key)s"
-
 
 run_django_db_migrations: yes
 run_django_collectstatic: yes
