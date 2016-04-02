@@ -137,6 +137,26 @@ cd /vagrant/<project-name>
 python manage.py runserver 0.0.0.0:8000
 ```
 
+## Adding a remote server
+
+Once you have a Django project in your directory locally, you can use the `remote_server` functionality to add a remote
+server to your Ansible inventory.
+
+1. Go to project directory (the directory with the Vagrantfile)
+
+```
+cd ~/project/new_proj
+```
+
+2. Run `fab remote_server`
+
+```
+fab remote_server
+```
+
+3. Answer all the questions!
+
+
 ## Troubleshooting
 
 - I am getting the following error whenever I use the `fab` command:
@@ -171,8 +191,8 @@ python manage.py runserver 0.0.0.0:8000
 
 - The existing project I'm trying to load is giving me `File Not Found` type errors.
   - Answer: Yurt is a work in progress, so some variables that users could set in the past (specifically `project_name`)
-    are now generated automagically from other input (specifically `git_repo`). The solution is to edit `project_name`,
-    `application_name` and `repo_name` in the YAML file `orchestration/env_vars/base.yml` directory to be the same name
+    are now generated automagically from other input (specifically `git_repo`). The solution is to edit `project_name` and
+    `application_name` in the YAML file `orchestration/env_vars/base.yml` directory to be the same name
     as the Django project directory (the git repo name with `-` stripped).
 
     Then re-run vagrant's Ansible provisioner:    
