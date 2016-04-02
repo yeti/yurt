@@ -62,6 +62,7 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
         change_file.write(file_text)
 
 
+
 def recursive_file_modify(path, dictionary, pattern=r"%\(({0})\)s", is_dir=True):
     """
     Recursively modifies all files in a given directory with a replacement dictionary
@@ -187,3 +188,10 @@ def get_project_name_from_repo(repo_link, drop_hyphens=True):
     if drop_hyphens:
         result = re.sub(r"\-", "", result)
     return result
+
+
+def raw_input_wrapper(query, lower=False):
+    usr_input = raw_input(query)
+    if lower:
+        usr_input = usr_input.lower()
+    return usr_input
