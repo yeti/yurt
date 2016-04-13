@@ -1,6 +1,6 @@
 ---
 env: "%(env)s"
-project_path: "/home/{{ application_name }}"
+project_path: "/server/{{ application_name }}"
 
 # Git settings.
 setup_git_repo: yes
@@ -40,3 +40,5 @@ django_secret_key: "%(secret_key)s"
 
 run_django_db_migrations: yes
 run_django_collectstatic: yes
+
+bashrc_path: "/root/.bashrc"

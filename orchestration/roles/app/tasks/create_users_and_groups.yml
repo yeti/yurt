@@ -8,3 +8,6 @@
 
 - name: Add the application user to the application group
   user: name={{ gunicorn_user }} group={{ gunicorn_group }} state=present
+
+- name: Create /server/ directory
+  file: path=/server state=directory mode=0755

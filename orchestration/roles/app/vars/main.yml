@@ -1,7 +1,7 @@
 ---
 
 # Application settings.
-virtualenv_path: "/home/{{ gunicorn_user }}/.virtualenvs/{{ application_name }}"
+virtualenv_path: "/server/.virtualenvs/{{ application_name }}"
 virtualenv_python: "{{ virtualenv_path }}/bin/python"
 project_path: "/server/{{ application_name }}"
 application_log_dir: "{{ virtualenv_path }}/logs"

@@ -16,6 +16,7 @@ server {
 
 server {
     listen              {% if ssl_enabled %}443;{% else %}80;{% endif %}
+
     server_name         {{ nginx_server_name }};
 
     {% if ssl_enabled %}
