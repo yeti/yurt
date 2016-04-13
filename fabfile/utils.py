@@ -22,7 +22,7 @@ def get_fab_settings():
             sys.path.append(".")
             return __import__("fabric_settings", globals(), locals(), [], 0).FABRIC
         except ImportError:
-            raise Exception('Create `fabric_settings.py` file in this directory')
+            raise ImportError('Create `fabric_settings.py` file in this directory')
 
 
 def get_file_text(path):
@@ -60,7 +60,6 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
         file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
     with open(filepath, 'w') as change_file:
         change_file.write(file_text)
-
 
 
 def recursive_file_modify(path, dictionary, pattern=r"%\(({0})\)s", is_dir=True):

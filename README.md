@@ -58,7 +58,7 @@ deploying using Ansible to either a Vagrant or web host instance.
 2. Symlink the fabfile from the yurt directory to the project directory
 
     ```
-    sudo ln -s ~/projects/yurt/fabfile .
+    ln -s ~/projects/yurt/fabfile .
     ```
 
 #### NEW project Setup
@@ -96,6 +96,49 @@ deploying using Ansible to either a Vagrant or web host instance.
    ```
 2. Enter the SSH link to your repo
 
+## Creating a new remote deployment target
+
+1. Navigate to the project directory
+
+    ```
+    cd ~/projects/new_proj
+    ```
+    
+2. Enter the following command
+
+    ```
+    fab add.remote_server
+    ```
+
+3. Answer the interactive questions
+
+4. Confirm the settings by pressing Enter!
+
+5. You now have a target server that can be deployed to. Let's prep that server!
+
+## Prepping the Server (with PEM credentials)
+
+1. Navigate to the project directory
+
+    ```
+    cd ~/projects/new_proj
+    ```
+
+2. Creating the PEM file: Enter the following command
+
+    ```
+    fab setup.create_pem_file
+    ```
+
+3. Copying the PEM file to the Remote Server: Enter the following command
+
+    ```
+    fab setup.copy_pem_file
+    ```
+    * Stick with the default 'root' user
+
+4. You're ready to deploy
+
 ## Deploying a Yurt Project
 
 1. Navigate to the repo in the project directory
@@ -103,14 +146,16 @@ deploying using Ansible to either a Vagrant or web host instance.
    ```
    cd ~/projects/new_proj/<repo_name>
    ```
+
+2. Make sure your target branch has been committed and pushed to remote.
    
-2. Enter the following command
+3. Enter the following command
 
    ```
    ansible-playbook -i orchestration/inventory/<environment> orchestration/site.yml
    ```
    
-   * where `<environment>` is either `development`, `staging` or `production`
+   * where `<environment>` is the environment name you set in `Creating a new remote deployment target` (i.e. "development", "staging", or "production")
 
 ## Testing
 
