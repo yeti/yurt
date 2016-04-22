@@ -1,5 +1,4 @@
 import os
-import re
 from collections import OrderedDict
 
 from fabric.decorators import task
@@ -35,6 +34,10 @@ TEMPLATE_TO_PROJECT_MAPPING = {
 
 @task
 def remote_server():
+    """
+    Adds remote server files for deploying to new remote servers
+    :return:
+    """
     if os.path.exists("./templates.tmp"):
         print "A `templates.tmp` directory is in the current working directory. Delete this before trying again."
         return None
