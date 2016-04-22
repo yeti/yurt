@@ -149,13 +149,11 @@ deploying using Ansible to either a Vagrant or web host instance.
 
 2. Make sure your target branch has been committed and pushed to remote.
    
-3. Enter the following command
+3. Enter the following command. There will be a prompt to choose which remote server to push to.
 
    ```
-   ansible-playbook -i orchestration/inventory/<environment> orchestration/site.yml
+   fab deploy
    ```
-   
-   * where `<environment>` is the environment name you set in `Creating a new remote deployment target` (i.e. "development", "staging", or "production")
 
 ## Testing
 
