@@ -138,7 +138,7 @@ def copy_pem_file(user=None, host=None, key_name=None):
         except KeyError:
             print KeyError("Not a good input!")
             return
-    print "If prompted for 'Passphrase for private key:', ssh input the password credentials for this server."
+    print "If prompted for 'Passphrase for private key:', input the password credentials for this server."
     run('mkdir -p ~/.ssh')
     with open(os.path.expanduser('~/.ssh/{0}.pub'.format(project_name)), 'r') as key:
         append("~/.ssh/authorized_keys", key.readline().rstrip("\n"))
