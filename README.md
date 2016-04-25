@@ -155,6 +155,15 @@ deploying using Ansible to either a Vagrant or web host instance.
    fab deploy
    ```
 
+4. Advanced: The prompts for the above command can be skipped by setting the "env" variable to the remote server
+   environment name in the Fabric call, like below.
+
+   ```
+   fab --set env=development deploy
+   ```
+   * `development` would be the remote server environment name that could be
+     found in the project's `orchestration/inventory` directory
+
 ## Testing
 
 You should at this point have a development environment for a Django project set up in a Vagrant VM.

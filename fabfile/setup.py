@@ -126,19 +126,19 @@ def copy_pem_file(user=None, host=None, key_name=None):
                          else filename
                          for filename in os.listdir(os.path.expanduser("~/.ssh"))])
         key_names.remove("config")
-        print "Option\tKeyname"
-        print "______\t_______"
+        print("Option\tKeyname")
+        print("______\t_______")
         for index, keyname in enumerate(key_names):
             KEYNAME_ENUM[str(index)] = keyname
-            print "{0}:\t{1}".format(index, keyname)
-        print ""
+            print("{0}:\t{1}".format(index, keyname))
+        print("")
         try:
             project_name = KEYNAME_ENUM[raw_input("".join(("Which key in ~/.ssh are you ",
                                                            "copying to the remote server (Input the option)?:\t")))]
         except KeyError:
-            print KeyError("Not a good input!")
+            raise KeyError("Not a good input!")
             return
-    print "If prompted for 'Passphrase for private key:', input the password credentials for this server."
+    print("If prompted for 'Passphrase for private key:', input the password credentials for this server.")
     run('mkdir -p ~/.ssh')
     with open(os.path.expanduser('~/.ssh/{0}.pub'.format(project_name)), 'r') as key:
         append("~/.ssh/authorized_keys", key.readline().rstrip("\n"))
@@ -156,14 +156,14 @@ def delete_fabric_settings():
     """
     backup_fab_settings = raw_input("Backup `fabric_settings.py` before it's deleted (Y/N)?")
     if backup_fab_settings.lower() == 'y':
-        print 'Backing up `fabric_settings.py` => `fabric_settings.py.bak`'
+        print('Backing up `fabric_settings.py` => `fabric_settings.py.bak`')
         local('cp fabric_settings.py fabric_settings.py.bak')
     elif backup_fab_settings.lower() == 'n':
-        print 'No backup made!'
+        print('No backup made!')
     else:
-        print 'Bad input. Re-run by calling `fab setup.delete_fabric_settings`'
+        print('Bad input. Re-run by calling `fab setup.delete_fabric_settings`')
         return None
-    print 'Deleting `fabric_settings`'
+    print('Deleting `fabric_settings`')
     local('rm fabric_settings.py')
     local('rm *.pyc')
 
@@ -195,7 +195,7 @@ def new(PEM_copy=None):
         delete_setting = delete_choice[raw_input('''Delete `fabric_settings.py` file (Y/N)?
 Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t''').lower()]
     except KeyError:
-        print "Bad input. `fabric_settings.py` not deleted."
+        print("Bad input. `fabric_settings.py` not deleted.")
         return None
 
     if delete_setting:
