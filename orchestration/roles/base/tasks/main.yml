@@ -22,6 +22,7 @@
     - build-essential
     - ntp
     - htop
+    - sudo
     - git
     - libjpeg-dev
     - libpq-dev
