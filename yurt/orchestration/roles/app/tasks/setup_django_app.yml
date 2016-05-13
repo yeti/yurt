@@ -1,7 +1,7 @@
 ---
 
 - name: Install packages required by the Django app inside virtualenv
-  pip: virtualenv={{ virtualenv_path }} requirements={{ requirements_file }} executable="{{ virtualenv_path }}/bin/pip3"
+  pip: virtualenv="{{ virtualenv_path }}" requirements="{{ requirements_file }}"
 
 - name: Make `manage.py` executable
   file: path="{{ project_path }}/manage.py" mode="u+x,g+x"

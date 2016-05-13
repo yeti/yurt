@@ -1,82 +1,81 @@
 import os
-from fabric.contrib.files import append
-from fabric.decorators import task
-from fabric.operations import local, run, put
+import click
+
 from fabric.context_managers import settings, lcd
+from fabric.contrib.files import append
+from fabric.operations import local, run
 from fabric.state import env
-from fabric.tasks import execute
-from context_managers import bash
-from utils import recursive_file_modify, add_fab_path_to_bashrc, get_fab_settings, \
-    generate_printable_string, generate_ssh_keypair, get_environment_pem, get_project_name_from_repo
+import hvac
+
+from utils import recursive_file_modify, get_fab_settings, \
+    generate_printable_string, generate_ssh_keypair, get_environment_pem, get_project_name_from_repo, \
+    get_vault_credentials_from_path
+from cli import main
 
 __author__ = 'deanmercado'
 
-###
-# fab setup commands: these commands setup a new django project
-###
+YURT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+FABFILE_PATH = os.path.join(YURT_PATH, 'fabfile')
+DJANGO_PROJECT_PATH = os.path.join(YURT_PATH, 'django_project')
+ORCHESTRATION_PROJECT_PATH = os.path.join(YURT_PATH, 'orchestration')
 
 
-@task
+def create_settings():
+    fabric_settings = get_fab_settings()
+    project_name = get_project_name_from_repo(fabric_settings.get('git_repo'))
+    fabric_settings['project_name'] = project_name
+    fabric_settings['git_repo_url'] = fabric_settings.get('git_repo')
+    fabric_settings['repo_name'] = get_project_name_from_repo(fabric_settings.get('git_repo'), False)
+    return fabric_settings, project_name
+
+
 def create_project():
     """
     Creates Django project by copying over
     :return: Void
     """
-    env.settings = get_fab_settings()
-    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
-    env.settings['project_name'] = env.proj_name
-    local("cp -rf ./fabfile/../django_project/ ./{0}".format(env.proj_name))
-    recursive_file_modify(os.path.abspath("./{0}".format(env.proj_name)), env.settings)
+    fabric_settings, project_name = create_settings()
+    local("cp -rf {0} ./{1}".format(os.path.join(DJANGO_PROJECT_PATH, "*"), project_name))
+    recursive_file_modify(os.path.abspath("./{0}".format(project_name)), fabric_settings)
 
 
-@task
 def load_orchestration_and_requirements():
     """
     Copies over the orchestration directory and requirements.txt file to current directory
     :return: Void
     """
-    env.settings = get_fab_settings()
-    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
-    env.repo_name = get_project_name_from_repo(env.settings.get('git_repo'), False)
-    env.settings['project_name'] = env.proj_name
-    env.settings['repo_name'] = env.proj_name
-
-    local('cp -rf ./fabfile/../orchestration ./{0}'.format(env.proj_name))
-    local('cp -f ./fabfile/requirements.txt ./{0}'.format(env.proj_name))
-    recursive_file_modify('./{0}/orchestration'.format(env.proj_name), env.settings)
+    fabric_settings, project_name = create_settings()
+    local('cp -rf {0} ./{1}'.format(ORCHESTRATION_PROJECT_PATH, project_name))
+    local('cp -f {0} ./{1}'.format(os.path.join(YURT_PATH, 'requirements.txt'), project_name))
+    recursive_file_modify('./{0}/orchestration'.format(project_name), fabric_settings)
 
 
-@task
 def enable_git_repo():
     """
     Sets up git repository in project direcory
     :return: Void
     """
-    env.settings = get_fab_settings()
-    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
+    fabric_settings, project_name = create_settings()
+    if project_name not in os.listdir('.'):
+        local('mkdir {0}'.format(project_name))
 
-    if env.proj_name not in os.listdir('.'):
-        local('mkdir {0}'.format(env.proj_name))
-
-    with lcd(env.proj_name):
+    with lcd(project_name):
         with settings(warn_only=True):
             local('git init')
-            local('git remote add origin {0}'.format(env.git_repo_url))
+            local('git remote add origin {0}'.format(fabric_settings.get('git_repo_url')))
             local('git checkout -b develop')
 
 
-@task
 def move_vagrantfile_to_project_dir():
     """
     Moves Vagrantfile from `orchestration` directory to project directory
     :return:
     """
-    env.settings = get_fab_settings()
-    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
-    local('mv ./{0}/orchestration/Vagrantfile .'.format(env.proj_name))
+    fabric_settings, project_name = create_settings()
+    local('mv ./{0}/orchestration/Vagrantfile .'.format(project_name))
 
 
-@task
+@main.command()
 def create_pem_file():
     """
     Generates an SSH Key Pair (that is added to your keychain and `~/.ssh` directory)
@@ -98,7 +97,7 @@ def create_pem_file():
     print("PEM-file `~/.ssh/{0}.pem` added!".format(project_name))
 
 
-@task
+@main.command()
 def copy_pem_file(user=None, host=None, key_name=None):
     """
     Appends public SSH Key (named after `project_name` in `fabric_settings.py`) to remote host
@@ -148,7 +147,6 @@ def copy_pem_file(user=None, host=None, key_name=None):
         print("Pub key added to `/home/{0}/.ssh/authorized_keys` in server".format(env.user))
 
 
-@task
 def delete_fabric_settings():
     """
     Deletes `fabric_settings.py`
@@ -161,48 +159,40 @@ def delete_fabric_settings():
     elif backup_fab_settings.lower() == 'n':
         print('No backup made!')
     else:
-        print('Bad input. Re-run by calling `fab setup.delete_fabric_settings`')
+        print('Bad input.')
         return None
     print('Deleting `fabric_settings`')
     local('rm fabric_settings.py')
     local('rm *.pyc')
 
 
-@task
-def new(PEM_copy=None):
+@main.command()
+@click.pass_context
+def new_project(context):
     """
     Create new project
-    :return: Void
+    :return: None
     """
-    env.settings = get_fab_settings()
-    env.proj_name = get_project_name_from_repo(env.settings.get('git_repo'))
-    env.settings['project_name'] = env.proj_name
-    env.git_repo_url = env.settings.get('git_repo')
-    execute(enable_git_repo)
-    execute(create_project)
-    execute(load_orchestration_and_requirements)
-    execute(move_vagrantfile_to_project_dir)
-    if PEM_copy:
-        execute(create_pem_file)
-        environment = get_environment_pem(message='Export PEM file to remote')
-        execute(copy_pem_file, environment=environment)
+    enable_git_repo()
+    create_project()
+    load_orchestration_and_requirements()
+    move_vagrantfile_to_project_dir()
     delete_choice = {
         'y': True,
         'n': False
     }
     local('vagrant up')
     try:
-        delete_setting = delete_choice[raw_input('''Delete `fabric_settings.py` file (Y/N)?
-Hint: If you plan on running more fab calls after this, enter `N`.\nChoice:\t''').lower()]
+        delete_setting = delete_choice[raw_input('''Delete `fabric_settings.py` file (Y/N)?\nChoice:\t''').lower()]
     except KeyError:
         print("Bad input. `fabric_settings.py` not deleted.")
         return None
 
     if delete_setting:
-        execute(delete_fabric_settings)
+        delete_fabric_settings()
 
 
-@task
+@main.command()
 def existing():
     """
     Sets up existing project local environment
@@ -211,25 +201,26 @@ def existing():
     git_repo = raw_input("Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t")
     project_name = get_project_name_from_repo(git_repo)
     repo_name = get_project_name_from_repo(git_repo, False)
-    env.settings = {
+    SETTINGS = {
         'git_repo': git_repo,
         'project_name': project_name
     }
     local("git clone {0}".format(git_repo))
     local("mv ./{0} ./{1}".format(repo_name, project_name))
-    local("cp ./fabfile/../orchestration/Vagrantfile ./")
-    recursive_file_modify('./Vagrantfile', env.settings, is_dir=False)
+    local("cp {0} ./".format(os.path.join(ORCHESTRATION_PROJECT_PATH, "Vagrantfile")))
+    recursive_file_modify('./Vagrantfile', SETTINGS, is_dir=False)
     local("vagrant up")
 
 
-@task
-def add_settings():
+@main.command()
+@click.option('--vault', is_flag=True, help="Uses vault for git keys")
+def add_settings(vault):
     """
     Adds `fabric_settings.py` to this directory
     :return: Void
     """
     public_key, private_key = generate_ssh_keypair()
-    SETTINGS = {
+    settings = {
         'git_public_key': public_key,
         'git_private_key': private_key,
         'vagrant': {
@@ -237,6 +228,23 @@ def add_settings():
             'secret_key': generate_printable_string(40)
         }
     }
+    if vault:
+        url, token, path = get_vault_credentials_from_path(".")
+        client = hvac.Client(url=url, token=token)
+        if client.is_authenticated() and not client.is_sealed():
+            unique_key = 'secret/git_keys_{}'.format(generate_printable_string(25, False))
+            client.write(unique_key, private_key=private_key, public_key=public_key)
+            settings['git_public_key'] = " ".join(["{{",
+                                                   "lookup('vault', '{0}', 'public_key', '{1}')".format(unique_key,
+                                                                                                        path),
+                                                   "}}"])
+            settings['git_private_key'] = " ".join(["{{",
+                                                    "lookup('vault', '{0}', 'private_key', '{1}')".format(unique_key,
+                                                                                                          path),
+                                                    "}}"])
+            print "Add this public key to your SSH deploy keys in Github:\n{}".format(public_key)
+        else:
+            raise Exception('Vault is unavailable!')
     if 'fabric_settings.py' in os.listdir('.'):
         continue_process = raw_input('You already have `fabric_settings.py in this folder. Overwrite? (Y/N)')
         if continue_process.lower() == 'y':
@@ -244,7 +252,7 @@ def add_settings():
         else:
             print("Aborted.")
             return False
-    local('cp ./fabfile/fabric_settings.py.default.py ./fabric_settings.py')
-    recursive_file_modify('./fabric_settings.py', SETTINGS, is_dir=False)
+    local('cp {0} ./fabric_settings.py'.format(os.path.join(FABFILE_PATH, "fabric_settings.py.default.py")))
+    recursive_file_modify('./fabric_settings.py', settings, is_dir=False)
     print("".join(("You now have `fabric_settings.py`. Edit this file to have the correct ",
-                   "values and then enter `fab setup.new`")))
+                   "values and then enter `yurt new_project`")))

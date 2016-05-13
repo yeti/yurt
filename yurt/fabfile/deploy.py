@@ -4,11 +4,12 @@ from fabric.context_managers import settings
 from fabric.decorators import task
 from fabric.operations import local
 from fabric.state import env
+from cli import main
 
 __author__ = 'deanmercado'
 
 
-@task
+@main.command()
 def deploy():
     """
     Starts deploy process
@@ -16,7 +17,7 @@ def deploy():
     """
     ENVIRONMENT_OPTIONS = {}
     if not os.path.exists("orchestration"):
-        print("You aren't in a Yurt project. Use `cd` to get in the right directory.")
+        print("You aren't in a Yurt repository yet. Use `cd` to get in the right directory.")
         return
     if env.get("env", None) is None:
         print("Option\tInventory")
