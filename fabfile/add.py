@@ -32,7 +32,8 @@ ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
 ])
 
 VAULT_ATTRIBUTES_TO_QUESTIONS = OrderedDict([
-    ("VAULT_ADDR", "What is the public IP/DNS of this vault (include protocol)?: "),
+    ("PROTOCOL", "Is this vault ssl enabled (True/False)?: "),
+    ("VAULT_ADDR", "What is the public IP/DNS of this vault (ex. example.com)?: "),
     ("VAULT_TOKEN", "What is your token for this vault?: "),
     ("VAULT_UUID", "What will you name this vault (leave blank for random)?: ")
 ])
@@ -121,12 +122,17 @@ def vault():
     vault_UUID = ""
     for attribute, prompt in VAULT_ATTRIBUTES_TO_QUESTIONS.iteritems():
         response = raw_input(prompt)
+        protocol = ""
         if attribute == "VAULT_UUID":
             if response == "":
                 vault_UUID = generate_printable_string(20, False)
             else:
                 vault_UUID = response
+        elif attribute == "PROTOCOL":
+            protocol = "https://" if (response == "True") else "http://"
         else:
+            if attribute == "VAULT_ADDR":
+                response = "".join((protocol, response))
             settings[attribute] = response
     print("Vault Settings:")
     pretty_print_dictionary(settings)
