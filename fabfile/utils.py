@@ -1,3 +1,4 @@
+import json
 import string
 from Crypto.PublicKey import RSA
 from fabric.context_managers import prefix, settings
@@ -194,3 +195,28 @@ def raw_input_wrapper(query, lower=False):
     if lower:
         usr_input = usr_input.lower()
     return usr_input
+
+
+def pretty_print_dictionary(dictionary):
+    print("{")
+    for attr, value in dictionary.iteritems():
+        print("{0} : {1}, ".format(attr, value))
+    print("}\n")
+
+
+def get_vault_credentials_from_path(path):
+    vaults = []
+    vault_keys = {}
+    for path in os.listdir(path):
+        vault_query = re.search(r"vault_([^\.]+)\.json", path)
+        if vault_query:
+            vaults.append(vault_query.group(0))
+        for idx, vault in enumerate(vaults):
+            vault_keys[str(idx)] = vault
+    print("Option:\tVault:")
+    for option_num, vault in vault_keys.iteritems():
+        print("{0}:\t{1}".format(option_num, vault))
+    vault_path = vault_keys[raw_input("Which vault do you want this server to access (use Option number)?:\t")]
+    with open(vault_path, 'r') as vault_file:
+        vault_details = json.loads(vault_file.read())
+        return vault_details["VAULT_ADDR"], vault_details["VAULT_TOKEN"], vault_path
