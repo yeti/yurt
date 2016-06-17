@@ -19,13 +19,61 @@ Setup
 -----
 .. code-block:: shell
 
-    $ pip install yak-yurt
-    $ sudo ansible-galaxy install nodesource.node
-    $ vagrant plugin install vagrant-vbguest
+    pip install yak-yurt
+    mkdir ~/roles
+    ansible-galaxy install nodesource.node -p ~/roles
+    vagrant plugin install vagrant-vbguest
+
+Usage
+-----
+
+- Create some editable settings (required before running "yurt new_project")
+
+.. code-block:: shell
+
+    cd new_proj
+    yurt add_settings (--vault)
+    (nano/vim/subl) fabric_settings.py
+
+- Create a Django project and a Vagrant VM instance
+
+.. code-block:: shell
+
+    cd new_proj
+    yurt new_project
+
+- Adds a remote server target to the Django project
+
+.. code-block:: shell
+
+    cd new_proj
+    yurt remote_server
+
+- Deploys to a remote server target (must be inside the Django project git repo)
+
+.. code-block:: shell
+
+    cd new_proj/project_repo
+    yurt deploy
+
+- Setup a Yurt-started project (git ssh link required)
+
+.. code-block:: shell
+
+    cd new_proj
+    yurt existing
+
+- Create a JSON file with Vault credentials (experimental)
+
+.. code-block:: shell
+
+    cd new_proj
+    yurt vault (--dest=<destination directory>)
+
 
 Notes on Project Structure
 --------------------------
-- After running the initial steps inside an empty directory ("new_proj") this is the structure:
+- After running either "yurt existing" or "yurt new_project" inside an empty directory ("new_proj") this is the structure:
 
 .. code-block:: shell
 
@@ -58,33 +106,9 @@ Notes on Project Structure
                 |_ site.yml
                 |_ vagrant.yml
 
-Usage
------
-.. code-block:: shell
-
-    $ cd new_proj
-    $ yurt add_settings
-    $ (nano/vim/subl) fabric_settings.py
-
-- Creates some editable settings (that Yurt can use to build a new Django project)
-
-.. code-block:: shell
-
-    $ cd new_proj
-    $ yurt new_project
-
-- Creates a Django project and a Vagrant VM instance
-
-.. code-block:: shell
-
-    $ cd new_proj
-    $ yurt remote_server
-
-- Adds a remote server target to the Django project
-
-.. code-block:: shell
-
-    $ cd new_proj/project_repo
-    $ yurt deploy
-
-- Deploys to a remote server target (must be inside the Django project git repo)
+Vagrant Notes
+-------------
+- Use the command `vagrant ssh` to SSH into the Vagrant VM
+- On the Vagrant VM, the application code is in `/server/<project_name>` and the virtualenv is in `/server/.virtualenvs/<project_name>`
+- VM is provisioned with Ansible for the first time when calling `vagrant up`
+- Re-provisioning with Ansible can be called with `vagrant provision`

@@ -1,21 +1,16 @@
 import os
 import click
-
 from fabric.context_managers import settings, lcd
 from fabric.contrib.files import append
 from fabric.operations import local, run
 from fabric.state import env
-import hvac
-
 from utils import recursive_file_modify, get_fab_settings, \
-    generate_printable_string, generate_ssh_keypair, get_environment_pem, get_project_name_from_repo, \
-    get_vault_credentials_from_path
+    generate_ssh_keypair, get_project_name_from_repo
 from cli import main
 
 __author__ = 'deanmercado'
 
 YURT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-FABFILE_PATH = os.path.join(YURT_PATH, 'fabfile')
 DJANGO_PROJECT_PATH = os.path.join(YURT_PATH, 'django_project')
 ORCHESTRATION_PROJECT_PATH = os.path.join(YURT_PATH, 'orchestration')
 
@@ -79,7 +74,6 @@ def move_vagrantfile_to_project_dir():
 def create_pem_file():
     """
     Generates an SSH Key Pair (that is added to your keychain and `~/.ssh` directory)
-    :return:
     """
     pub, pem = generate_ssh_keypair(in_template=False)
 
@@ -101,10 +95,6 @@ def create_pem_file():
 def copy_pem_file(user=None, host=None, key_name=None):
     """
     Appends public SSH Key (named after `project_name` in `fabric_settings.py`) to remote host
-    :param user: str, Remote user
-    :param host: str, Remote ip address
-    :param key_name: str, Name of Key_pair in ~/.ssh
-    :return:
     """
     project_name = key_name
     env.user = user
@@ -150,7 +140,6 @@ def copy_pem_file(user=None, host=None, key_name=None):
 def delete_fabric_settings():
     """
     Deletes `fabric_settings.py`
-    :return: None
     """
     backup_fab_settings = raw_input("Backup `fabric_settings.py` before it's deleted (Y/N)?")
     if backup_fab_settings.lower() == 'y':
@@ -171,7 +160,6 @@ def delete_fabric_settings():
 def new_project(context):
     """
     Create new project
-    :return: None
     """
     enable_git_repo()
     create_project()
@@ -196,7 +184,6 @@ def new_project(context):
 def existing():
     """
     Sets up existing project local environment
-    :return:
     """
     git_repo = raw_input("Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t")
     project_name = get_project_name_from_repo(git_repo)
@@ -212,47 +199,5 @@ def existing():
     local("vagrant up")
 
 
-@main.command()
-@click.option('--vault', is_flag=True, help="Uses vault for git keys")
-def add_settings(vault):
-    """
-    Adds `fabric_settings.py` to this directory
-    :return: Void
-    """
-    public_key, private_key = generate_ssh_keypair()
-    settings = {
-        'git_public_key': public_key,
-        'git_private_key': private_key,
-        'vagrant': {
-            'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(40)
-        }
-    }
-    if vault:
-        url, token, path = get_vault_credentials_from_path(".")
-        client = hvac.Client(url=url, token=token)
-        if client.is_authenticated() and not client.is_sealed():
-            unique_key = 'secret/git_keys_{}'.format(generate_printable_string(25, False))
-            client.write(unique_key, private_key=private_key, public_key=public_key)
-            settings['git_public_key'] = " ".join(["{{",
-                                                   "lookup('vault', '{0}', 'public_key', '{1}')".format(unique_key,
-                                                                                                        path),
-                                                   "}}"])
-            settings['git_private_key'] = " ".join(["{{",
-                                                    "lookup('vault', '{0}', 'private_key', '{1}')".format(unique_key,
-                                                                                                          path),
-                                                    "}}"])
-            print "Add this public key to your SSH deploy keys in Github:\n{}".format(public_key)
-        else:
-            raise Exception('Vault is unavailable!')
-    if 'fabric_settings.py' in os.listdir('.'):
-        continue_process = raw_input('You already have `fabric_settings.py in this folder. Overwrite? (Y/N)')
-        if continue_process.lower() == 'y':
-            pass
-        else:
-            print("Aborted.")
-            return False
-    local('cp {0} ./fabric_settings.py'.format(os.path.join(FABFILE_PATH, "fabric_settings.py.default.py")))
-    recursive_file_modify('./fabric_settings.py', settings, is_dir=False)
-    print("".join(("You now have `fabric_settings.py`. Edit this file to have the correct ",
-                   "values and then enter `yurt new_project`")))
+if __name__ == '__main__':
+    main()

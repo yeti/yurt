@@ -36,3 +36,6 @@ def deploy():
     else:
         selection = env.env
     local('ansible-playbook -i orchestration/inventory/{0} orchestration/site.yml'.format(selection))
+
+if __name__ == '__main__':
+    main()

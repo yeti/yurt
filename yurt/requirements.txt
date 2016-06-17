@@ -1,3 +1,5 @@
 Django
 django_compressor
+djangorestframework
+django-grappelli
 psycopg2

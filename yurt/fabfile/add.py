@@ -1,20 +1,22 @@
 import json
 import os
 from collections import OrderedDict
-
+import click
 import hvac
-from fabric.decorators import task
-from fabric.operations import local
 from fabric.context_managers import lcd
 from fabric.operations import local
+from requests import ConnectionError
 
 from cli import main
 from setup import YURT_PATH
-
-TEMPLATES_PATH = os.path.join(YURT_PATH, "templates")
 from utils import get_project_name_from_repo, generate_printable_string,\
                   recursive_file_modify, raw_input_wrapper, pretty_print_dictionary, \
-                  get_vault_credentials_from_path
+                  get_vault_credentials_from_path, generate_ssh_keypair, find_vagrantfile_dir, \
+                  register_values_in_vault
+
+TEMPLATES_PATH = os.path.join(YURT_PATH, "templates")
+FABFILE_PATH = os.path.join(YURT_PATH, 'fabfile')
+
 
 ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
     ("git_repo", "Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t"),
@@ -43,9 +45,9 @@ VAULT_ATTRIBUTES_TO_QUESTIONS = OrderedDict([
 ])
 
 TEMPLATE_TO_PROJECT_MAPPING = {
-    "./env_settings.py.template.py": "../{0}/config/settings/{1}.py",
-    "./env_vars.yml.template": "../{0}/orchestration/env_vars/{2}.yml",
-    "./inventory.template": "../{0}/orchestration/inventory/{2}"
+    "./env_settings.py.template.py": "{0}/{1}/config/settings/{2}.py",
+    "./env_vars.yml.template": "{0}/{1}/orchestration/env_vars/{3}.yml",
+    "./inventory.template": "{0}/{1}/orchestration/inventory/{3}"
 }
 
 SECRETS_PARAMS = [
@@ -53,11 +55,11 @@ SECRETS_PARAMS = [
     "db_password"
 ]
 
+
 @main.command()
 def remote_server():
     """
     Adds remote server files for deploying to new remote servers
-    :return:
     """
     if os.path.exists("./templates.tmp"):
         print("A `templates.tmp` directory is in the current working directory. Delete this before trying again.")
@@ -75,6 +77,7 @@ def remote_server():
 
     for attribute, prompt in ATTRIBUTE_TO_QUESTION_MAPPING.iteritems():
         settings[attribute] = raw_input_wrapper(prompt, attribute in lowercase_attrs)
+    vagrantfile_path = find_vagrantfile_dir()
     settings["repo_name"] = get_project_name_from_repo(settings.get("git_repo"), False)
     settings["project_name"] = get_project_name_from_repo(settings.get("git_repo"))
     settings_path = "".join(("./{0}/config/settings/{1}".format(settings.get("project_name"),
@@ -83,23 +86,15 @@ def remote_server():
     settings["settings_path"] = ".".join(settings_path.split("/")[2:])
     settings["settings_path"] = ".".join(settings["settings_path"].split(".")[:-1])
     if settings["vault_used"] == "yes":
-        vault_address, vault_token, vault_path = get_vault_credentials_from_path(".")
-
-        vault_client = hvac.Client(url=vault_address, token=vault_token)
-        if vault_client.is_authenticated() and not vault_client.is_sealed():
-            secrets = {}
-            vault_secret_path = "secret/{0}_{1}".format(settings["project_name"],
-                                                        settings["env"])
-            for param in SECRETS_PARAMS:
-                secrets[param] = settings[param]
-                settings[param] = " ".join(("{{",
-                                            "lookup('vault', '{0}', '{1}', '{2}')".format(vault_secret_path,
-                                                                                          param,
-                                                                                          vault_path),
-                                            "}}"))
-            vault_client.write(vault_secret_path, **secrets)
-        else:
-            raise Exception("Vault connection is down.")
+        secrets = {}
+        for param in SECRETS_PARAMS:
+            secrets[param] = settings[param]
+        registered_settings = register_values_in_vault(vagrantfile_path,
+                                                       "secret/{0}_{1}".format(settings["project_name"],
+                                                                               settings["env"]),
+                                                       secrets)
+        for key in registered_settings:
+            settings[key] = registered_settings[key]
 
     print("Current Settings:")
     pretty_print_dictionary(settings)
@@ -108,7 +103,8 @@ def remote_server():
     recursive_file_modify("./templates.tmp", settings)
     with lcd("./templates.tmp"):
         for filepath, dest_template in TEMPLATE_TO_PROJECT_MAPPING.iteritems():
-            destination = dest_template.format(settings.get("project_name"),
+            destination = dest_template.format(vagrantfile_path.rstrip('/'),
+                                               settings.get("project_name"),
                                                settings.get("abbrev_env"),
                                                settings.get("env"))
             local("mv {0} {1}".format(filepath, destination))
@@ -116,10 +112,50 @@ def remote_server():
 
 
 @main.command()
-def vault():
+@click.option('--vault', is_flag=True, help="Uses vault for git keys")
+def add_settings(vault):
     """
-    Adds a vault that remote servers will push to
-    :return:
+    Adds `fabric_settings.py` to this directory
+    :return: Void
+    """
+    public_key, private_key = generate_ssh_keypair()
+    settings = {
+        'git_public_key': public_key,
+        'git_private_key': private_key,
+        'vagrant': {
+            'db_pw': generate_printable_string(15, False),
+            'secret_key': generate_printable_string(40)
+        }
+    }
+    if vault:
+        registered_settings = register_values_in_vault('.',
+                                                       'secret/git_keys_{}'.format(generate_printable_string(25,
+                                                                                                             False)),
+                                                       {'public_key': public_key,
+                                                        'private_key': private_key},
+                                                       quoted=True
+                                                       )
+        settings['git_private_key'] = registered_settings['private_key']
+        settings['git_public_key'] = registered_settings['public_key']
+
+    if 'fabric_settings.py' in os.listdir('.'):
+        continue_process = raw_input('You already have `fabric_settings.py` in this folder. Overwrite? (Y/N)')
+        if continue_process.lower() == 'y':
+            pass
+        else:
+            print("Aborted.")
+            return False
+    local('cp {0} ./fabric_settings.py'.format(os.path.join(FABFILE_PATH, "fabric_settings.py.default.py")))
+    recursive_file_modify('./fabric_settings.py', settings, is_dir=False)
+    print("".join(("You now have `fabric_settings.py`. Edit this file to have the correct ",
+                   "values and then enter `yurt new_project`")))
+
+
+@main.command()
+@click.option("--dest", default=None, help='Vault file path destination. (Overrides defaults)')
+def vault(dest):
+    """
+    Adds a vault that remote servers will push secrets to
     """
     settings = {}
     vault_UUID = ""
@@ -138,13 +174,20 @@ def vault():
         if attribute == "VAULT_ADDR":
             response = "".join((protocol, response))
         settings[attribute] = response
+
+    if dest:
+        path_prefix = dest
+    else:
+        path_prefix = find_vagrantfile_dir()
+
     print("Vault Settings:")
     pretty_print_dictionary(settings)
     print("Vault_UUID: {0}".format(vault_UUID))
+    dest_path = os.path.join(path_prefix, 'vault_{0}.json'.format(vault_UUID))
+    print("Stored in {0}".format(dest_path))
     raw_input("Press Enter to Continue or Ctrl+C to Cancel")
-    if os.path.exists("./Vagrantfile"):
-        path_prefix = "./"
-    else:
-        path_prefix = "../"
-    with open(os.path.join(path_prefix, 'vault_{0}.json'.format(vault_UUID)), 'w') as outfile:
+    with open(dest_path, 'w') as outfile:
         json.dump(settings, outfile)
+
+if __name__ == '__main__':
+    main()

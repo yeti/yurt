@@ -1,5 +1,7 @@
 import json
 import string
+
+import hvac
 from Crypto.PublicKey import RSA
 from fabric.context_managers import prefix, settings
 from fabric.operations import local, os
@@ -7,6 +9,8 @@ import re
 from random import choice
 from fabric.state import env
 import sys
+from requests import ConnectionError
+
 
 __author__ = 'deanmercado'
 
@@ -207,8 +211,8 @@ def pretty_print_dictionary(dictionary):
 def get_vault_credentials_from_path(path):
     vaults = []
     vault_keys = {}
-    for path in os.listdir(path):
-        vault_query = re.search(r"vault_([^\.]+)\.json", path)
+    for json_path in os.listdir(path):
+        vault_query = re.search(r"vault_([^\.]+)\.json", json_path)
         if vault_query:
             vaults.append(vault_query.group(0))
         for idx, vault in enumerate(vaults):
@@ -217,6 +221,40 @@ def get_vault_credentials_from_path(path):
     for option_num, vault in vault_keys.iteritems():
         print("{0}:\t{1}".format(option_num, vault))
     vault_path = vault_keys[raw_input("Which vault do you want this server to access (use Option number)?:\t")]
-    with open(vault_path, 'r') as vault_file:
+    with open(os.path.join(path, vault_path), 'r') as vault_file:
         vault_details = json.loads(vault_file.read())
         return vault_details["VAULT_ADDR"], vault_details["VAULT_TOKEN"], vault_path
+
+
+def find_vagrantfile_dir(path=None):
+    if path is None:
+        path = os.getcwd()
+    vagrantfile_path = os.path.join(path, "Vagrantfile")
+    if os.path.exists(vagrantfile_path):
+        return path
+    if os.path.expanduser("~") == path:
+        raise Exception('Vagrantfile not found! If running `yurt vault`, run `yurt vault --dest=.`')
+    return find_vagrantfile_dir(os.path.dirname(path))
+
+
+def register_values_in_vault(vagrantfile_path, vault_path, save_dict, quoted=False):
+    url, token, path = get_vault_credentials_from_path(vagrantfile_path)
+    client = hvac.Client(url=url, token=token)
+    return_settings = {}
+    try:
+        if client.is_authenticated() and not client.is_sealed():
+            client.write(vault_path, **save_dict)
+            for key in save_dict:
+                lookup_string = " ".join(("{{",
+                                          "lookup('vault', '{0}', '{1}', '{2}')".format(vault_path,
+                                                                                        key,
+                                                                                        path),
+                                          "}}"))
+                if quoted:
+                    lookup_string = "".join(("\\\"", lookup_string, "\\\""))
+                return_settings[key] = lookup_string
+            return return_settings
+        else:
+            raise Exception('Vault is unavailable!')
+    except ConnectionError:
+        print('Cannot connect to vault: Connection Error')

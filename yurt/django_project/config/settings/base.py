@@ -12,6 +12,7 @@ PROJECT_DIRNAME = PROJECT_ROOT.split(os.sep)[-1]
 # Application definition
 
 INSTALLED_APPS = (
+    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -19,6 +20,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'compressor',
+    'rest_framework'
 )
 
 MIDDLEWARE_CLASSES = (

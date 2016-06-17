@@ -8,7 +8,7 @@ def read(filepathname):
 
 
 def get_package_data_files():
-    package_data_files = ['django_project/ansible.cfg', 'requirements.txt']
+    package_data_files = ['django_project/ansible.cfg', 'django_project/.gitignore', 'requirements.txt']
     for orchestration, dirnames, filenames in os.walk('yurt/orchestration/'):
         for filename in filenames:
             package_data_files.append(os.path.join(orchestration.split('/', 1)[1], filename))
@@ -27,7 +27,7 @@ setup(
     packages=find_packages(),
     package_data={'yurt': get_package_data_files()},
     include_package_data=True,
-    version="0.1.dev41",
+    version="0.1.dev48",
     description="A tool for deploying Django Web Apps to remote servers",
     long_description=long_description,
     url="https://github.com/yeti/yurt/",
