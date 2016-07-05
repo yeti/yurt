@@ -2,20 +2,16 @@ import json
 import os
 from collections import OrderedDict
 import click
-import hvac
-from fabric.context_managers import lcd
-from fabric.operations import local
-from requests import ConnectionError
+from invoke import run
 
 from cli import main
 from setup import YURT_PATH
 from utils import get_project_name_from_repo, generate_printable_string,\
                   recursive_file_modify, raw_input_wrapper, pretty_print_dictionary, \
-                  get_vault_credentials_from_path, generate_ssh_keypair, find_vagrantfile_dir, \
-                  register_values_in_vault
+                  find_vagrantfile_dir, register_values_in_vault
 
 TEMPLATES_PATH = os.path.join(YURT_PATH, "templates")
-FABFILE_PATH = os.path.join(YURT_PATH, 'fabfile')
+FABFILE_PATH = os.path.join(YURT_PATH, 'yurt_core')
 
 
 ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
@@ -45,9 +41,9 @@ VAULT_ATTRIBUTES_TO_QUESTIONS = OrderedDict([
 ])
 
 TEMPLATE_TO_PROJECT_MAPPING = {
-    "./env_settings.py.template.py": "{0}/{1}/config/settings/{2}.py",
-    "./env_vars.yml.template": "{0}/{1}/orchestration/env_vars/{3}.yml",
-    "./inventory.template": "{0}/{1}/orchestration/inventory/{3}"
+    "./templates.tmp/env_settings.py.template.py": "{0}/{1}/config/settings/{2}.py",
+    "./templates.tmp/env_vars.yml.template": "{0}/{1}/orchestration/env_vars/{3}.yml",
+    "./templates.tmp/inventory.template": "{0}/{1}/orchestration/inventory/{3}"
 }
 
 SECRETS_PARAMS = [
@@ -57,7 +53,18 @@ SECRETS_PARAMS = [
 
 
 @main.command()
-def remote_server():
+@click.option("--git_repo", default=None, help="Git Repo Link to Yurt project")
+@click.option("--env", default=None, help="Environment name (i.e. 'Development', 'Staging')")
+@click.option("--abbrev_env", default=None, help="Abbreviated env name (i.e. 'dev', 'stage')")
+@click.option("--app_host_ip", default=None, help="Public DNS of App Server")
+@click.option("--db_host_ip", default=None, help="IP of DB Server")
+@click.option("--debug", default=None, help="Runs debug mode (use `True` or `False`)")
+@click.option("--num_gunicorn_workers", default=None, help="Number of Gunicorn workers")
+@click.option("--gunicorn_max_requests", default=None, help="Number of Gunicorn max requests")
+@click.option("--ssl_enabled", default=None, help="SSL is enabled on remote (use `yes` or `no`)")
+@click.option("--git_branch", default=None, help="Git branch to pull from")
+@click.option("--vault_used", default=None, help="Uses 'vault_.json' file for vault lookup (use `yes` or `no`)")
+def remote_server(**kwargs):
     """
     Adds remote server files for deploying to new remote servers
     """
@@ -76,7 +83,15 @@ def remote_server():
               "Press Enter to Continue.")
 
     for attribute, prompt in ATTRIBUTE_TO_QUESTION_MAPPING.iteritems():
-        settings[attribute] = raw_input_wrapper(prompt, attribute in lowercase_attrs)
+        if kwargs[attribute] is None:
+            settings[attribute] = raw_input_wrapper(prompt, attribute in lowercase_attrs)
+            # Handle gunicorn defaults
+            if attribute == "num_gunicorn_workers" and settings[attribute] == "":
+                settings[attribute] = "2"
+            if attribute == "gunicorn_max_requests":
+                settings[attribute] = "0"
+        else:
+            settings[attribute] = kwargs[attribute]
     vagrantfile_path = find_vagrantfile_dir()
     settings["repo_name"] = get_project_name_from_repo(settings.get("git_repo"), False)
     settings["project_name"] = get_project_name_from_repo(settings.get("git_repo"))
@@ -85,7 +100,7 @@ def remote_server():
                              ".py"))
     settings["settings_path"] = ".".join(settings_path.split("/")[2:])
     settings["settings_path"] = ".".join(settings["settings_path"].split(".")[:-1])
-    if settings["vault_used"] == "yes":
+    if settings["vault_used"].lower() == "yes":
         secrets = {}
         for param in SECRETS_PARAMS:
             secrets[param] = settings[param]
@@ -99,56 +114,15 @@ def remote_server():
     print("Current Settings:")
     pretty_print_dictionary(settings)
     raw_input("Press Enter to Continue or Ctrl+C to Cancel")
-    local("cp -rf {0} ./templates.tmp".format(TEMPLATES_PATH))
+    run("cp -rf {0} ./templates.tmp".format(TEMPLATES_PATH))
     recursive_file_modify("./templates.tmp", settings)
-    with lcd("./templates.tmp"):
-        for filepath, dest_template in TEMPLATE_TO_PROJECT_MAPPING.iteritems():
-            destination = dest_template.format(vagrantfile_path.rstrip('/'),
-                                               settings.get("project_name"),
-                                               settings.get("abbrev_env"),
-                                               settings.get("env"))
-            local("mv {0} {1}".format(filepath, destination))
-    local("rm -rf ./templates.tmp")
-
-
-@main.command()
-@click.option('--vault', is_flag=True, help="Uses vault for git keys")
-def add_settings(vault):
-    """
-    Adds `fabric_settings.py` to this directory
-    :return: Void
-    """
-    public_key, private_key = generate_ssh_keypair()
-    settings = {
-        'git_public_key': public_key,
-        'git_private_key': private_key,
-        'vagrant': {
-            'db_pw': generate_printable_string(15, False),
-            'secret_key': generate_printable_string(40)
-        }
-    }
-    if vault:
-        registered_settings = register_values_in_vault('.',
-                                                       'secret/git_keys_{}'.format(generate_printable_string(25,
-                                                                                                             False)),
-                                                       {'public_key': public_key,
-                                                        'private_key': private_key},
-                                                       quoted=True
-                                                       )
-        settings['git_private_key'] = registered_settings['private_key']
-        settings['git_public_key'] = registered_settings['public_key']
-
-    if 'fabric_settings.py' in os.listdir('.'):
-        continue_process = raw_input('You already have `fabric_settings.py` in this folder. Overwrite? (Y/N)')
-        if continue_process.lower() == 'y':
-            pass
-        else:
-            print("Aborted.")
-            return False
-    local('cp {0} ./fabric_settings.py'.format(os.path.join(FABFILE_PATH, "fabric_settings.py.default.py")))
-    recursive_file_modify('./fabric_settings.py', settings, is_dir=False)
-    print("".join(("You now have `fabric_settings.py`. Edit this file to have the correct ",
-                   "values and then enter `yurt new_project`")))
+    for file_path, dest_template in TEMPLATE_TO_PROJECT_MAPPING.iteritems():
+        destination = dest_template.format(vagrantfile_path.rstrip('/'),
+                                           settings.get("project_name"),
+                                           settings.get("abbrev_env"),
+                                           settings.get("env"))
+        run("mv {0} {1}".format(file_path, destination))
+    run("rm -rf ./templates.tmp")
 
 
 @main.command()
