@@ -35,15 +35,15 @@ setup(
     author="Dean Mercado",
     author_email="support@yeti.co",
     install_requires=[
-        "Fabric",
-        "ansible==2.1.0",
+        "invoke==0.13.0",
+        "ansible==2.1.0.0",
         "pycrypto==2.5",
-        "click",
-        "hvac"
+        "click==6.6",
+        "hvac==0.2.13"
     ],
     entry_points={
         "console_scripts": [
-            "yurt=yurt.fabfile.cli:main",
+            "yurt=yurt.yurt_core.cli:main",
         ]
     },
     classifiers=[

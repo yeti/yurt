@@ -27,27 +27,25 @@ Setup
 Usage
 -----
 
-- Create some editable settings (required before running "yurt new_project")
-
+- Get HELP for a Yurt command
 .. code-block:: shell
 
-    cd new_proj
-    yurt add_settings (--vault)
-    (nano/vim/subl) fabric_settings.py
+    yurt deploy --help
+
 
 - Create a Django project and a Vagrant VM instance
 
 .. code-block:: shell
 
     cd new_proj
-    yurt new_project
+    yurt new_project (--git_repo=<git repo link>) (--vault)
 
 - Adds a remote server target to the Django project
 
 .. code-block:: shell
 
     cd new_proj
-    yurt remote_server
+    yurt remote_server (--help)
 
 - Deploys to a remote server target (must be inside the Django project git repo)
 
@@ -61,7 +59,7 @@ Usage
 .. code-block:: shell
 
     cd new_proj
-    yurt existing
+    yurt existing (--git_repo=<git repo link>)
 
 - Create a JSON file with Vault credentials (experimental)
 
@@ -73,7 +71,7 @@ Usage
 
 Notes on Project Structure
 --------------------------
-- After running either "yurt existing" or "yurt new_project" inside an empty directory ("new_proj") this is the structure:
+- After running either ``yurt existing`` or ``yurt new_project`` inside an empty directory ("new_proj") this is the structure:
 
 .. code-block:: shell
 
@@ -108,7 +106,7 @@ Notes on Project Structure
 
 Vagrant Notes
 -------------
-- Use the command `vagrant ssh` to SSH into the Vagrant VM
-- On the Vagrant VM, the application code is in `/server/<project_name>` and the virtualenv is in `/server/.virtualenvs/<project_name>`
-- VM is provisioned with Ansible for the first time when calling `vagrant up`
-- Re-provisioning with Ansible can be called with `vagrant provision`
+- Use the command ``vagrant ssh`` to SSH into the Vagrant VM
+- On the Vagrant VM, the application code is in ``/server/<project_name>`` and the virtualenv is in ``/server/.virtualenvs/<project_name>``
+- VM is provisioned with Ansible for the first time when calling ``vagrant up``
+- Re-provisioning with Ansible can be called with ``vagrant provision``

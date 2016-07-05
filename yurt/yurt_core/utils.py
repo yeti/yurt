@@ -1,16 +1,11 @@
 import json
 import string
-
 import hvac
 from Crypto.PublicKey import RSA
-from fabric.context_managers import prefix, settings
-from fabric.operations import local, os
 import re
 from random import choice
-from fabric.state import env
-import sys
 from requests import ConnectionError
-
+import os
 
 __author__ = 'deanmercado'
 
@@ -19,15 +14,34 @@ __author__ = 'deanmercado'
 ###
 
 
-def get_fab_settings():
-    try:
-        return __import__("fabric_settings", globals(), locals(), [], 0).FABRIC
-    except ImportError:
-        try:
-            sys.path.append(".")
-            return __import__("fabric_settings", globals(), locals(), [], 0).FABRIC
-        except ImportError:
-            raise ImportError('Create `fabric_settings.py` file in this directory')
+def add_settings(vault, git_repo):
+    """
+    Return a settings dict that can be used to generate a new project
+    :param vault: boolean, do we have a vault that can be looked up
+    :param git_repo: a git repo link
+    :return:
+    """
+    public_key, private_key = generate_ssh_keypair()
+    settings = {
+        'git_repo': git_repo,
+        'git_pub_key': public_key,
+        'git_priv_key': private_key,
+        'vagrant': {
+            'db_host_ip': '127.0.0.1',
+            'secret_key': generate_printable_string(40),
+            'settings_path': 'config.settings.local',
+            'db_password': generate_printable_string(15, False)
+        }
+    }
+    if vault:
+        registered_settings = register_values_in_vault('.',
+                                                       'secret/git_keys_{}'.format(generate_printable_string(25,
+                                                                                                             False)),
+                                                       {'public_key': public_key, 'private_key': private_key},
+                                                       quoted=True)
+        settings['git_priv_key'] = registered_settings['private_key']
+        settings['git_pub_key'] = registered_settings['public_key']
+    return settings
 
 
 def get_file_text(path):
@@ -107,20 +121,6 @@ def _get_bashrc():
     return bash_text, bash_path
 
 
-def add_fab_path_to_bashrc():
-    """
-    Adds FAB_PATH variable to .bashrc
-    :return: Void
-    """
-    with prefix('cd fabfile'):
-        bashrc_text, bash_path = _get_bashrc()
-        with open(os.path.expanduser(bash_path), 'w') as bashrc:
-            if "export FAB_PATH" in bashrc_text:
-                bashrc_text = re.sub(r'export FAB_PATH=[^\n]*\n', '', bashrc_text)
-            bashrc.write(bashrc_text)
-        local('echo "export FAB_PATH=$(pwd -P)" >> {0}'.format(bash_path))
-
-
 def generate_printable_string(num_chars, special_chars=True):
     """
     Generates a random string of printable characters
@@ -158,32 +158,6 @@ def generate_ssh_keypair(in_template=True):
     if in_template:
         private = re.sub(r"\n", "\n  ", private)
     return public, private
-
-
-def get_environment_pem(message='', name_only=False):
-    env.settings = get_fab_settings()
-    if name_only:
-        environments = {
-            '1': 'development',
-            '2': 'staging',
-            '3': 'production'
-        }
-    else:
-        environments = {
-            '1': env.settings.get('development'),
-            '2': env.settings.get('staging'),
-            '3': env.settings.get('production')
-        }
-    try:
-        environment = environments[raw_input("""
-        Choose which environment (1-3) <{0}>:
-        (1) Development
-        (2) Staging
-        (3) Production
-         Choice:\t""").format(message)]
-    except KeyError:
-        environment = None
-    return environment
 
 
 def get_project_name_from_repo(repo_link, drop_hyphens=True):
