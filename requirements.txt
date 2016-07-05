@@ -1,5 +1,5 @@
-Fabric
-ansible
+ansible==2.1.0.0
 pycrypto==2.5
-hvac
-click
+hvac==0.2.13
+click==6.6
+invoke==0.13.0
