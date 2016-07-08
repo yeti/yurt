@@ -3,3 +3,6 @@ dist/
 yak_yurt.egg-info/
 build/
 orchestration/
+.tox/
+.idea/
+.eggs/

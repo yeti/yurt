@@ -14,23 +14,32 @@ __author__ = 'deanmercado'
 ###
 
 
-def add_settings(vault, git_repo):
+def add_settings(vault, git_repo, test_mode=False):
     """
     Return a settings dict that can be used to generate a new project
     :param vault: boolean, do we have a vault that can be looked up
     :param git_repo: a git repo link
+    :param test_mode: a flag that makes this method spoof private/public keygen
     :return:
     """
-    public_key, private_key = generate_ssh_keypair()
+    if not test_mode:
+        public_key, private_key = generate_ssh_keypair()
+        secret_key = generate_printable_string(40)
+        db_password = generate_printable_string(15, False)
+    else:
+        public_key = "PUBLIC_KEY"
+        private_key = "PRIVATE_KEY"
+        secret_key = "secret_key"
+        db_password = "password"
     settings = {
         'git_repo': git_repo,
         'git_pub_key': public_key,
         'git_priv_key': private_key,
         'vagrant': {
             'db_host_ip': '127.0.0.1',
-            'secret_key': generate_printable_string(40),
+            'secret_key': secret_key,
             'settings_path': 'config.settings.local',
-            'db_password': generate_printable_string(15, False)
+            'db_password': db_password
         }
     }
     if vault:
@@ -232,3 +241,5 @@ def register_values_in_vault(vagrantfile_path, vault_path, save_dict, quoted=Fal
             raise Exception('Vault is unavailable!')
     except ConnectionError:
         print('Cannot connect to vault: Connection Error')
+
+

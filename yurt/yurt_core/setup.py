@@ -4,17 +4,13 @@ from invoke import run
 from utils import recursive_file_modify, \
     generate_ssh_keypair, get_project_name_from_repo, add_settings
 from cli import main
+from paths import DJANGO_PROJECT_PATH, ORCHESTRATION_PROJECT_PATH, YURT_PATH, YURT_CORE_PATH, TEMPLATES_PATH
 
 __author__ = 'deanmercado'
 
-YURT_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-DJANGO_PROJECT_PATH = os.path.join(YURT_PATH, 'django_project')
-ORCHESTRATION_PROJECT_PATH = os.path.join(YURT_PATH, 'orchestration')
-FABFILE_PATH = os.path.join(YURT_PATH, 'yurt_core')
 
-
-def create_settings(vault, git_repo):
-    config_settings = add_settings(vault, git_repo)
+def create_settings(vault, git_repo, test_mode=False):
+    config_settings = add_settings(vault, git_repo, test_mode)
     project_name = get_project_name_from_repo(config_settings.get('git_repo'))
     config_settings['project_name'] = project_name
     config_settings['git_repo_url'] = config_settings.get('git_repo')
@@ -36,7 +32,7 @@ def load_orchestration_and_requirements(config_settings, project_name):
     """
     run('cp -rf {0} ./{1}'.format(ORCHESTRATION_PROJECT_PATH, project_name))
     run('cp -f {0} ./{1}'.format(os.path.join(YURT_PATH, 'requirements.txt'), project_name))
-    run('cp -f {0} ./{1}/.gitignore'.format(os.path.join(FABFILE_PATH, 'gitignore.template'), project_name))
+    run('cp -f {0} ./{1}/.gitignore'.format(os.path.join(TEMPLATES_PATH, 'gitignore.template'), project_name))
     recursive_file_modify('./{0}/orchestration'.format(project_name), config_settings)
 
 
@@ -55,7 +51,7 @@ def enable_git_repo(config_settings, project_name):
     os.chdir(current_path)
 
 
-def add_all_files_to_git_repo(config_settings, project_name):
+def add_all_files_to_git_repo(_, project_name):
     current_path = os.getcwd()
     os.chdir("./{}".format(project_name))
     run('git add .')
@@ -63,7 +59,7 @@ def add_all_files_to_git_repo(config_settings, project_name):
     os.chdir(current_path)
 
 
-def move_vagrantfile_to_project_dir(config_settings, project_name):
+def move_vagrantfile_to_project_dir(_, project_name):
     """
     Moves Vagrantfile from `orchestration` directory to project directory
     """
@@ -128,7 +124,6 @@ def copy_pem_file(user, host, key_name):
         except KeyError:
             raise KeyError("Not a good input!")
             return
-    print("If prompted for 'Passphrase for private key:', input the password credentials for this server.")
     with open(os.path.expanduser('~/.ssh/{0}.pub'.format(project_name)), 'r') as key:
         # Copy the key over to the server's authorized keys
         run('ssh {}@{} "mkdir -p ~/.ssh && echo \"{}\" >> ~/.ssh/authorized_keys"'.format(user,

@@ -3,16 +3,11 @@ import os
 from collections import OrderedDict
 import click
 from invoke import run
-
 from cli import main
-from setup import YURT_PATH
 from utils import get_project_name_from_repo, generate_printable_string,\
                   recursive_file_modify, raw_input_wrapper, pretty_print_dictionary, \
                   find_vagrantfile_dir, register_values_in_vault
-
-TEMPLATES_PATH = os.path.join(YURT_PATH, "templates")
-FABFILE_PATH = os.path.join(YURT_PATH, 'yurt_core')
-
+from paths import TEMPLATES_PATH
 
 ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
     ("git_repo", "Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t"),
