@@ -1,10 +1,14 @@
 import os
 import click
 from invoke import run
-from utils import recursive_file_modify, \
-    generate_ssh_keypair, get_project_name_from_repo, add_settings
-from cli import main
-from paths import DJANGO_PROJECT_PATH, ORCHESTRATION_PROJECT_PATH, YURT_PATH, YURT_CORE_PATH, TEMPLATES_PATH
+try:
+    from utils import recursive_file_modify, generate_ssh_keypair, get_project_name_from_repo, add_settings
+    from cli import main
+    from paths import DJANGO_PROJECT_PATH, ORCHESTRATION_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
+except ImportError:
+    from .utils import recursive_file_modify, generate_ssh_keypair, get_project_name_from_repo, add_settings
+    from .cli import main
+    from .paths import DJANGO_PROJECT_PATH, ORCHESTRATION_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
 
 __author__ = 'deanmercado'
 

@@ -3,9 +3,10 @@ import unittest
 import mock
 from base import BaseCase
 from utils import assemble_call_args_list, testmode_create_settings, fake_abspath
-from ..setup import enable_git_repo, create_project, load_orchestration_and_requirements
+from ..setup import enable_git_repo, create_project, load_orchestration_and_requirements, \
+    move_vagrantfile_to_project_dir, add_all_files_to_git_repo
 from ..cli import main
-from ..paths import ORCHESTRATION_PROJECT_PATH, DJANGO_PROJECT_PATH, YURT_PATH, YURT_CORE_PATH, TEMPLATES_PATH
+from ..paths import ORCHESTRATION_PROJECT_PATH, DJANGO_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
 
 
 class SetupTestCase(BaseCase):
@@ -166,8 +167,31 @@ class SetupTestCase(BaseCase):
             'cp -f {0} ./yetifanpage'.format(os.path.join(YURT_PATH, 'requirements.txt')),
             'cp -f {0} ./yetifanpage/.gitignore'.format(os.path.join(TEMPLATES_PATH, 'gitignore.template'))
         ]
-        assert mock_run.call_args_list == map(lambda run_call: mock.call(run_call), expected_run_calls)
+        self.assertItemsEqual(mock_run.call_args_list, map(lambda run_call: mock.call(run_call), expected_run_calls))
         mock_rfm.assert_called_with('./yetifanpage/orchestration', self.NEW_PROJECT_ARGS[0])
+
+    @mock.patch('yurt.yurt_core.setup.run')
+    def test_move_vagrantfile_to_project_dir(self, mock_run):
+        move_vagrantfile_to_project_dir(*self.NEW_PROJECT_ARGS)
+        mock_run.assert_called_with('mv ./yetifanpage/orchestration/Vagrantfile .')
+
+    @mock.patch('yurt.yurt_core.setup.os.getcwd', return_value='/path/to/cwd')
+    @mock.patch('yurt.yurt_core.setup.os.chdir')
+    @mock.patch('yurt.yurt_core.setup.run')
+    def test_add_all_files_to_git_repo(self, mock_run, mock_chdir, mock_getcwd):
+        add_all_files_to_git_repo(*self.NEW_PROJECT_ARGS)
+        mock_getcwd.assert_called()
+        expected_chdir_calls = [
+            "./yetifanpage",
+            "/path/to/cwd"
+        ]
+        expected_run_calls = [
+            'git add .',
+            'git commit -m "Project Start: Add general project structure and orchestration"'
+        ]
+        self.assertItemsEqual(mock_run.call_args_list, map(lambda run_call: mock.call(run_call), expected_run_calls))
+        self.assertItemsEqual(mock_chdir.call_args_list, map(lambda run_call: mock.call(run_call), expected_chdir_calls))
+
 
 if __name__ == '__main__':
     unittest.main()

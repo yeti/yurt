@@ -114,22 +114,6 @@ def recursive_file_modify(path, dictionary, pattern=r"%\(({0})\)s", is_dir=True)
         _perform_substitution(path, dictionary, pattern, all_vars_pattern)
 
 
-def _get_bashrc():
-    """
-    Gets the text in ~/.bashrc
-    :return: String, the bashrc text
-    """
-    bash_path = '~/.bashrc'
-    try:
-        with open(os.path.expanduser(bash_path), 'r') as bashrc:
-            bash_text = bashrc.read()
-    except Exception:
-        bash_path = '~/.bash_profile'
-        with open(os.path.expanduser(bash_path), 'r') as bash_profile:
-            bash_text = bash_profile.read()
-    return bash_text, bash_path
-
-
 def generate_printable_string(num_chars, special_chars=True):
     """
     Generates a random string of printable characters
