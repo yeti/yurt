@@ -1,12 +1,21 @@
 import os
-import unittest
-import mock
-from base import BaseCase
-from utils import assemble_call_args_list, testmode_create_settings, fake_abspath
-from ..setup import enable_git_repo, create_project, load_orchestration_and_requirements, \
+from yurt.yurt_core.tests.base import BaseCase
+from yurt.yurt_core.tests.utils import assemble_call_args_list, testmode_create_settings, fake_abspath
+from yurt.yurt_core.setup import enable_git_repo, create_project, load_orchestration_and_requirements, \
     move_vagrantfile_to_project_dir, add_all_files_to_git_repo
-from ..cli import main
-from ..paths import ORCHESTRATION_PROJECT_PATH, DJANGO_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
+from yurt.yurt_core.cli import main
+from yurt.yurt_core.paths import ORCHESTRATION_PROJECT_PATH, DJANGO_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
+
+try:
+    import unittest
+    from unittest import mock
+    OPEN_METHOD = 'builtins.open'
+    INPUT_METHOD = 'builtins.input'
+except ImportError:
+    import mock
+    import unittest
+    OPEN_METHOD = '__builtin__.open'
+    INPUT_METHOD = '__builtin__.raw_input'
 
 
 class SetupTestCase(BaseCase):
@@ -74,7 +83,7 @@ class SetupTestCase(BaseCase):
         run_calls = mock_run.call_args_list
         assert expected_run_calls == run_calls
 
-    @mock.patch('yurt.yurt_core.setup.open')
+    @mock.patch(OPEN_METHOD)
     @mock.patch('yurt.yurt_core.setup.run')
     def test_copy_pem_file(self, mock_run, mock_open):
         arguments1 = {
@@ -103,12 +112,12 @@ class SetupTestCase(BaseCase):
         mock_run.assert_called_with(expected_ssh_call2, warn=True)
 
     @mock.patch('yurt.yurt_core.setup.os.chmod')
-    @mock.patch('yurt.yurt_core.setup.generate_ssh_keypair', return_value=('ssh-rsa ...', 'PEMKEY'))
-    @mock.patch('yurt.yurt_core.setup.raw_input', side_effect=lambda _: 'test_proj')
-    @mock.patch('yurt.yurt_core.setup.open', side_effect=[mock.mock_open().return_value, mock.mock_open().return_value])
+    @mock.patch('yurt.yurt_core.setup.generate_ssh_keypair', return_value=(b'ssh-rsa ...', b'PEMKEY'))
+    @mock.patch(INPUT_METHOD, side_effect=lambda test: 'test_proj')
+    @mock.patch(OPEN_METHOD, side_effect=[mock.mock_open().return_value, mock.mock_open().return_value])
     @mock.patch('yurt.yurt_core.setup.run')
     def test_create_pem_file(self, *mock_calls):
-        mock_run, mock_open, mock_input, _, _ = mock_calls
+        mock_run, mock_open, _, _, _ = mock_calls
         self.runner.invoke(main, ['create_pem_file'])
         expected_run_calls = [
             (('mv ./test_proj.pem ~/.ssh',),),
@@ -119,8 +128,12 @@ class SetupTestCase(BaseCase):
             (('./test_proj.pem', 'w'),),
             (('./test_proj.pub', 'w'),),
         ]
-        assert expected_run_calls == mock_run.call_args_list
-        assert expected_open_calls == mock_open.call_args_list
+        try:
+            self.assertItemsEqual(expected_run_calls, mock_run.call_args_list)
+            self.assertItemsEqual(expected_open_calls, mock_open.call_args_list)
+        except AttributeError:
+            self.assertEqual(expected_run_calls, mock_run.call_args_list)
+            self.assertEqual(expected_open_calls, mock_open.call_args_list)
 
     ##################
     # Helper methods #
@@ -147,8 +160,12 @@ class SetupTestCase(BaseCase):
             mock.call('/path/to/cwd'),
         ]
         enable_git_repo(*self.NEW_PROJECT_ARGS)
-        self.assertItemsEqual(mock_run.call_args_list, expected_run_calls)
-        self.assertItemsEqual(mock_chdir.call_args_list, expected_chdir_calls)
+        try:
+            self.assertItemsEqual(mock_run.call_args_list, expected_run_calls)
+            self.assertItemsEqual(mock_chdir.call_args_list, expected_chdir_calls)
+        except AttributeError:
+            self.assertEqual(mock_run.call_args_list, expected_run_calls)
+            self.assertEqual(mock_chdir.call_args_list, expected_chdir_calls)
 
     @mock.patch('yurt.yurt_core.setup.os.path.abspath', side_effect=fake_abspath)
     @mock.patch('yurt.yurt_core.setup.recursive_file_modify')
@@ -167,7 +184,12 @@ class SetupTestCase(BaseCase):
             'cp -f {0} ./yetifanpage'.format(os.path.join(YURT_PATH, 'requirements.txt')),
             'cp -f {0} ./yetifanpage/.gitignore'.format(os.path.join(TEMPLATES_PATH, 'gitignore.template'))
         ]
-        self.assertItemsEqual(mock_run.call_args_list, map(lambda run_call: mock.call(run_call), expected_run_calls))
+        try:
+            self.assertItemsEqual(mock_run.call_args_list,
+                                  map(lambda run_call: mock.call(run_call), expected_run_calls))
+        except AttributeError:
+            self.assertEqual(mock_run.call_args_list,
+                             [mock.call(run_call) for run_call in expected_run_calls])
         mock_rfm.assert_called_with('./yetifanpage/orchestration', self.NEW_PROJECT_ARGS[0])
 
     @mock.patch('yurt.yurt_core.setup.run')
@@ -180,7 +202,7 @@ class SetupTestCase(BaseCase):
     @mock.patch('yurt.yurt_core.setup.run')
     def test_add_all_files_to_git_repo(self, mock_run, mock_chdir, mock_getcwd):
         add_all_files_to_git_repo(*self.NEW_PROJECT_ARGS)
-        mock_getcwd.assert_called()
+        self.assertEqual(mock_getcwd.called, True)
         expected_chdir_calls = [
             "./yetifanpage",
             "/path/to/cwd"
@@ -189,9 +211,16 @@ class SetupTestCase(BaseCase):
             'git add .',
             'git commit -m "Project Start: Add general project structure and orchestration"'
         ]
-        self.assertItemsEqual(mock_run.call_args_list, map(lambda run_call: mock.call(run_call), expected_run_calls))
-        self.assertItemsEqual(mock_chdir.call_args_list, map(lambda run_call: mock.call(run_call), expected_chdir_calls))
-
+        try:
+            self.assertItemsEqual(mock_run.call_args_list,
+                                  map(lambda run_call: mock.call(run_call), expected_run_calls))
+            self.assertItemsEqual(mock_chdir.call_args_list,
+                                  map(lambda run_call: mock.call(run_call), expected_chdir_calls))
+        except AttributeError:
+            self.assertEqual(mock_run.call_args_list,
+                             [mock.call(run_call) for run_call in expected_run_calls])
+            self.assertEqual(mock_chdir.call_args_list,
+                             [mock.call(run_call) for run_call in expected_chdir_calls])
 
 if __name__ == '__main__':
     unittest.main()

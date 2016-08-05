@@ -1,10 +1,18 @@
-import StringIO
 import json
 import unittest
 import mock
 import os
 import shutil
-from ..utils import get_vault_credentials_from_path
+from invoke import run
+from yurt.yurt_core.paths import TEMPLATES_PATH
+from yurt.yurt_core.utils import get_vault_credentials_from_path, find_vagrantfile_dir
+# Python 2/3 issues
+try:
+    import StringIO
+    RAW_INPUT_IMPORT = 'yurt.yurt_core.utils.raw_input'
+except ImportError:
+    import io as StringIO
+    RAW_INPUT_IMPORT = 'yurt.yurt_core.utils.input'
 
 
 class UtilsTestCase(unittest.TestCase):
@@ -27,7 +35,7 @@ class UtilsTestCase(unittest.TestCase):
         shutil.rmtree('./test_fs')
 
     @mock.patch('sys.stdout', new_callable=StringIO.StringIO)
-    @mock.patch('yurt.yurt_core.utils.raw_input', return_value='0')
+    @mock.patch(RAW_INPUT_IMPORT, return_value='0')
     def test_get_vault_credentials_from_path(self, *mock_methods):
         _, _ = mock_methods
         with open('vault_charlesdanceparty.json', 'w') as vaultfile:
@@ -36,4 +44,16 @@ class UtilsTestCase(unittest.TestCase):
         self.assertEqual(address, 'https://charlesdanceparty.com/')
         self.assertEqual(token, 'watchhimdancewatchhimdance')
 
-
+    def test_find_vagrantfile_dir(self):
+        run('cp -rf {}/test_directory .'.format(TEMPLATES_PATH))
+        os.chdir('./test_directory/directory_level1/directory_level2/directory_level3/directory_level4')
+        self.assertEqual(find_vagrantfile_dir(),
+                         os.path.abspath(
+                             os.path.join(
+                                 os.getcwd(),
+                                 '..',
+                                 '..',
+                                 '..',
+                                 '..'))
+                         )
+        os.chdir('../../../../../')

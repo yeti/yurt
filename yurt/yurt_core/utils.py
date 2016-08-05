@@ -75,7 +75,6 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
     :param all_vars_pattern: raw str
     :return: Void
     """
-
     file_text = get_file_text(filepath)
     change_vars = re.findall(all_vars_pattern, file_text)
     for variable in change_vars:
@@ -140,13 +139,6 @@ def generate_ssh_keypair(in_template=True):
     """
     key = RSA.generate(4096)
     public = key.publickey().exportKey('OpenSSH')
-    if type(public) == ValueError:
-        public = """
-            This version of PyCrypto doesn't fully support key exporting to
-            `OpenSSH` format. You can create a public key manually using `ssh-keygen`
-            and the private key below. Replace this message with the public key
-            (on one line).
-        """
     private = key.exportKey('PEM')
     if in_template:
         private = re.sub(r"\n", "\n  ", private)
@@ -162,7 +154,10 @@ def get_project_name_from_repo(repo_link, drop_hyphens=True):
 
 
 def raw_input_wrapper(query, lower=False):
-    usr_input = raw_input(query)
+    try:
+        usr_input = raw_input(query)
+    except NameError:
+        usr_input = input(query)
     if lower:
         usr_input = usr_input.lower()
     return usr_input
@@ -170,7 +165,11 @@ def raw_input_wrapper(query, lower=False):
 
 def pretty_print_dictionary(dictionary):
     print("{")
-    for attr, value in dictionary.iteritems():
+    try:
+        dict_items = dictionary.iteritems()
+    except AttributeError:
+        dict_items = dictionary.items()
+    for attr, value in dict_items:
         print("{0} : {1}, ".format(attr, value))
     print("}\n")
 
@@ -185,9 +184,17 @@ def get_vault_credentials_from_path(path):
         for idx, vault in enumerate(vaults):
             vault_keys[str(idx)] = vault
     print("Option:\tVault:")
-    for option_num, vault in vault_keys.iteritems():
+    try:
+        vault_keys_items = vault_keys.iteritems()
+    except AttributeError:
+        vault_keys_items = vault_keys.items()
+    for option_num, vault in vault_keys_items:
         print("{0}:\t{1}".format(option_num, vault))
-    vault_path = vault_keys[raw_input("Which vault do you want this server to access (use Option number)?:\t")]
+    try:
+        vault_input = raw_input("Which vault do you want this server to access (use Option number)?:\t")
+    except NameError:
+        vault_input = input("Which vault do you want this server to access (use Option number)?:\t")
+    vault_path = vault_keys[vault_input]
     with open(os.path.join(path, vault_path), 'r') as vault_file:
         vault_details = json.loads(vault_file.read())
         return vault_details["VAULT_ADDR"], vault_details["VAULT_TOKEN"], vault_path

@@ -36,7 +36,7 @@ setup(
         "tox==2.3.1",
         "invoke==0.13.0",
         "ansible==2.1.0.0",
-        "pycrypto==2.6.1",
+        "pycryptodome==3.4",
         "click==6.6",
         "hvac==0.2.13"
     ],
@@ -44,7 +44,7 @@ setup(
         "tox==2.3.1",
         "invoke==0.13.0",
         "ansible==2.1.0.0",
-        "pycrypto==2.6.1",
+        "pycryptodome==3.4",
         "click==6.6",
         "hvac==0.2.13"
     ],

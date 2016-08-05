@@ -5,7 +5,12 @@ from ..setup import create_settings
 
 def assemble_call_args_list(subcommand, kwargs_dict={}):
     result = [subcommand, ]
-    for key, value in kwargs_dict.iteritems():
+    try:
+        dict_items = kwargs_dict.iteritems()
+    except AttributeError:
+        dict_items = kwargs_dict.items()
+
+    for key, value in dict_items:
         result.append("".join(("--", key)))
         if value:
             result.append(value)

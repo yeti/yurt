@@ -1,9 +1,19 @@
-import unittest
-import mock
-from ..cli import main
-from ..paths import TEMPLATES_PATH
-from utils import assemble_call_args_list, yield_vault_inputs, fake_open_file
-from base import BaseCase
+from yurt.yurt_core.cli import main
+from yurt.yurt_core.paths import TEMPLATES_PATH
+from yurt.yurt_core.tests.utils import assemble_call_args_list, yield_vault_inputs, fake_open_file
+from yurt.yurt_core.tests.base import BaseCase
+try:
+    # Python 3
+    import unittest
+    from unittest import mock
+    OPEN_METHOD = 'builtins.open'
+    INPUT_METHOD = 'builtins.input'
+except ImportError:
+    # Python 2
+    import mock
+    import unittest
+    OPEN_METHOD = 'yurt.yurt_core.add.open'
+    INPUT_METHOD = 'yurt.yurt_core.add.raw_input'
 
 
 class AddTestCase(BaseCase):
@@ -15,7 +25,7 @@ class AddTestCase(BaseCase):
     @mock.patch('yurt.yurt_core.add.run')
     @mock.patch('yurt.yurt_core.add.recursive_file_modify')
     @mock.patch('yurt.yurt_core.add.find_vagrantfile_dir', return_value=".")
-    @mock.patch('yurt.yurt_core.add.raw_input')
+    @mock.patch(INPUT_METHOD)
     @mock.patch('yurt.yurt_core.add.os.path.exists', return_value=False)
     def test_remote_server(self,
                            mock_os_path_exists,
@@ -40,12 +50,12 @@ class AddTestCase(BaseCase):
         cli_call = assemble_call_args_list("remote_server", remote_server_kwargs)
         self.runner.invoke(main, cli_call)
         mock_os_path_exists.assert_called_with("./templates.tmp")
-        mock_raw_input.assert_called()
-        mock_recursive_file_modify.assert_called()
-        mock_find_vagrantfile_dir.assert_called()
+        mock_raw_input.assert_called_with('Press Enter to Continue or Ctrl+C to Cancel')
+        self.assertEqual(mock_recursive_file_modify.called, True)
+        self.assertEqual(mock_find_vagrantfile_dir.called, True)
         expected_run_calls = [
             'cp -rf {} ./templates.tmp'.format(TEMPLATES_PATH),
-            "".join(('mv ./templates.tmp/env_settings.py.template.py ',
+            "".join(('mv ./templates.tmp/env_settings.py.template ',
                      './themonstermash/config/settings/theyDidTheMash.py')),
             "".join(('mv ./templates.tmp/inventory.template ',
                      './themonstermash/orchestration/inventory/itWasAGraveyardSmash')),
@@ -55,15 +65,19 @@ class AddTestCase(BaseCase):
         ]
 
         actual_run_calls = mock_run.call_args_list
-        # Assert that all the right files are being moved over
-        self.assertItemsEqual(map(lambda run_call: mock.call(run_call),
-                                  expected_run_calls),
-                              actual_run_calls)
+        try:
+            # Assert that all the right files are being moved over
+            self.assertItemsEqual(map(lambda run_call: mock.call(run_call),
+                                      expected_run_calls),
+                                  actual_run_calls)
+        except AttributeError:
+            evaluated_calls = [mock.call(run_call) for run_call in expected_run_calls]
+            self.assertEqual(sorted(evaluated_calls), sorted(actual_run_calls))
 
-    @mock.patch('yurt.yurt_core.add.raw_input', side_effect=yield_vault_inputs)
+    @mock.patch(INPUT_METHOD, side_effect=yield_vault_inputs)
     @mock.patch('yurt.yurt_core.add.find_vagrantfile_dir', return_value='/home/count_chocula/projects/monster-mash')
     @mock.patch('yurt.yurt_core.add.pretty_print_dictionary')
-    @mock.patch('yurt.yurt_core.add.open', side_effect=fake_open_file)
+    @mock.patch(OPEN_METHOD, side_effect=fake_open_file, create=True)
     def test_vault(self,
                    mock_open,
                    mock_pretty_print,

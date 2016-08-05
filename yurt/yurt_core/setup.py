@@ -1,14 +1,11 @@
 import os
+import stat
 import click
 from invoke import run
-try:
-    from utils import recursive_file_modify, generate_ssh_keypair, get_project_name_from_repo, add_settings
-    from cli import main
-    from paths import DJANGO_PROJECT_PATH, ORCHESTRATION_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
-except ImportError:
-    from .utils import recursive_file_modify, generate_ssh_keypair, get_project_name_from_repo, add_settings
-    from .cli import main
-    from .paths import DJANGO_PROJECT_PATH, ORCHESTRATION_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
+from yurt.yurt_core.utils import recursive_file_modify, generate_ssh_keypair, get_project_name_from_repo, add_settings
+from yurt.yurt_core.cli import main
+from yurt.yurt_core.paths import DJANGO_PROJECT_PATH, ORCHESTRATION_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
+
 
 __author__ = 'deanmercado'
 
@@ -76,16 +73,18 @@ def create_pem_file():
     Generates an SSH Key Pair (that is added to your keychain and `~/.ssh` directory)
     """
     pub, pem = generate_ssh_keypair(in_template=False)
-
-    project_name = raw_input("What will you name this ssh_key?\
-    (Hint: just an alphanumeric name that describes what the key is for):\t")
-
+    try:
+        project_name = raw_input("What will you name this ssh_key?\
+                                 (Hint: just an alphanumeric name that describes what the key is for):\t")
+    except NameError:
+        project_name = input("What will you name this ssh_key?\
+                             (Hint: just an alphanumeric name that describes what the key is for):\t")
     with open("./{0}.pem".format(project_name), 'w') as key:
-        key.write(pem)
-        os.chmod("./{0}.pem".format(project_name), 0400)
+        key.write(pem.decode('utf-8'))
         run("mv ./{0}.pem ~/.ssh".format(project_name))
+        os.chmod(os.path.expanduser("~/.ssh/{0}.pem".format(project_name)), stat.S_IRUSR)
     with open("./{0}.pub".format(project_name), 'w') as key:
-        key.write(pub)
+        key.write(pub.decode('utf-8'))
         run("mv ./{0}.pub ~/.ssh".format(project_name))
         run("ssh-add ~/.ssh/{0}.pem".format(project_name))
     print("PEM-file `~/.ssh/{0}.pem` added!".format(project_name))
@@ -102,13 +101,19 @@ def copy_pem_file(user, host, key_name):
     project_name = key_name
 
     if user is None:
-        user = raw_input("SSH User? (default: 'root'):\t")
+        try:
+            user = raw_input("SSH User? (default: 'root'):\t")
+        except NameError:
+            user = input("SSH User? (default: 'root'):\t")
         if user.strip(" ") == "":
             user = "root"
         else:
             user = user
     if host is None:
-        host = raw_input("Public IP/DNS of Remote Server?:\t")
+        try:
+            host = raw_input("Public IP/DNS of Remote Server?:\t")
+        except NameError:
+            host = input("Public IP/DNS of Remote Server?:\t")
     if key_name is None:
         KEYNAME_ENUM = {}
         key_names = set([filename.split('.')[0]
@@ -123,7 +128,11 @@ def copy_pem_file(user, host, key_name):
             print("{0}:\t{1}".format(index, keyname))
         print("")
         try:
-            project_name = KEYNAME_ENUM[raw_input("".join(("Which key in ~/.ssh are you ",
+            try:
+                project_name = KEYNAME_ENUM[raw_input("".join(("Which key in ~/.ssh are you ",
+                                                               "copying to the remote server (Input the option)?:\t")))]
+            except NameError:
+                project_name = KEYNAME_ENUM[input("".join(("Which key in ~/.ssh are you ",
                                                            "copying to the remote server (Input the option)?:\t")))]
         except KeyError:
             raise KeyError("Not a good input!")
@@ -148,8 +157,13 @@ def new_project(git_repo, vault):
     Create new project
     """
     if git_repo is None:
-        git_repo = raw_input("".join(("Enter the git repository link\n",
+        try:
+            git_repo = raw_input("".join(("Enter the git repository link\n",
+                                          "(i.e. git@github.com:mr_programmer/robot_repository.git):\t")))
+        except NameError:
+            git_repo = input("".join(("Enter the git repository link\n",
                                       "(i.e. git@github.com:mr_programmer/robot_repository.git):\t")))
+
     ordered_methods = [
         enable_git_repo,
         create_project,
@@ -171,8 +185,13 @@ def existing(git_repo):
     Sets up existing project local environment
     """
     if git_repo is None:
-        git_repo = raw_input("""Enter the git repository link
-        (i.e. git@github.com:mr_programmer/robot_repository.git):\t""")
+        try:
+            git_repo = raw_input("""Enter the git repository link
+            (i.e. git@github.com:mr_programmer/robot_repository.git):\t""")
+        except NameError:
+            git_repo = input("""Enter the git repository link
+            (i.e. git@github.com:mr_programmer/robot_repository.git):\t""")
+
     project_name = get_project_name_from_repo(git_repo)
     repo_name = get_project_name_from_repo(git_repo, False)
     SETTINGS = {

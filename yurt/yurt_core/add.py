@@ -3,11 +3,12 @@ import os
 from collections import OrderedDict
 import click
 from invoke import run
-from cli import main
-from utils import get_project_name_from_repo, generate_printable_string,\
+from yurt.yurt_core.cli import main
+from yurt.yurt_core.utils import get_project_name_from_repo, generate_printable_string,\
                   recursive_file_modify, raw_input_wrapper, pretty_print_dictionary, \
                   find_vagrantfile_dir, register_values_in_vault
-from paths import TEMPLATES_PATH
+from yurt.yurt_core.paths import TEMPLATES_PATH
+
 
 ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
     ("git_repo", "Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t"),
@@ -36,7 +37,7 @@ VAULT_ATTRIBUTES_TO_QUESTIONS = OrderedDict([
 ])
 
 TEMPLATE_TO_PROJECT_MAPPING = {
-    "./templates.tmp/env_settings.py.template.py": "{0}/{1}/config/settings/{2}.py",
+    "./templates.tmp/env_settings.py.template": "{0}/{1}/config/settings/{2}.py",
     "./templates.tmp/env_vars.yml.template": "{0}/{1}/orchestration/env_vars/{3}.yml",
     "./templates.tmp/inventory.template": "{0}/{1}/orchestration/inventory/{3}"
 }
@@ -71,13 +72,23 @@ def remote_server(**kwargs):
         "secret_key": generate_printable_string(40),
         "db_password": generate_printable_string(20, False),
     }
-
-    raw_input("You will be asked a bunch of questions for setting up the server.\nMake sure your "
+    try:
+        raw_input("You will be asked a bunch of questions for setting up the server.\nMake sure your "
+                  "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
+                  "the input you enter matches one of those choices.\n"
+                  "Press Enter to Continue.")
+    except NameError:
+        input("You will be asked a bunch of questions for setting up the server.\nMake sure your "
               "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
               "the input you enter matches one of those choices.\n"
               "Press Enter to Continue.")
 
-    for attribute, prompt in ATTRIBUTE_TO_QUESTION_MAPPING.iteritems():
+    try:
+        question_items = ATTRIBUTE_TO_QUESTION_MAPPING.iteritems()
+    except AttributeError:
+        question_items = ATTRIBUTE_TO_QUESTION_MAPPING.items()
+
+    for attribute, prompt in question_items:
         if kwargs[attribute] is None:
             settings[attribute] = raw_input_wrapper(prompt, attribute in lowercase_attrs)
             # Handle gunicorn defaults
@@ -108,10 +119,17 @@ def remote_server(**kwargs):
 
     print("Current Settings:")
     pretty_print_dictionary(settings)
-    raw_input("Press Enter to Continue or Ctrl+C to Cancel")
+    try:
+        raw_input("Press Enter to Continue or Ctrl+C to Cancel")
+    except NameError:
+        input("Press Enter to Continue or Ctrl+C to Cancel")
     run("cp -rf {0} ./templates.tmp".format(TEMPLATES_PATH))
     recursive_file_modify("./templates.tmp", settings)
-    for file_path, dest_template in TEMPLATE_TO_PROJECT_MAPPING.iteritems():
+    try:
+        template_project_items = TEMPLATE_TO_PROJECT_MAPPING.iteritems()
+    except AttributeError:
+        template_project_items = TEMPLATE_TO_PROJECT_MAPPING.items()
+    for file_path, dest_template in template_project_items:
         destination = dest_template.format(vagrantfile_path.rstrip('/'),
                                            settings.get("project_name"),
                                            settings.get("abbrev_env"),
@@ -129,8 +147,15 @@ def vault(dest):
     settings = {}
     vault_UUID = ""
     protocol = ""
-    for attribute, prompt in VAULT_ATTRIBUTES_TO_QUESTIONS.iteritems():
-        response = raw_input(prompt)
+    try:
+        vault_items = VAULT_ATTRIBUTES_TO_QUESTIONS.iteritems()
+    except AttributeError:
+        vault_items = VAULT_ATTRIBUTES_TO_QUESTIONS.items()
+    for attribute, prompt in vault_items:
+        try:
+            response = raw_input(prompt)
+        except NameError:
+            response = input(prompt)
         if attribute == "VAULT_UUID":
             if response == "":
                 vault_UUID = generate_printable_string(20, False)
@@ -154,7 +179,11 @@ def vault(dest):
     print("Vault_UUID: {0}".format(vault_UUID))
     dest_path = os.path.join(path_prefix, 'vault_{0}.json'.format(vault_UUID))
     print("Stored in {0}".format(dest_path))
-    raw_input("Press Enter to Continue or Ctrl+C to Cancel")
+    try:
+        raw_input("Press Enter to Continue or Ctrl+C to Cancel")
+    except NameError:
+        input("Press Enter to Continue or Ctrl+C to Cancel")
+    
     with open(dest_path, 'w') as outfile:
         json.dump(settings, outfile)
 
