@@ -52,19 +52,19 @@ def enable_git_repo(config_settings, project_name):
     os.chdir(current_path)
 
 
-def add_all_files_to_git_repo(_, project_name):
+def add_all_files_to_git_repo(*args):
     current_path = os.getcwd()
-    os.chdir("./{}".format(project_name))
+    os.chdir("./{}".format(args[1]))
     run('git add .')
     run('git commit -m "Project Start: Add general project structure and orchestration"')
     os.chdir(current_path)
 
 
-def move_vagrantfile_to_project_dir(_, project_name):
+def move_vagrantfile_to_project_dir(*args):
     """
     Moves Vagrantfile from `orchestration` directory to project directory
     """
-    run('mv ./{0}/orchestration/Vagrantfile .'.format(project_name))
+    run('mv ./{0}/orchestration/Vagrantfile .'.format(args[1]))
 
 
 @main.command()
