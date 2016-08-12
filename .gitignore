@@ -6,3 +6,6 @@ orchestration/
 .tox/
 .idea/
 .eggs/
+htmlcov/
+.coverage
+.python-version
