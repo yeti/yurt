@@ -83,6 +83,23 @@ class SetupTestCase(BaseCase):
         run_calls = mock_run.call_args_list
         assert expected_run_calls == run_calls
 
+    @mock.patch('yurt.yurt_core.setup.recursive_file_modify')
+    @mock.patch('yurt.yurt_core.setup.run')
+    def test_existing_good_name(self, *mocks):
+        mock_run = mocks[0]
+        kwargs = {
+            'git_repo': u'git@github.com:yeti/yeti_fan_page.git'
+        }
+        cli_call = assemble_call_args_list("existing", kwargs)
+        self.runner.invoke(main, cli_call)
+        expected_run_calls = [
+            (('git clone git@github.com:yeti/yeti_fan_page.git',),),
+            (('cp {0} ./'.format(os.path.join(ORCHESTRATION_PROJECT_PATH, 'Vagrantfile')),),),
+            (('vagrant up',),),
+        ]
+        run_calls = mock_run.call_args_list
+        assert expected_run_calls == run_calls
+
     @mock.patch(OPEN_METHOD)
     @mock.patch('yurt.yurt_core.setup.run')
     def test_copy_pem_file(self, mock_run, mock_open):
