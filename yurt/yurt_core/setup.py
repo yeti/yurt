@@ -199,7 +199,8 @@ def existing(git_repo):
         'project_name': project_name
     }
     run("git clone {0}".format(git_repo))
-    run("mv ./{0} ./{1}".format(repo_name, project_name))
+    if not(repo_name == project_name):
+        run("mv ./{0} ./{1}".format(repo_name, project_name))
     run("cp {0} ./".format(os.path.join(ORCHESTRATION_PROJECT_PATH, "Vagrantfile")))
     recursive_file_modify('./Vagrantfile', SETTINGS, is_dir=False)
     run("vagrant up")
