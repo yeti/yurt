@@ -75,10 +75,10 @@ class SetupTestCase(BaseCase):
             'git_repo': u'git@github.com:yeti/yeti-fan-page.git'
         }, is_dir=False)
         expected_run_calls = [
-            (('git clone git@github.com:yeti/yeti-fan-page.git',),),
-            (('mv ./yeti-fan-page ./yetifanpage',),),
-            (('cp {0} ./'.format(os.path.join(ORCHESTRATION_PROJECT_PATH, 'Vagrantfile')),),),
-            (('vagrant up',),),
+            mock.call('git clone git@github.com:yeti/yeti-fan-page.git'),
+            mock.call('mv ./yeti-fan-page ./yetifanpage'),
+            mock.call('cp {0} ./'.format(os.path.join(ORCHESTRATION_PROJECT_PATH, 'Vagrantfile'))),
+            mock.call('vagrant up'),
         ]
         run_calls = mock_run.call_args_list
         assert expected_run_calls == run_calls
@@ -93,9 +93,9 @@ class SetupTestCase(BaseCase):
         cli_call = assemble_call_args_list("existing", kwargs)
         self.runner.invoke(main, cli_call)
         expected_run_calls = [
-            (('git clone git@github.com:yeti/yeti_fan_page.git',),),
-            (('cp {0} ./'.format(os.path.join(ORCHESTRATION_PROJECT_PATH, 'Vagrantfile')),),),
-            (('vagrant up',),),
+            mock.call('git clone git@github.com:yeti/yeti_fan_page.git'),
+            mock.call('cp {0} ./'.format(os.path.join(ORCHESTRATION_PROJECT_PATH, 'Vagrantfile'))),
+            mock.call('vagrant up'),
         ]
         run_calls = mock_run.call_args_list
         assert expected_run_calls == run_calls
@@ -137,13 +137,13 @@ class SetupTestCase(BaseCase):
         mock_run, mock_open, _, _, _ = mock_calls
         self.runner.invoke(main, ['create_pem_file'])
         expected_run_calls = [
-            (('mv ./test_proj.pem ~/.ssh',),),
-            (('mv ./test_proj.pub ~/.ssh',),),
-            (('ssh-add ~/.ssh/test_proj.pem',),),
+            mock.call('mv ./test_proj.pem ~/.ssh'),
+            mock.call('mv ./test_proj.pub ~/.ssh'),
+            mock.call('ssh-add ~/.ssh/test_proj.pem'),
         ]
         expected_open_calls = [
-            (('./test_proj.pem', 'w'),),
-            (('./test_proj.pub', 'w'),),
+            mock.call('./test_proj.pem', 'w'),
+            mock.call('./test_proj.pub', 'w'),
         ]
         try:
             self.assertItemsEqual(expected_run_calls, mock_run.call_args_list)
