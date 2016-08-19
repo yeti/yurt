@@ -1,6 +1,6 @@
 import os
 from invoke import run
-from cli import main
+from yurt.yurt_core.cli import main
 
 __author__ = 'deanmercado'
 
