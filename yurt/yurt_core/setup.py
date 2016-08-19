@@ -19,28 +19,31 @@ def create_settings(vault, git_repo, test_mode=False):
     return config_settings, project_name
 
 
-def create_project(config_settings, project_name):
+def create_project(*args):
     """
     Creates Django project by copying over stuff
     """
+    config_settings, project_name = args
     run("cp -rf {0} ./{1}".format(os.path.join(DJANGO_PROJECT_PATH, "*"), project_name))
     recursive_file_modify(os.path.abspath("./{0}".format(project_name)), config_settings)
 
 
-def load_orchestration_and_requirements(config_settings, project_name):
+def load_orchestration_and_requirements(*args):
     """
     Copies over the orchestration directory and requirements.txt file to current directory
     """
+    config_settings, project_name = args
     run('cp -rf {0} ./{1}'.format(ORCHESTRATION_PROJECT_PATH, project_name))
     run('cp -f {0} ./{1}'.format(os.path.join(YURT_PATH, 'requirements.txt'), project_name))
     run('cp -f {0} ./{1}/.gitignore'.format(os.path.join(TEMPLATES_PATH, 'gitignore.template'), project_name))
     recursive_file_modify('./{0}/orchestration'.format(project_name), config_settings)
 
 
-def enable_git_repo(config_settings, project_name):
+def enable_git_repo(*args):
     """
     Sets up git repository in project direcory
     """
+    config_settings, project_name = args
     if project_name not in os.listdir('.'):
         run('mkdir {0}'.format(project_name))
 
@@ -53,8 +56,9 @@ def enable_git_repo(config_settings, project_name):
 
 
 def add_all_files_to_git_repo(*args):
+    _, project_name = args
     current_path = os.getcwd()
-    os.chdir("./{}".format(args[1]))
+    os.chdir("./{}".format(project_name))
     run('git add .')
     run('git commit -m "Project Start: Add general project structure and orchestration"')
     os.chdir(current_path)
@@ -64,7 +68,8 @@ def move_vagrantfile_to_project_dir(*args):
     """
     Moves Vagrantfile from `orchestration` directory to project directory
     """
-    run('mv ./{0}/orchestration/Vagrantfile .'.format(args[1]))
+    _, project_name = args
+    run('mv ./{0}/orchestration/Vagrantfile .'.format(project_name))
 
 
 @main.command()
