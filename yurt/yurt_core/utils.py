@@ -14,23 +14,32 @@ __author__ = 'deanmercado'
 ###
 
 
-def add_settings(vault, git_repo):
+def add_settings(vault, git_repo, test_mode=False):
     """
     Return a settings dict that can be used to generate a new project
     :param vault: boolean, do we have a vault that can be looked up
     :param git_repo: a git repo link
+    :param test_mode: a flag that makes this method spoof private/public keygen
     :return:
     """
-    public_key, private_key = generate_ssh_keypair()
+    if not test_mode:
+        public_key, private_key = generate_ssh_keypair()
+        secret_key = generate_printable_string(40)
+        db_password = generate_printable_string(15, False)
+    else:
+        public_key = "PUBLIC_KEY"
+        private_key = "PRIVATE_KEY"
+        secret_key = "secret_key"
+        db_password = "password"
     settings = {
         'git_repo': git_repo,
         'git_pub_key': public_key,
         'git_priv_key': private_key,
         'vagrant': {
             'db_host_ip': '127.0.0.1',
-            'secret_key': generate_printable_string(40),
+            'secret_key': secret_key,
             'settings_path': 'config.settings.local',
-            'db_password': generate_printable_string(15, False)
+            'db_password': db_password
         }
     }
     if vault:
@@ -66,7 +75,6 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
     :param all_vars_pattern: raw str
     :return: Void
     """
-
     file_text = get_file_text(filepath)
     change_vars = re.findall(all_vars_pattern, file_text)
     for variable in change_vars:
@@ -105,22 +113,6 @@ def recursive_file_modify(path, dictionary, pattern=r"%\(({0})\)s", is_dir=True)
         _perform_substitution(path, dictionary, pattern, all_vars_pattern)
 
 
-def _get_bashrc():
-    """
-    Gets the text in ~/.bashrc
-    :return: String, the bashrc text
-    """
-    bash_path = '~/.bashrc'
-    try:
-        with open(os.path.expanduser(bash_path), 'r') as bashrc:
-            bash_text = bashrc.read()
-    except Exception:
-        bash_path = '~/.bash_profile'
-        with open(os.path.expanduser(bash_path), 'r') as bash_profile:
-            bash_text = bash_profile.read()
-    return bash_text, bash_path
-
-
 def generate_printable_string(num_chars, special_chars=True):
     """
     Generates a random string of printable characters
@@ -147,13 +139,6 @@ def generate_ssh_keypair(in_template=True):
     """
     key = RSA.generate(4096)
     public = key.publickey().exportKey('OpenSSH')
-    if type(public) == ValueError:
-        public = """
-            This version of PyCrypto doesn't fully support key exporting to
-            `OpenSSH` format. You can create a public key manually using `ssh-keygen`
-            and the private key below. Replace this message with the public key
-            (on one line).
-        """
     private = key.exportKey('PEM')
     if in_template:
         private = re.sub(r"\n", "\n  ", private)
@@ -169,7 +154,10 @@ def get_project_name_from_repo(repo_link, drop_hyphens=True):
 
 
 def raw_input_wrapper(query, lower=False):
-    usr_input = raw_input(query)
+    try:
+        usr_input = raw_input(query)
+    except NameError:
+        usr_input = input(query)
     if lower:
         usr_input = usr_input.lower()
     return usr_input
@@ -177,7 +165,11 @@ def raw_input_wrapper(query, lower=False):
 
 def pretty_print_dictionary(dictionary):
     print("{")
-    for attr, value in dictionary.iteritems():
+    try:
+        dict_items = dictionary.iteritems()
+    except AttributeError:
+        dict_items = dictionary.items()
+    for attr, value in dict_items:
         print("{0} : {1}, ".format(attr, value))
     print("}\n")
 
@@ -192,9 +184,17 @@ def get_vault_credentials_from_path(path):
         for idx, vault in enumerate(vaults):
             vault_keys[str(idx)] = vault
     print("Option:\tVault:")
-    for option_num, vault in vault_keys.iteritems():
+    try:
+        vault_keys_items = vault_keys.iteritems()
+    except AttributeError:
+        vault_keys_items = vault_keys.items()
+    for option_num, vault in vault_keys_items:
         print("{0}:\t{1}".format(option_num, vault))
-    vault_path = vault_keys[raw_input("Which vault do you want this server to access (use Option number)?:\t")]
+    try:
+        vault_input = raw_input("Which vault do you want this server to access (use Option number)?:\t")
+    except NameError:
+        vault_input = input("Which vault do you want this server to access (use Option number)?:\t")
+    vault_path = vault_keys[vault_input]
     with open(os.path.join(path, vault_path), 'r') as vault_file:
         vault_details = json.loads(vault_file.read())
         return vault_details["VAULT_ADDR"], vault_details["VAULT_TOKEN"], vault_path
@@ -232,3 +232,5 @@ def register_values_in_vault(vagrantfile_path, vault_path, save_dict, quoted=Fal
             raise Exception('Vault is unavailable!')
     except ConnectionError:
         print('Cannot connect to vault: Connection Error')
+
+

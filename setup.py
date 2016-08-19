@@ -17,27 +17,34 @@ def get_package_data_files():
                 package_data_files.append(os.path.join(templates.split('/', 1)[1], filename))
     return package_data_files
 
-
-long_description = "{}\n\n{}".format(read("README.rst"),
-                                     read("CONTRIBUTORS.rst"))
-
+long_description = "{0}\n".format(read("README.rst"))
 
 setup(
     name="yak-yurt",
     packages=find_packages(),
     package_data={'yurt': get_package_data_files()},
     include_package_data=True,
-    version="0.1.dev49",
+    version="0.1.dev50",
     description="A tool for deploying Django Web Apps to remote servers",
     long_description=long_description,
     url="https://github.com/yeti/yurt/",
     license="MIT",
     author="Dean Mercado",
     author_email="support@yeti.co",
-    install_requires=[
+    test_suite="yurt.yurt_core.tests",
+    setup_requires=[
+        "tox==2.3.1",
         "invoke==0.13.0",
         "ansible==2.1.0.0",
-        "pycrypto==2.5",
+        "pycryptodome==3.4",
+        "click==6.6",
+        "hvac==0.2.13"
+    ],
+    install_requires=[
+        "tox==2.3.1",
+        "invoke==0.13.0",
+        "ansible==2.1.0.0",
+        "pycryptodome==3.4",
         "click==6.6",
         "hvac==0.2.13"
     ],
@@ -52,7 +59,6 @@ setup(
         "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Topic :: Software Development",
         "Topic :: Software Development :: Build Tools",
