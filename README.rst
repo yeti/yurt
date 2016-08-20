@@ -10,6 +10,9 @@ Supported on Mac OSX 10.11 (El Capitan)
 A collection of commands for generating a new Django project (running Python 3) and
 deploying using Ansible to either a Vagrant or web host instance.
 
+.. image:: https://travis-ci.org/yeti/yurt.svg?branch=master
+    :target: https://travis-ci.org/yeti/yurt
+
 Dependencies
 ------------
 - Vagrant
