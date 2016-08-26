@@ -45,7 +45,13 @@ class AddTestCase(BaseCase):
             'gunicorn_max_requests': '0',
             'ssl_enabled': 'yes',
             'git_branch': 'develop',
-            'vault_used': 'no'
+            'vault_used': 'no',
+            'email_host': 'smtp.gmail.com',
+            'email_port': '587',
+            'email_host_user': 'hello@world.com',
+            'email_host_password': 'hello@world.com',
+            'email_use_ssl': 'False',
+            'email_use_tls': 'True',
         }
         cli_call = assemble_call_args_list("remote_server", remote_server_kwargs)
         self.runner.invoke(main, cli_call)

@@ -30,6 +30,7 @@ django_environment:
   DATABASE_PASSWORD: "{{ db_password }}"
   DATABASE_HOST: "{{ db_host|default('127.0.0.1') }}"
   EMAIL_HOST: "{{ email_host|default(omit) }}"
+  EMAIL_PORT: "{{ email_host|default(omit) }}"
   EMAIL_HOST_USER: "{{ email_host_user|default(omit) }}"
   EMAIL_HOST_PASSWORD: "{{ email_host_password|default(omit) }}"
   BROKER_URL: "{{ broker_url|default(omit) }}"

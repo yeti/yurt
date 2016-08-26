@@ -26,6 +26,6 @@ class LookupModule(LookupBase):
         client = Client(**vault)
         if client.is_authenticated() and not client.is_sealed():
             result = client.read(key)['data'][field]
-            return result
+            return [result]
         else:
             raise AnsibleError('Unable to authenticate with Vault!')

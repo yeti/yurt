@@ -3,7 +3,6 @@ import stat
 import click
 from invoke import run
 from yurt.yurt_core.utils import recursive_file_modify, generate_ssh_keypair, get_project_name_from_repo, add_settings
-from yurt.yurt_core.cli import main
 from yurt.yurt_core.paths import DJANGO_PROJECT_PATH, ORCHESTRATION_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
 
 
@@ -72,7 +71,12 @@ def move_vagrantfile_to_project_dir(*args):
     run('mv ./{0}/orchestration/Vagrantfile .'.format(project_name))
 
 
-@main.command()
+@click.group()
+def setup():
+    pass
+
+
+@setup.command()
 def create_pem_file():
     """
     Generates an SSH Key Pair (that is added to your keychain and `~/.ssh` directory)
@@ -95,7 +99,7 @@ def create_pem_file():
     print("PEM-file `~/.ssh/{0}.pem` added!".format(project_name))
 
 
-@main.command()
+@setup.command()
 @click.option('--user', default=None, help='Remote SSH user')
 @click.option('--host', default=None, help='SSH Host IP address')
 @click.option('--key_name', default=None, help='Name of PEM file (in ~/.ssh)')
@@ -154,7 +158,7 @@ def copy_pem_file(user, host, key_name):
         print("Pub key added to `/home/{0}/.ssh/authorized_keys` in server".format(user))
 
 
-@main.command()
+@setup.command()
 @click.option('--git_repo', default=None, help='Git Repo Link')
 @click.option('--vault', is_flag=True, help="Uses vault for git keys")
 def new_project(git_repo, vault):
@@ -183,7 +187,7 @@ def new_project(git_repo, vault):
     run('vagrant up')
 
 
-@main.command()
+@setup.command()
 @click.option('--git_repo', default=None, help='Git Repo Link')
 def existing(git_repo):
     """
@@ -212,4 +216,4 @@ def existing(git_repo):
 
 
 if __name__ == '__main__':
-    main()
+    setup()
