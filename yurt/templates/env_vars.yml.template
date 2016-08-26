@@ -12,6 +12,11 @@ db_user: "{{ application_name }}"
 db_name: "{{ application_name }}"
 db_password: "%(db_password)s"
 
+# Email settings
+email_host: "%(email_host)s"
+email_host_password: "%(email_host_password)s"
+email_host_user: "%(email_host_user)s"
+email_port: "%(email_port)s"
 
 # Gunicorn settings. For the number of workers, a good rule to follow is
 # 2 x number of CPUs + 1

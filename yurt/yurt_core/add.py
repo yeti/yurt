@@ -3,7 +3,6 @@ import os
 from collections import OrderedDict
 import click
 from invoke import run
-from yurt.yurt_core.cli import main
 from yurt.yurt_core.utils import get_project_name_from_repo, generate_printable_string,\
                   recursive_file_modify, raw_input_wrapper, pretty_print_dictionary, \
                   find_vagrantfile_dir, register_values_in_vault
@@ -25,6 +24,12 @@ ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
                                        "you make a request, basically reloading the code. Very han",
                                        "dy when developing. Set to 0 for unlimited requests.: "))),
     ("ssl_enabled", "Is SSL enabled on this server (yes/no)?: "),
+    ("email_host", "Email host (i.e. 'smtp.google.com')?: "),
+    ("email_host_user", "Default email FROM user (i.e. 'dean@deanismyname.com')?: "),
+    ("email_host_password", "Email user's password: "),
+    ("email_port", "Email server port: "),
+    ("email_use_ssl", "Email server uses SSL (use `True` or `False`)?: "),
+    ("email_use_tls", "Email server uses TLS (use `True` or `False`)?: "),
     ("git_branch", "From which git branch will the server pull the project?: "),
     ("vault_used", "Are you utilizing a vault to store secrets for this server (yes/no)?: ")
 ])
@@ -44,11 +49,20 @@ TEMPLATE_TO_PROJECT_MAPPING = {
 
 SECRETS_PARAMS = [
     "secret_key",
-    "db_password"
+    "db_password",
+    "email_host",
+    "email_host_user",
+    "email_host_password",
+    "email_port",
 ]
 
 
-@main.command()
+@click.group()
+def add():
+    pass
+
+
+@add.command()
 @click.option("--git_repo", default=None, help="Git Repo Link to Yurt project")
 @click.option("--env", default=None, help="Environment name (i.e. 'Development', 'Staging')")
 @click.option("--abbrev_env", default=None, help="Abbreviated env name (i.e. 'dev', 'stage')")
@@ -59,6 +73,12 @@ SECRETS_PARAMS = [
 @click.option("--gunicorn_max_requests", default=None, help="Number of Gunicorn max requests")
 @click.option("--ssl_enabled", default=None, help="SSL is enabled on remote (use `yes` or `no`)")
 @click.option("--git_branch", default=None, help="Git branch to pull from")
+@click.option("--email_host", default=None, help="Email host DNS")
+@click.option("--email_host_user", default=None, help="Default FROM email user")
+@click.option("--email_host_password", default=None, help="FROM email user password")
+@click.option("--email_port", default=None, help="Email server port")
+@click.option("--email_use_ssl", default=None, help="Email user uses SSL (use `True` or `False`)?")
+@click.option("--email_use_tls", default=None, help="Email user uses TLS (use `True` or `False`)?")
 @click.option("--vault_used", default=None, help="Uses 'vault_.json' file for vault lookup (use `yes` or `no`)")
 def remote_server(**kwargs):
     """
@@ -138,7 +158,7 @@ def remote_server(**kwargs):
     run("rm -rf ./templates.tmp")
 
 
-@main.command()
+@add.command()
 @click.option("--dest", default=None, help='Vault file path destination. (Overrides defaults)')
 def vault(dest):
     """
@@ -188,4 +208,4 @@ def vault(dest):
         json.dump(settings, outfile)
 
 if __name__ == '__main__':
-    main()
+    add()

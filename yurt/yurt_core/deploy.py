@@ -1,11 +1,16 @@
+import click
 import os
 from invoke import run
-from yurt.yurt_core.cli import main
 
 __author__ = 'deanmercado'
 
 
-@main.command()
+@click.group()
+def deploy_cli():
+    pass
+
+
+@click.command()
 def deploy():
     """
     Starts deploy process
@@ -26,4 +31,4 @@ def deploy():
     run('ansible-playbook -i orchestration/inventory/{0} orchestration/site.yml'.format(selection))
 
 if __name__ == '__main__':
-    main()
+    deploy_cli()
