@@ -4,8 +4,8 @@ from yurt.yurt_core.tests.utils import assemble_call_args_list, yield_vault_inpu
 from yurt.yurt_core.tests.base import BaseCase
 try:
     # Python 3
-    import unittest
     from unittest import mock
+    import unittest
     OPEN_METHOD = 'builtins.open'
     INPUT_METHOD = 'builtins.input'
 except ImportError:
