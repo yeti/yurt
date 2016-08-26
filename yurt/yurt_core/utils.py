@@ -103,12 +103,13 @@ def recursive_file_modify(path, dictionary, pattern=r"%\(({0})\)s", is_dir=True)
     # Iterates through every item in the given path
     if is_dir:
         for item in os.listdir(path):
-            itempath = os.path.join(path, item)
-            # If directory, call this function again
-            if os.path.isdir(itempath) and not(itempath in [".", ".."]):
-                recursive_file_modify(itempath, dictionary, pattern)
-            else:
-                _perform_substitution(itempath, dictionary, pattern, all_vars_pattern)
+            if os.path.splitext(item)[1] not in ['.git', '.pyc']:
+                itempath = os.path.join(path, item)
+                # If directory, call this function again
+                if os.path.isdir(itempath) and not(itempath in [".", ".."]):
+                    recursive_file_modify(itempath, dictionary, pattern)
+                else:
+                    _perform_substitution(itempath, dictionary, pattern, all_vars_pattern)
     else:
         _perform_substitution(path, dictionary, pattern, all_vars_pattern)
 
