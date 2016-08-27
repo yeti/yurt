@@ -97,7 +97,7 @@ def remote_server(**kwargs):
                   "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
                   "the input you enter matches one of those choices.\n"
                   "Press Enter to Continue.")
-    except NameError:
+    except (AttributeError, NameError):
         input("You will be asked a bunch of questions for setting up the server.\nMake sure your "
               "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
               "the input you enter matches one of those choices.\n"
