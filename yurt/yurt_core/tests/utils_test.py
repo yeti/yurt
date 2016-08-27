@@ -1,6 +1,4 @@
 import json
-import unittest
-import mock
 import os
 import shutil
 from invoke import run
@@ -8,11 +6,15 @@ from yurt.yurt_core.paths import TEMPLATES_PATH
 from yurt.yurt_core.utils import get_vault_credentials_from_path, find_vagrantfile_dir
 # Python 2/3 issues
 try:
+    from unittest import mock
+    import unittest
+    import io as StringIO
+    RAW_INPUT_IMPORT = 'builtins.input'
+except ImportError:
     import StringIO
     RAW_INPUT_IMPORT = 'yurt.yurt_core.utils.raw_input'
-except ImportError:
-    import io as StringIO
-    RAW_INPUT_IMPORT = 'yurt.yurt_core.utils.input'
+    import mock
+    import unittest
 
 
 class UtilsTestCase(unittest.TestCase):

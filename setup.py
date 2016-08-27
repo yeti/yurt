@@ -24,7 +24,7 @@ setup(
     packages=find_packages(),
     package_data={'yurt': get_package_data_files()},
     include_package_data=True,
-    version="0.1.4",
+    version="0.1.5",
     description="A tool for deploying Django Web Apps to remote servers",
     long_description=long_description,
     url="https://github.com/yeti/yurt/",
@@ -35,16 +35,14 @@ setup(
     setup_requires=[
         "tox==2.3.1",
         "invoke==0.13.0",
-        "ansible==2.1.0.0",
-        "pycryptodome==3.4",
+        "ansible==2.1.1.0",
         "click==6.6",
         "hvac==0.2.13"
     ],
     install_requires=[
         "tox==2.3.1",
         "invoke==0.13.0",
-        "ansible==2.1.0.0",
-        "pycryptodome==3.4",
+        "ansible==2.1.1.0",
         "click==6.6",
         "hvac==0.2.13"
     ],
