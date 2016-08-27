@@ -1,5 +1,4 @@
-ansible==2.1.0.0
-pycryptodome==3.4
+ansible==2.1.1.0
 hvac==0.2.13
 click==6.6
 invoke==0.13.0
