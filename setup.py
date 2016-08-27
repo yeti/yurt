@@ -24,7 +24,7 @@ setup(
     packages=find_packages(),
     package_data={'yurt': get_package_data_files()},
     include_package_data=True,
-    version="0.1.4",
+    version="0.1.5",
     description="A tool for deploying Django Web Apps to remote servers",
     long_description=long_description,
     url="https://github.com/yeti/yurt/",
