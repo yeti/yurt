@@ -10,7 +10,7 @@ def deploy_cli():
     pass
 
 
-@click.command()
+@deploy_cli.command()
 def deploy():
     """
     Starts deploy process
