@@ -11,6 +11,8 @@ git_branch: %(git_branch)s
 db_user: "{{ application_name }}"
 db_name: "{{ application_name }}"
 db_password: "%(db_password)s"
+db_host: "%(db_host_ip)s"
+
 
 # Email settings
 email_host: "%(email_host)s"
