@@ -3,8 +3,8 @@
 - name: Install PostgreSQL
   apt: name={{ item }} update_cache={{ update_apt_cache }} state=installed
   with_items:
-    - postgresql=9.4.*
-    - postgresql-contrib=9.4.*
+    - postgresql=9.4*
+    - postgresql-contrib=9.4*
     - python-psycopg2=2.5.*
   tags: packages
 
