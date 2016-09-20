@@ -13,7 +13,6 @@ db_name: "{{ application_name }}"
 db_password: "%(db_password)s"
 db_host: "%(db_host_ip)s"
 
-
 # Email settings
 email_host: "%(email_host)s"
 email_host_password: "%(email_host_password)s"
