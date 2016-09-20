@@ -4,8 +4,8 @@ from yurt.yurt_core.tests.utils import assemble_call_args_list, yield_vault_inpu
 from yurt.yurt_core.tests.base import BaseCase
 try:
     # Python 3
-    import unittest
     from unittest import mock
+    import unittest
     OPEN_METHOD = 'builtins.open'
     INPUT_METHOD = 'builtins.input'
 except ImportError:
@@ -38,8 +38,9 @@ class AddTestCase(BaseCase):
             'git_repo': 'git@github.com:paolopaolopaolo/the-monster-mash.git',
             'env': 'itWasAGraveyardSmash',
             'abbrev_env': 'theyDidTheMash',
-            'app_host_ip': 'it-caught-on-in-a-flash.com',
-            'db_host_ip': 'he-did-the-mash.org',
+            'app_host_dns': 'it-caught-on-in-a-flash.com',
+            'app_host_ip': '1.2.3.4',
+            'db_host_ip': '5.6.7.8',
             'debug': 'True',
             'num_gunicorn_workers': '2',
             'gunicorn_max_requests': '0',

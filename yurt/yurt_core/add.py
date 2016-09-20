@@ -13,7 +13,8 @@ ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
     ("git_repo", "Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t"),
     ("env", "What name is this environment (i.e. development, staging, production)?: "),
     ("abbrev_env", "How do you want this environment abbreviated (i.e. dev, stage, prod)?: "),
-    ("app_host_ip", "What is the public DNS of this project's host (i.e. example.com)?: "),
+    ("app_host_dns", "What is the public DNS of this project's host (i.e. example.com)?: "),
+    ("app_host_ip", "What is the IP of this project's host (i.e. 10.20.30.40)?: "),
     ("db_host_ip", "What is this project's DB host (Hint: public IP of project if hosted locally)?: "),
     ("debug", "This Django server will use Debug mode (True/False): "),
     ("num_gunicorn_workers", "".join(("How many gunicorn workers do you want ",
@@ -66,7 +67,8 @@ def add():
 @click.option("--git_repo", default=None, help="Git Repo Link to Yurt project")
 @click.option("--env", default=None, help="Environment name (i.e. 'Development', 'Staging')")
 @click.option("--abbrev_env", default=None, help="Abbreviated env name (i.e. 'dev', 'stage')")
-@click.option("--app_host_ip", default=None, help="Public DNS of App Server")
+@click.option("--app_host_ip", default=None, help="IP of App Server")
+@click.option("--app_host_dns", default=None, help="DNS of App Server")
 @click.option("--db_host_ip", default=None, help="IP of DB Server")
 @click.option("--debug", default=None, help="Runs debug mode (use `True` or `False`)")
 @click.option("--num_gunicorn_workers", default=None, help="Number of Gunicorn workers")
@@ -97,7 +99,7 @@ def remote_server(**kwargs):
                   "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
                   "the input you enter matches one of those choices.\n"
                   "Press Enter to Continue.")
-    except NameError:
+    except (AttributeError, NameError):
         input("You will be asked a bunch of questions for setting up the server.\nMake sure your "
               "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
               "the input you enter matches one of those choices.\n"
