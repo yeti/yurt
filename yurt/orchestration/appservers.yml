@@ -2,8 +2,9 @@
 
 - name: Provision a {{ application_name }} app server
   hosts: appservers
-  sudo: yes
-  sudo_user: root
+  become: yes
+  become_user: root
+  become_method: sudo
   remote_user: root
   vars:
     - update_apt_cache: yes
