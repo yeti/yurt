@@ -43,6 +43,7 @@ class SetupTestCase(BaseCase):
     ############################
 
     @mock.patch('yurt.yurt_core.setup.add_all_files_to_git_repo')
+    @mock.patch('yurt.yurt_core.setup.copy_ansible_configs_to_parent')
     @mock.patch('yurt.yurt_core.setup.move_vagrantfile_to_project_dir')
     @mock.patch('yurt.yurt_core.setup.load_orchestration_and_requirements')
     @mock.patch('yurt.yurt_core.setup.create_project')
@@ -78,6 +79,7 @@ class SetupTestCase(BaseCase):
             mock.call('git clone git@github.com:yeti/yeti-fan-page.git'),
             mock.call('mv ./yeti-fan-page ./yetifanpage'),
             mock.call('cp {0} ./'.format(os.path.join(ORCHESTRATION_PROJECT_PATH, 'Vagrantfile'))),
+            mock.call('cp yetifanpage/ansible.cfg .'),
             mock.call('vagrant up'),
         ]
         run_calls = mock_run.call_args_list
@@ -95,6 +97,7 @@ class SetupTestCase(BaseCase):
         expected_run_calls = [
             mock.call('git clone git@github.com:yeti/yeti_fan_page.git'),
             mock.call('cp {0} ./'.format(os.path.join(ORCHESTRATION_PROJECT_PATH, 'Vagrantfile'))),
+            mock.call('cp yeti_fan_page/ansible.cfg .'),
             mock.call('vagrant up'),
         ]
         run_calls = mock_run.call_args_list
