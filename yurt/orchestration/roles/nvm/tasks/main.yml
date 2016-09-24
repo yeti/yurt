@@ -1,0 +1,14 @@
+---
+
+- name: Get bashrc
+  shell: cat {{ bashrc_path }}
+  register: bashrc_contents
+
+- name: Install NVM
+  shell: curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.0/install.sh | bash
+  become_user: "{{ bashrc_user }}"
+  when: bashrc_contents.stdout.find('NVM_DIR=') == -1
+
+- name: Install Node version 4.4.7
+  shell: if [ -s {{ home_path }}.nvm/nvm.sh ]; then . {{ home_path }}.nvm/nvm.sh; fi && nvm install 4.4.7 executable=/bin/bash
+  become_user: "{{ bashrc_user }}"
