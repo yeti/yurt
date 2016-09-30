@@ -23,8 +23,6 @@ Setup
 .. code-block:: shell
 
     pip install yak-yurt
-    mkdir ~/roles
-    ansible-galaxy install nodesource.node -p ~/roles
     vagrant plugin install vagrant-vbguest
 
 Usage

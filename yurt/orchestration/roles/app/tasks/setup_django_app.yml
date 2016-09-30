@@ -27,7 +27,7 @@
   tags: django.migrate
 
 - name: Install "less" node.js package globally.
-  npm: name=less global=yes
+  npm: name=less global=yes executable={{ home_path }}.nvm/versions/node/v4.4.7/bin/npm
 
 - name: Run Django collectstatic
   django_manage:

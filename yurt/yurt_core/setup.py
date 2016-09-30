@@ -71,6 +71,10 @@ def move_vagrantfile_to_project_dir(*args):
     run('mv ./{0}/orchestration/Vagrantfile .'.format(project_name))
 
 
+def copy_ansible_configs_to_parent(*args):
+    _, project_name = args
+    run('cp {0}/ansible.cfg .'.format(project_name))
+
 @click.group()
 def setup():
     pass
@@ -178,6 +182,7 @@ def new_project(git_repo, vault):
         create_project,
         load_orchestration_and_requirements,
         move_vagrantfile_to_project_dir,
+        copy_ansible_configs_to_parent,
         add_all_files_to_git_repo
     ]
     args = create_settings(vault, git_repo)
@@ -211,6 +216,7 @@ def existing(git_repo):
     if not(repo_name == project_name):
         run("mv ./{0} ./{1}".format(repo_name, project_name))
     run("cp {0} ./".format(os.path.join(ORCHESTRATION_PROJECT_PATH, "Vagrantfile")))
+    run("cp {0} .".format(os.path.join(project_name, "ansible.cfg")))
     recursive_file_modify('./Vagrantfile', SETTINGS, is_dir=False)
     run("vagrant up")
 

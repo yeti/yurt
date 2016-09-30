@@ -27,4 +27,6 @@ django_secret_key: "%(vagrant.secret_key)s"
 run_django_db_migrations: yes
 run_django_collectstatic: yes
 
-bashrc_path: "/home/vagrant/.bashrc"
+bashrc_user: "vagrant"
+home_path: "/home/{{ bashrc_user }}/"
+bashrc_path: "{{ home_path }}.bashrc"

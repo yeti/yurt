@@ -47,4 +47,6 @@ django_secret_key: "%(secret_key)s"
 run_django_db_migrations: yes
 run_django_collectstatic: yes
 
-bashrc_path: "/root/.bashrc"
+bashrc_user: "root"
+home_path: "/{{ bashrc_user }}/"
+bashrc_path: "{{ home_path }}.bashrc"
