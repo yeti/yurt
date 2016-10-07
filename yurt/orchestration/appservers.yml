@@ -15,5 +15,5 @@
   roles:
     - base
     - memcached
-    - nodesource.node
+    - nvm
     - app
