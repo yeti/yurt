@@ -200,6 +200,16 @@ def get_vault_credentials_from_path(path):
         return vault_details["VAULT_ADDR"], vault_details["VAULT_TOKEN"], vault_path
 
 
+def find_project_folder(path=None):
+    if path is None:
+        path = os.getcwd()
+    vagrantfile_path = os.path.abspath(find_vagrantfile_dir(path))
+    path_files = [os.path.join(vagrantfile_path, path) for path in os.listdir(vagrantfile_path)]
+    project_path = [path_file for path_file in path_files
+                    if (os.path.isdir(path_file) and 'manage.py' in os.listdir(path_file))][0]
+    return project_path
+
+
 def find_vagrantfile_dir(path=None):
     if path is None:
         path = os.getcwd()

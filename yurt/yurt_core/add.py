@@ -3,10 +3,11 @@ import os
 from collections import OrderedDict
 import click
 from invoke import run
+from invoke.exceptions import Failure
 from yurt.yurt_core.utils import get_project_name_from_repo, generate_printable_string,\
                   recursive_file_modify, raw_input_wrapper, pretty_print_dictionary, \
-                  find_vagrantfile_dir, register_values_in_vault
-from yurt.yurt_core.paths import TEMPLATES_PATH
+                  find_vagrantfile_dir, register_values_in_vault, find_project_folder
+from yurt.yurt_core.paths import TEMPLATES_PATH, YURT_PATH
 
 
 ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
@@ -105,6 +106,7 @@ def remote_server(**kwargs):
               "the input you enter matches one of those choices.\n"
               "Press Enter to Continue.")
 
+    # TODO: Abstract this question-loop with a re-usable util function
     try:
         question_items = ATTRIBUTE_TO_QUESTION_MAPPING.iteritems()
     except AttributeError:
@@ -164,7 +166,7 @@ def remote_server(**kwargs):
 @click.option("--dest", default=None, help='Vault file path destination. (Overrides defaults)')
 def vault(dest):
     """
-    Adds a vault that remote servers will push secrets to
+    Adds a vault config that remote servers can push secrets to
     """
     settings = {}
     vault_UUID = ""
@@ -208,6 +210,49 @@ def vault(dest):
     
     with open(dest_path, 'w') as outfile:
         json.dump(settings, outfile)
+
+
+@add.command()
+@click.option("--name", default=None, help='Ansible Role name')
+@click.option("--remote/--local", default=False, help='Install role from AnsibleGalaxy(remote) or generate one (local)')
+def role(**kwargs):
+    ROLE_ATTRIBUTE_MAPPING = OrderedDict([
+        ('name', 'What will you name this role?: '),
+        ('remote', 'Install existing role from Ansible Galaxy (Y/N)?: '),
+    ])
+    try:
+        question_items = ROLE_ATTRIBUTE_MAPPING.iteritems()
+    except AttributeError:
+        question_items = ROLE_ATTRIBUTE_MAPPING.items()
+
+    # TODO: Abstract this question-loop with a re-usable util function
+    settings = {}
+    for attribute, prompt in question_items:
+        if kwargs[attribute] is None:
+            settings[attribute] = raw_input_wrapper(prompt, True)
+        else:
+            settings[attribute] = kwargs[attribute]
+
+    project_path = find_project_folder()
+    path_to_roles = ['orchestration', 'roles']
+
+    if settings['remote']:
+        roles_path = os.path.join(project_path, *path_to_roles)
+        ansible_galaxy_cmd = 'ansible-galaxy install -p {} {}'.format(roles_path, settings["name"])
+    else:
+        path_to_roles.append(settings['name'])
+        roles_path = os.path.join(project_path, *path_to_roles)
+        ansible_galaxy_cmd = 'ansible-galaxy init {} --force'.format(roles_path)
+    try:
+        run(ansible_galaxy_cmd)
+    except Failure:
+        if settings['remote']:
+            raise ImportError('Role installation with Ansible Galaxy disabled on Python3.')
+        else:
+            print('WARN: Role-scaffolding with Ansible Galaxy disabled on Python3. Using custom scaffolding.')
+            source_role_scaffold_path = os.path.join(YURT_PATH, 'templates', 'temp_role')
+            ansible_galaxy_cmd = 'cp -rf {} {}'.format(source_role_scaffold_path, roles_path)
+            run(ansible_galaxy_cmd)
 
 if __name__ == '__main__':
     add()
