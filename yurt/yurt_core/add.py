@@ -213,16 +213,22 @@ def vault(dest):
 
 
 @add.command()
-@click.option("--name", default=None, help='Ansible Role name')
-@click.option("--remote/--local", default=False, help='Install role from AnsibleGalaxy(remote) or generate one (local)')
+@click.option("--name",
+              default=None,
+              help='Ansible Role name')
+@click.option("--remote/--local",
+              default=False,
+              help='Install role from Ansible Galaxy (remote) or generate one (local)')
 def role(**kwargs):
     ROLE_ATTRIBUTE_MAPPING = OrderedDict([
         ('name', 'What will you name this role?: '),
         ('remote', 'Install existing role from Ansible Galaxy (Y/N)?: '),
     ])
     try:
+        # Python 2
         question_items = ROLE_ATTRIBUTE_MAPPING.iteritems()
     except AttributeError:
+        # Python 3
         question_items = ROLE_ATTRIBUTE_MAPPING.items()
 
     # TODO: Abstract this question-loop with a re-usable util function
