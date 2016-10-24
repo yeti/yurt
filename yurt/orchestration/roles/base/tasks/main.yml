@@ -21,6 +21,7 @@
     - apt-transport-https
     - curl
     - build-essential
+    - emacs
     - ntp
     - htop
     - sudo
