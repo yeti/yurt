@@ -24,6 +24,9 @@ def create_project(*args):
     """
     config_settings, project_name = args
     run("cp -rf {0} ./{1}".format(os.path.join(DJANGO_PROJECT_PATH, "*"), project_name))
+    run("find . -name \"*.pyc\" -type f -delete")
+    run("find . -name \"*.pyo\" -type f -delete")
+    run("find . -name \"__pycache__\" -type f -delete")
     recursive_file_modify(os.path.abspath("./{0}".format(project_name)), config_settings)
 
 
@@ -194,7 +197,8 @@ def new_project(git_repo, vault):
 
 @setup.command()
 @click.option('--git_repo', default=None, help='Git Repo Link')
-def existing(git_repo):
+@click.option('--git_branch', default='develop', help='Git Branch to checkout')
+def existing(git_repo, git_branch):
     """
     Sets up existing project local environment
     """
@@ -212,7 +216,8 @@ def existing(git_repo):
         'git_repo': git_repo,
         'project_name': project_name
     }
-    run("git clone {0}".format(git_repo))
+    run("git clone {0}".format(git_repo), warn=True)
+    run("cd ./{} && git checkout {}".format(repo_name, git_branch), warn=True)
     if not(repo_name == project_name):
         run("mv ./{0} ./{1}".format(repo_name, project_name))
     run("cp {0} ./".format(os.path.join(ORCHESTRATION_PROJECT_PATH, "Vagrantfile")))
