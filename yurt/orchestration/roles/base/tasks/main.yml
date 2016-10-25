@@ -19,7 +19,9 @@
   apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=present
   with_items:
     - apt-transport-https
+    - curl
     - build-essential
+    - emacs
     - ntp
     - htop
     - sudo
@@ -32,6 +34,7 @@
     - python3-pip
     - python3-pycurl
     - supervisor
+    - vim
   tags: packages
 
 - name: Install virtualenv

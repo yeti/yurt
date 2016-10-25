@@ -65,7 +65,8 @@ class SetupTestCase(BaseCase):
     @mock.patch('yurt.yurt_core.setup.run')
     def test_existing(self, mock_run, mock_rec_file_mod):
         kwargs = {
-            'git_repo': u'git@github.com:yeti/yeti-fan-page.git'
+            'git_repo': u'git@github.com:yeti/yeti-fan-page.git',
+            'git_branch': u'doodoobranch',
         }
         cli_call = assemble_call_args_list("existing", kwargs)
         self.runner.invoke(main, cli_call)
@@ -76,32 +77,40 @@ class SetupTestCase(BaseCase):
             'git_repo': u'git@github.com:yeti/yeti-fan-page.git'
         }, is_dir=False)
         expected_run_calls = [
-            mock.call('git clone git@github.com:yeti/yeti-fan-page.git'),
+            mock.call('git clone git@github.com:yeti/yeti-fan-page.git', warn=True),
+            mock.call('cd ./yeti-fan-page && git checkout doodoobranch', warn=True),
             mock.call('mv ./yeti-fan-page ./yetifanpage'),
             mock.call('cp {0} ./'.format(os.path.join(ORCHESTRATION_PROJECT_PATH, 'Vagrantfile'))),
             mock.call('cp yetifanpage/ansible.cfg .'),
             mock.call('vagrant up'),
         ]
-        run_calls = mock_run.call_args_list
-        assert expected_run_calls == run_calls
+        try:
+            self.assertItemsEqual(mock_run.call_args_list, expected_run_calls)
+        except AttributeError:
+            self.assertEqual(mock_run.call_args_list, expected_run_calls)
 
     @mock.patch('yurt.yurt_core.setup.recursive_file_modify')
     @mock.patch('yurt.yurt_core.setup.run')
     def test_existing_good_name(self, *mocks):
         mock_run = mocks[0]
         kwargs = {
-            'git_repo': u'git@github.com:yeti/yeti_fan_page.git'
+            'git_repo': u'git@github.com:yeti/yeti_fan_page.git',
+            'git_branch': u'doodoobranch'
         }
         cli_call = assemble_call_args_list("existing", kwargs)
         self.runner.invoke(main, cli_call)
         expected_run_calls = [
-            mock.call('git clone git@github.com:yeti/yeti_fan_page.git'),
+            mock.call('git clone git@github.com:yeti/yeti_fan_page.git', warn=True),
+            mock.call('cd ./yeti_fan_page && git checkout doodoobranch', warn=True),
             mock.call('cp {0} ./'.format(os.path.join(ORCHESTRATION_PROJECT_PATH, 'Vagrantfile'))),
             mock.call('cp yeti_fan_page/ansible.cfg .'),
             mock.call('vagrant up'),
         ]
-        run_calls = mock_run.call_args_list
-        assert expected_run_calls == run_calls
+        try:
+            self.assertItemsEqual(mock_run.call_args_list, expected_run_calls)
+        except AttributeError:
+            self.assertEqual(mock_run.call_args_list, expected_run_calls)
+
 
     @mock.patch(OPEN_METHOD)
     @mock.patch('yurt.yurt_core.setup.run')
@@ -192,7 +201,16 @@ class SetupTestCase(BaseCase):
     @mock.patch('yurt.yurt_core.setup.run')
     def test_create_project(self, mock_run, mock_rfm, _):
         create_project(*self.NEW_PROJECT_ARGS)
-        mock_run.assert_called_with('cp -rf {}/* ./yetifanpage'.format(DJANGO_PROJECT_PATH))
+        expected_run_calls = [
+            mock.call('cp -rf {}/* ./yetifanpage'.format(DJANGO_PROJECT_PATH)),
+            mock.call('find . -name \"*.pyc\" -type f -delete'),
+            mock.call('find . -name \"*.pyo\" -type f -delete'),
+            mock.call('find . -name \"__pycache__\" -type f -delete'),
+        ]
+        try:
+            self.assertItemsEqual(mock_run.call_args_list, expected_run_calls)
+        except AttributeError:
+            self.assertEqual(mock_run.call_args_list, expected_run_calls)
         mock_rfm.assert_called_with('/fake/abspath/yetifanpage', self.NEW_PROJECT_ARGS[0])
 
     @mock.patch('yurt.yurt_core.setup.recursive_file_modify')

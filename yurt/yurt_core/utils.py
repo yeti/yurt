@@ -20,7 +20,6 @@ def add_settings(vault, git_repo, test_mode=False):
     :param vault: boolean, do we have a vault that can be looked up
     :param git_repo: a git repo link
     :param test_mode: a flag that makes this method spoof private/public keygen
-    :return:
     """
     if not test_mode:
         public_key, private_key = generate_ssh_keypair()
