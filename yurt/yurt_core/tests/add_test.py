@@ -98,5 +98,34 @@ class AddTestCase(BaseCase):
             'VAULT_TOKEN': 'ea4d-ff43-1200-b32f',
         })
 
+    @mock.patch('yurt.yurt_core.add.run')
+    @mock.patch('yurt.yurt_core.add.find_project_folder',
+                return_value='/home/count_chocula/projects/monster-mash/monstermash')
+    def test_role_local(self,
+                  mock_find_project_folder,
+                  mock_run):
+        cli_call = assemble_call_args_list('role', {'name': 'test_role', 'local': None})
+        self.runner.invoke(main, cli_call)
+        mock_find_project_folder.assert_called_with()
+        mock_run.assert_called_with(
+            ''.join(('ansible-galaxy init /home/count_chocula/projects',
+                     '/monster-mash/monstermash/orchestration/roles/',
+                     'test_role --force')))
+
+    @mock.patch('yurt.yurt_core.add.run')
+    @mock.patch('yurt.yurt_core.add.find_project_folder',
+                return_value='/home/count_chocula/projects/monster-mash/monstermash')
+    def test_role_remote(self,
+                  mock_find_project_folder,
+                  mock_run):
+        cli_call = assemble_call_args_list('role', {'name': 'user1.test_role', 'remote': None})
+        self.runner.invoke(main, cli_call)
+        mock_find_project_folder.assert_called_with()
+        mock_run.assert_called_with(
+            ''.join(('ansible-galaxy install -p ',
+                     '/home/count_chocula/projects/monster-mash/monstermash',
+                     '/orchestration/roles user1.test_role'))
+        )
+
 if __name__ == '__main__':
     unittest.main()
