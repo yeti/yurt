@@ -25,7 +25,7 @@
   register: conf_file_abs_path
 
 - name: Ensure postgres is listening for application servers
-  lineinfile: dest="{{ conf_file_abs_path }}"
+  lineinfile: dest="{{ conf_file_abs_path.stdout }}"
               regexp="listen_addresses"
               line="listen_addresses = 'localhost,{{ db_host }}'"
               state=present

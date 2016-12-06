@@ -143,10 +143,7 @@ def remote_server(**kwargs):
 
     print("Current Settings:")
     pretty_print_dictionary(settings)
-    try:
-        raw_input("Press Enter to Continue or Ctrl+C to Cancel")
-    except NameError:
-        input("Press Enter to Continue or Ctrl+C to Cancel")
+    raw_input_wrapper("Press Enter to Continue or Ctrl+C to Cancel")
     run("cp -rf {0} ./templates.tmp".format(TEMPLATES_PATH))
     recursive_file_modify("./templates.tmp", settings)
     try:
