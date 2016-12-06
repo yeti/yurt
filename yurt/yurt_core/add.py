@@ -95,16 +95,10 @@ def remote_server(**kwargs):
         "secret_key": generate_printable_string(40),
         "db_password": generate_printable_string(20, False),
     }
-    try:
-        raw_input("You will be asked a bunch of questions for setting up the server.\nMake sure your "
-                  "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
-                  "the input you enter matches one of those choices.\n"
-                  "Press Enter to Continue.")
-    except (AttributeError, NameError):
-        input("You will be asked a bunch of questions for setting up the server.\nMake sure your "
-              "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
-              "the input you enter matches one of those choices.\n"
-              "Press Enter to Continue.")
+    raw_input_wrapper("You will be asked a bunch of questions for setting up the server.\nMake sure your "
+                      "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
+                      "the input you enter matches one of those choices.\n"
+                      "Press Enter to Continue.")
 
     # TODO: Abstract this question-loop with a re-usable util function
     try:
