@@ -3,9 +3,9 @@
 - name: Install PostgreSQL
   apt: name={{ item }} update_cache={{ update_apt_cache }} state=installed
   with_items:
-    - postgresql=9.4*
-    - postgresql-contrib=9.4*
-    - python-psycopg2=2.5.*
+    - postgresql
+    - postgresql-contrib
+    - python-psycopg2
   tags: packages
 
 - name: Ensure the PostgreSQL service is running
@@ -20,8 +20,12 @@
                  template='template0'
                  state=present
 
+- name: Get absolute path to latest version of PostgreSQL main config file
+  shell: echo "/etc/postgresql/`ls /etc/postgresql | sort -r | head -1`/main/postgresql.conf"
+  register: conf_file_abs_path
+
 - name: Ensure postgres is listening for application servers
-  lineinfile: dest=/etc/postgresql/9.4/main/postgresql.conf
+  lineinfile: dest="{{ conf_file_abs_path }}"
               regexp="listen_addresses"
               line="listen_addresses = 'localhost,{{ db_host }}'"
               state=present

@@ -16,7 +16,7 @@ ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
     ("abbrev_env", "How do you want this environment abbreviated (i.e. dev, stage, prod)?: "),
     ("app_host_dns", "What is the public DNS of this project's host (i.e. example.com)?: "),
     ("app_host_ip", "What is the IP of this project's host (i.e. 10.20.30.40)?: "),
-    ("db_host_ip", "What is this project's DB host (Hint: public IP of project if hosted locally)?: "),
+    ("db_host_ip", "What is this project's DB host (Hint: same IP as before if hosted locally)?: "),
     ("debug", "This Django server will use Debug mode (True/False): "),
     ("num_gunicorn_workers", "".join(("How many gunicorn workers do you want ",
                                       "(Hint: For the number of workers, a go",
@@ -25,13 +25,13 @@ ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
                                        "Setting this to 1 will restart the Gunicorn process each time ",
                                        "you make a request, basically reloading the code. Very han",
                                        "dy when developing. Set to 0 for unlimited requests.: "))),
-    ("ssl_enabled", "Is SSL enabled on this server (yes/no)?: "),
-    ("email_host", "Email host (i.e. 'smtp.google.com')?: "),
-    ("email_host_user", "Default email FROM user (i.e. 'dean@deanismyname.com')?: "),
-    ("email_host_password", "Email user's password: "),
-    ("email_port", "Email server port: "),
-    ("email_use_ssl", "Email server uses SSL (use `True` or `False`)?: "),
-    ("email_use_tls", "Email server uses TLS (use `True` or `False`)?: "),
+    ("ssl_enabled", "Is SSL enabled on this server,\nor in other words, is it using 'https://' (yes/no)?: "),
+    ("email_host", "Email host (default 'smtp.google.com')?: "),
+    ("email_host_user", "Default email FROM user (i.e. 'dean@deanismyname.com' or optional)?: "),
+    ("email_host_password", "Email user's password (optional)?: "),
+    ("email_port", "Email server port (default 687): "),
+    ("email_use_ssl", "Email server uses SSL (use `True` or `False`, default False)?: "),
+    ("email_use_tls", "Email server uses TLS (use `True` or `False`, default True)?: "),
     ("git_branch", "From which git branch will the server pull the project?: "),
     ("vault_used", "Are you utilizing a vault to store secrets for this server (yes/no)?: ")
 ])
@@ -79,9 +79,9 @@ def add():
 @click.option("--email_host", default=None, help="Email host DNS")
 @click.option("--email_host_user", default=None, help="Default FROM email user")
 @click.option("--email_host_password", default=None, help="FROM email user password")
-@click.option("--email_port", default=None, help="Email server port")
-@click.option("--email_use_ssl", default=None, help="Email user uses SSL (use `True` or `False`)?")
-@click.option("--email_use_tls", default=None, help="Email user uses TLS (use `True` or `False`)?")
+@click.option("--email_port", default='687', help="Email server port (default 687)")
+@click.option("--email_use_ssl", default='False', help="Email user uses SSL (use `True` or `False`, default False)?")
+@click.option("--email_use_tls", default='True', help="Email user uses TLS (use `True` or `False`, default True)?")
 @click.option("--vault_used", default=None, help="Uses 'vault_.json' file for vault lookup (use `yes` or `no`)")
 def remote_server(**kwargs):
     """
