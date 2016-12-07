@@ -36,7 +36,7 @@ def create_yurtrc_with_access_token():
        'Access Token: ')))
     yurtrc_path = os.path.join(TEMPLATES_PATH, 'yurtrc.template')
     template_vars = {'github_access_key': github_access_key}
-    run('cp {} ~/.yurtrc'.format(yurtrc_path))
+    run('cp {} {}'.format(yurtrc_path, YURTRC_PATH))
     recursive_file_modify(YURTRC_PATH, template_vars, is_dir=False)
 
 
