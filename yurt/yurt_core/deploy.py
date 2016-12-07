@@ -81,7 +81,7 @@ def deploy(ctx, selection):
     if selection is None:
         print("Option\tInventory")
         for index, filename in enumerate(os.listdir("./orchestration/inventory")):
-            if not(filename == "vagrant"):
+            if filename != "vagrant":
                 ENVIRONMENT_OPTIONS[str(index)] = filename
                 print("{0}:\t{1}".format(index, filename))
         num_selection = raw_input_wrapper("Which environment do you want to deploy (use Option number)?:\t")
