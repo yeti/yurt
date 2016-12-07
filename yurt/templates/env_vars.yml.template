@@ -50,3 +50,5 @@ run_django_collectstatic: yes
 bashrc_user: "root"
 home_path: "/{{ bashrc_user }}/"
 bashrc_path: "{{ home_path }}.bashrc"
+
+multiple_yurt_project_server: %(multiple_yurt_project_server)s

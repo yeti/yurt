@@ -9,6 +9,7 @@ from yurt.yurt_core.utils import get_project_name_from_repo, generate_printable_
                   find_vagrantfile_dir, register_values_in_vault, find_project_folder
 from yurt.yurt_core.paths import TEMPLATES_PATH, YURT_PATH
 
+TEMPLATE_FILES_TO_EXCLUDE_FROM_REMOTE_SERVER = ['yurtrc.template', 'temp_role', 'test_directory']
 
 ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
     ("git_repo", "Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t"),
@@ -33,7 +34,9 @@ ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
     ("email_use_ssl", "Email server uses SSL (use `True` or `False`, default False)?: "),
     ("email_use_tls", "Email server uses TLS (use `True` or `False`, default True)?: "),
     ("git_branch", "From which git branch will the server pull the project?: "),
-    ("vault_used", "Are you utilizing a vault to store secrets for this server (yes/no)?: ")
+    ("vault_used", "Are you utilizing a vault to store secrets for this server (yes/no)?: "),
+    ("multiple_yurt_project_server",
+     "Does this server already have another Yurt-built project deployed on it (yes/no)?: ")
 ])
 
 VAULT_ATTRIBUTES_TO_QUESTIONS = OrderedDict([
@@ -72,6 +75,7 @@ def add():
 @click.option("--app_host_dns", default=None, help="DNS of App Server")
 @click.option("--db_host_ip", default=None, help="IP of DB Server")
 @click.option("--debug", default=None, help="Runs debug mode (use `True` or `False`)")
+@click.option("--multiple_yurt_project_server", default=None, help="Server has other Yurt projects (use `yes` or `no`)")
 @click.option("--num_gunicorn_workers", default=None, help="Number of Gunicorn workers")
 @click.option("--gunicorn_max_requests", default=None, help="Number of Gunicorn max requests")
 @click.option("--ssl_enabled", default=None, help="SSL is enabled on remote (use `yes` or `no`)")
@@ -79,9 +83,9 @@ def add():
 @click.option("--email_host", default=None, help="Email host DNS")
 @click.option("--email_host_user", default=None, help="Default FROM email user")
 @click.option("--email_host_password", default=None, help="FROM email user password")
-@click.option("--email_port", default='687', help="Email server port (default 687)")
-@click.option("--email_use_ssl", default='False', help="Email user uses SSL (use `True` or `False`, default False)?")
-@click.option("--email_use_tls", default='True', help="Email user uses TLS (use `True` or `False`, default True)?")
+@click.option("--email_port", default=None, help="Email server port (default 687)")
+@click.option("--email_use_ssl", default=None, help="Email user uses SSL (use `True` or `False`, default False)?")
+@click.option("--email_use_tls", default=None, help="Email user uses TLS (use `True` or `False`, default True)?")
 @click.option("--vault_used", default=None, help="Uses 'vault_.json' file for vault lookup (use `yes` or `no`)")
 def remote_server(**kwargs):
     """
@@ -112,8 +116,18 @@ def remote_server(**kwargs):
             # Handle gunicorn defaults
             if attribute == "num_gunicorn_workers" and settings[attribute] == "":
                 settings[attribute] = "2"
-            if attribute == "gunicorn_max_requests":
+            if attribute == "gunicorn_max_requests" and settings[attribute] == "":
                 settings[attribute] = "0"
+            # Handle email defaults
+            if attribute == "email_port" and settings[attribute] == "":
+                settings[attribute] = "687"
+            if attribute == "email_use_ssl" and settings[attribute] == "":
+                settings[attribute] = "False"
+            if attribute == "email_use_tls" and settings[attribute] == "":
+                settings[attribute] = "True"
+            # Handle other defaults
+            if attribute == "multiple_yurt_project_server" and settings[attribute] == "":
+                settings[attribute] = "no"
         else:
             settings[attribute] = kwargs[attribute]
     vagrantfile_path = find_vagrantfile_dir()
@@ -138,7 +152,9 @@ def remote_server(**kwargs):
     print("Current Settings:")
     pretty_print_dictionary(settings)
     raw_input_wrapper("Press Enter to Continue or Ctrl+C to Cancel")
-    run("cp -rf {0} ./templates.tmp".format(TEMPLATES_PATH))
+    run("cp -rf {} ./templates.tmp".format(TEMPLATES_PATH))
+    for excluded_file in TEMPLATE_FILES_TO_EXCLUDE_FROM_REMOTE_SERVER:
+        run("rm -rf ./templates.tmp/{}".format(excluded_file))
     recursive_file_modify("./templates.tmp", settings)
     try:
         template_project_items = TEMPLATE_TO_PROJECT_MAPPING.iteritems()
@@ -149,7 +165,7 @@ def remote_server(**kwargs):
                                            settings.get("project_name"),
                                            settings.get("abbrev_env"),
                                            settings.get("env"))
-        run("mv {0} {1}".format(file_path, destination))
+        run("mv {} {}".format(file_path, destination))
     run("rm -rf ./templates.tmp")
 
 

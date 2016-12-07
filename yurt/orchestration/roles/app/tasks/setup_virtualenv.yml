@@ -27,9 +27,11 @@
 
 - name: Copy 'workon {environment}' statement to .bashrc
   lineinfile: dest={{ bashrc_path }} line="workon {{ application_name }}"
+  when: not multiple_yurt_project_server
 
 - name: Copy 'cd /path/to/application' statement to .bashrc
   lineinfile: dest={{ bashrc_path }} line="cd {{ project_path }}"
+  when: not multiple_yurt_project_server
 
 - name: Set permission to virtualenv path
   file: path={{ virtualenv_path }}

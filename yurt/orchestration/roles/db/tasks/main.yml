@@ -20,12 +20,12 @@
                  template='template0'
                  state=present
 
-- name: Get absolute path to latest version of PostgreSQL main config file
-  shell: echo "/etc/postgresql/`ls /etc/postgresql | sort -r | head -1`/main/postgresql.conf"
-  register: conf_file_abs_path
+- name: Get PostgreSQL Version for Configuration
+  shell: ls /etc/postgresql | sort -r | head -1
+  register: conf_file_version
 
 - name: Ensure postgres is listening for application servers
-  lineinfile: dest="{{ conf_file_abs_path.stdout }}"
+  lineinfile: dest="/etc/postgresql/{{ conf_file_version.stdout }}/main/postgresql.conf"
               regexp="listen_addresses"
               line="listen_addresses = 'localhost,{{ db_host }}'"
               state=present
@@ -46,14 +46,26 @@
                    role_attr_flags=NOSUPERUSER,NOCREATEDB
                    state=present
 
-- name: Ensure application servers can access the db server
-  template: src=pg_hba_config.j2
-            dest=/etc/postgresql/9.4/main/pg_hba.conf
-            backup=yes
-  register: pga_hba_config
+- name: Create Client Authentication file if it does not exist yet
+  become_user: postgres
+  copy: src=roles/db/templates/pg_hba_config.j2
+        dest=/etc/postgresql/{{ conf_file_version.stdout }}/main/pg_hba.conf
+        backup=yes
+        force=no
+  register: pga_hba_created
   tags: pga_hba_config
+
+- name: Ensure application servers can access the db server
+  lineinfile: dest="/etc/postgresql/{{ conf_file_version.stdout }}/main/pg_hba.conf"
+              insertafter="host    all             all             127.0.0.1/32            md5"
+              line="host    {{ application_name }}    {{ application_name }}    {{ item }}/32    md5"
+              state=present
+  register: pga_hba_config
+  with_items: "{{ private_application_hosts }}"
+  tags: pga_hba_config
+
 
 - name: If we changed the pga_hba.conf file, restart postgresql
   service: name=postgresql state=restarted enabled=yes
-  when: pga_hba_config.changed or postgresql_config.changed
+  when: pga_hba_created.changed or pga_hba_config.changed or postgresql_config.changed
   tags: pga_hba_config
