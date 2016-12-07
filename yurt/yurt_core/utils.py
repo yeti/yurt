@@ -151,6 +151,9 @@ def get_project_name_from_repo(repo_link, drop_hyphens=True):
         result = re.sub(r"\-", "", result)
     return result
 
+def get_owner_name_from_repo(repo_link):
+    result = re.search(r"\.com[/:]([^/]+)/.*(\.git)?$", repo_link).group(1)
+    return result
 
 def raw_input_wrapper(query, lower=False):
     try:
