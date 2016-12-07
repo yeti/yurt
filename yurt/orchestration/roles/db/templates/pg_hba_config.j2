@@ -91,9 +91,6 @@ local   all             all                                     peer
 
 # IPv4 local connections:
 host    all             all             127.0.0.1/32            md5
-{% for app_host in private_application_hosts|default([]) %}
-host    {{ application_name }}    {{ application_name }}    {{ app_host }}/32    md5
-{% endfor %}
 
 # IPv6 local connections:
 host    all             all             ::1/128                 md5

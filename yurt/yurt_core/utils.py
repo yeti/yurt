@@ -83,9 +83,12 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
             target_dictionary = dictionary.get(env_key).copy()
         else:
             target_dictionary = dictionary.copy()
-        file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
-    with open(filepath, 'w') as change_file:
-        change_file.write(file_text)
+        try:
+            file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
+        except TypeError:
+            print('Variable %({})s not sourced. Unfilled variable left in file {}.'.format(variable, filepath))
+        with open(filepath, 'w') as change_file:
+            change_file.write(file_text)
 
 
 def recursive_file_modify(path, dictionary, pattern=r"%\(({0})\)s", is_dir=True):

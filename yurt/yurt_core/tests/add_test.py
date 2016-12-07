@@ -62,6 +62,9 @@ class AddTestCase(BaseCase):
         self.assertEqual(mock_raw_input_wrapper.called, True)
         expected_run_calls = [
             'cp -rf {} ./templates.tmp'.format(TEMPLATES_PATH),
+            'rm -rf ./templates.tmp/yurtrc.template',
+            'rm -rf ./templates.tmp/temp_role',
+            'rm -rf ./templates.tmp/test_directory',
             "".join(('mv ./templates.tmp/env_settings.py.template ',
                      './themonstermash/config/settings/theyDidTheMash.py')),
             "".join(('mv ./templates.tmp/inventory.template ',
