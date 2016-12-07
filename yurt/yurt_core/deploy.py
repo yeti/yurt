@@ -4,7 +4,7 @@ import yaml
 from invoke import run
 from yurt.yurt_core.utils import raw_input_wrapper, recursive_file_modify, find_project_folder,\
     get_project_name_from_repo, get_owner_name_from_repo
-from yurt.yurt_core.paths import TEMPLATES_PATH
+from yurt.yurt_core.paths import TEMPLATES_PATH, YURTRC_PATH
 try:
     from ConfigParser import ConfigParser
 except ImportError:
@@ -14,7 +14,8 @@ __author__ = 'deanmercado'
 
 
 @click.group()
-def deploy_cli():
+@click.pass_context
+def deploy_cli(ctx):
     pass
 
 # TODO: make a more flexible engine for editing/reading from .yurtrc
@@ -36,7 +37,7 @@ def create_yurtrc_with_access_token():
     yurtrc_path = os.path.join(TEMPLATES_PATH, 'yurtrc.template')
     template_vars = {'github_access_key': github_access_key}
     run('cp {} ~/.yurtrc'.format(yurtrc_path))
-    recursive_file_modify(os.path.expanduser('~/.yurtrc'), template_vars, is_dir=False)
+    recursive_file_modify(YURTRC_PATH, template_vars, is_dir=False)
 
 
 def output_git_user_access_key():
@@ -58,8 +59,14 @@ def output_var_from_base_yml(variable):
         raise OSError('Not in a Yurt project folder')
 
 
+def run_playbook(selection):
+    run('ansible-playbook -i orchestration/inventory/{} orchestration/site.yml'.format(selection))
+
+
 @deploy_cli.command()
-def deploy():
+@click.option('--selection', default=None, help='Name of the inventory to deploy with ansible-playbook')
+@click.pass_context
+def deploy(ctx, selection):
     """
     Starts deploy process
     """
@@ -71,44 +78,41 @@ def deploy():
         else:
             raise OSError('Not in a Yurt project folder')
 
-    print("Option\tInventory")
-    for index, filename in enumerate(os.listdir("./orchestration/inventory")):
-        if not(filename == "vagrant"):
-            ENVIRONMENT_OPTIONS[str(index)] = filename
-            print("{0}:\t{1}".format(index, filename))
-    num_selection = raw_input_wrapper("Which environment do you want to deploy (use Option number)?:\t")
-    selection = ENVIRONMENT_OPTIONS[num_selection]
+    if selection is None:
+        print("Option\tInventory")
+        for index, filename in enumerate(os.listdir("./orchestration/inventory")):
+            if not(filename == "vagrant"):
+                ENVIRONMENT_OPTIONS[str(index)] = filename
+                print("{0}:\t{1}".format(index, filename))
+        num_selection = raw_input_wrapper("Which environment do you want to deploy (use Option number)?:\t")
+        selection = ENVIRONMENT_OPTIONS[num_selection]
 
     # Check if user has added deploy keys for the git repo
     not_first_timer = raw_input_wrapper("Have you added deploy keys for this git repo yet (y/n)?: ", True)
 
-    if not_first_timer == 'n':
-        if not os.path.exists(os.path.expanduser('~/.yurtrc')):
-            # Create the access_key/yurtrc file
-            create_yurtrc_with_access_token()
-        # Use the access_key in ~/.yurtrc to POST git ssh pub key to server
-        access_key = output_git_user_access_key()
-        # Get needed variables from base_yml
-        git_ssh_pub_key = output_var_from_base_yml('git_ssh_pub_key')
-        git_repo = output_var_from_base_yml('git_repo')
-        project_name = get_project_name_from_repo(git_repo, drop_hyphens=False)
-        owner_name = get_owner_name_from_repo(git_repo)
-        compiled_curl_command = ' '.join((
-            'curl -X POST',
-            '-H "Content-Type:application/json"',
-            '-d \'{{"title": "{}@{}", "key": "{}"}}\''.format(project_name, selection, git_ssh_pub_key),
-            'https://api.github.com/repos/{}/{}/keys?access_token={}'.format(owner_name, project_name, access_key))),
-
-        run(compiled_curl_command)
-        run('ansible-playbook -i orchestration/inventory/{0} orchestration/site.yml'.format(selection))
-
-    elif not_first_timer == 'y':
-        run('ansible-playbook -i orchestration/inventory/{0} orchestration/site.yml'.format(selection))
+    if not_first_timer in ['n', 'y']:
+        if not_first_timer == 'n':
+            if not os.path.exists(YURTRC_PATH):
+                # Create the access_key/yurtrc file
+                create_yurtrc_with_access_token()
+            # Use the access_key in ~/.yurtrc to POST git ssh pub key to server
+            access_key = output_git_user_access_key()
+            # Get needed variables from base_yml
+            git_ssh_pub_key = output_var_from_base_yml('git_ssh_pub_key')
+            git_repo = output_var_from_base_yml('git_repo')
+            project_name = get_project_name_from_repo(git_repo, drop_hyphens=False)
+            owner_name = get_owner_name_from_repo(git_repo)
+            compiled_curl_command = ' '.join((
+                'curl -X POST',
+                '-H "Content-Type:application/json"',
+                '-d \'{{"title": "{}@{}", "key": "{}"}}\''.format(project_name, selection, git_ssh_pub_key),
+                'https://api.github.com/repos/{}/{}/keys?access_token={}'.format(owner_name, project_name, access_key))),
+            run(compiled_curl_command)
+        run_playbook(selection)
 
     else:
         print('Bad input! Try again.')
-        deploy()
-
+        ctx.invoke(deploy, selection=selection)
 
 if __name__ == '__main__':
     deploy_cli()
