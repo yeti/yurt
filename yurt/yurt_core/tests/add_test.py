@@ -25,11 +25,11 @@ class AddTestCase(BaseCase):
     @mock.patch('yurt.yurt_core.add.run')
     @mock.patch('yurt.yurt_core.add.recursive_file_modify')
     @mock.patch('yurt.yurt_core.add.find_vagrantfile_dir', return_value=".")
-    @mock.patch(INPUT_METHOD)
+    @mock.patch('yurt.yurt_core.add.raw_input_wrapper', return_value=".")
     @mock.patch('yurt.yurt_core.add.os.path.exists', return_value=False)
     def test_remote_server(self,
                            mock_os_path_exists,
-                           mock_raw_input,
+                           mock_raw_input_wrapper,
                            mock_find_vagrantfile_dir,
                            mock_recursive_file_modify,
                            mock_run):
@@ -57,11 +57,14 @@ class AddTestCase(BaseCase):
         cli_call = assemble_call_args_list("remote_server", remote_server_kwargs)
         self.runner.invoke(main, cli_call)
         mock_os_path_exists.assert_called_with("./templates.tmp")
-        mock_raw_input.assert_called_with('Press Enter to Continue or Ctrl+C to Cancel')
         self.assertEqual(mock_recursive_file_modify.called, True)
         self.assertEqual(mock_find_vagrantfile_dir.called, True)
+        self.assertEqual(mock_raw_input_wrapper.called, True)
         expected_run_calls = [
             'cp -rf {} ./templates.tmp'.format(TEMPLATES_PATH),
+            'rm -rf ./templates.tmp/yurtrc.template',
+            'rm -rf ./templates.tmp/temp_role',
+            'rm -rf ./templates.tmp/test_directory',
             "".join(('mv ./templates.tmp/env_settings.py.template ',
                      './themonstermash/config/settings/theyDidTheMash.py')),
             "".join(('mv ./templates.tmp/inventory.template ',

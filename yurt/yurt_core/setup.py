@@ -167,8 +167,9 @@ def copy_pem_file(user, host, key_name):
 
 @setup.command()
 @click.option('--git_repo', default=None, help='Git Repo Link')
+@click.option('--skip_vagrant', is_flag=True, help='Skip `vagrant up` at the end of program')
 @click.option('--vault', is_flag=True, help="Uses vault for git keys")
-def new_project(git_repo, vault):
+def new_project(git_repo, skip_vagrant, vault):
     """
     Create new project
     """
@@ -192,7 +193,8 @@ def new_project(git_repo, vault):
     # TODO: Validate `args` before running them through THE GAUNTLET
     for method in ordered_methods:
         method(*args)
-    run('vagrant up')
+    if not skip_vagrant:
+        run('vagrant up')
 
 
 @setup.command()

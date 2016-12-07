@@ -9,6 +9,7 @@ from yurt.yurt_core.utils import get_project_name_from_repo, generate_printable_
                   find_vagrantfile_dir, register_values_in_vault, find_project_folder
 from yurt.yurt_core.paths import TEMPLATES_PATH, YURT_PATH
 
+TEMPLATE_FILES_TO_EXCLUDE_FROM_REMOTE_SERVER = ['yurtrc.template', 'temp_role', 'test_directory']
 
 ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
     ("git_repo", "Enter the git repository link\n(i.e. git@github.com:mr_programmer/robot_repository.git):\t"),
@@ -16,7 +17,7 @@ ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
     ("abbrev_env", "How do you want this environment abbreviated (i.e. dev, stage, prod)?: "),
     ("app_host_dns", "What is the public DNS of this project's host (i.e. example.com)?: "),
     ("app_host_ip", "What is the IP of this project's host (i.e. 10.20.30.40)?: "),
-    ("db_host_ip", "What is this project's DB host (Hint: public IP of project if hosted locally)?: "),
+    ("db_host_ip", "What is this project's DB host (Hint: same IP as before if hosted locally)?: "),
     ("debug", "This Django server will use Debug mode (True/False): "),
     ("num_gunicorn_workers", "".join(("How many gunicorn workers do you want ",
                                       "(Hint: For the number of workers, a go",
@@ -25,15 +26,17 @@ ATTRIBUTE_TO_QUESTION_MAPPING = OrderedDict([
                                        "Setting this to 1 will restart the Gunicorn process each time ",
                                        "you make a request, basically reloading the code. Very han",
                                        "dy when developing. Set to 0 for unlimited requests.: "))),
-    ("ssl_enabled", "Is SSL enabled on this server (yes/no)?: "),
-    ("email_host", "Email host (i.e. 'smtp.google.com')?: "),
-    ("email_host_user", "Default email FROM user (i.e. 'dean@deanismyname.com')?: "),
-    ("email_host_password", "Email user's password: "),
-    ("email_port", "Email server port: "),
-    ("email_use_ssl", "Email server uses SSL (use `True` or `False`)?: "),
-    ("email_use_tls", "Email server uses TLS (use `True` or `False`)?: "),
+    ("ssl_enabled", "Is SSL enabled on this server,\nor in other words, is it using 'https://' (yes/no)?: "),
+    ("email_host", "Email host (default 'smtp.google.com')?: "),
+    ("email_host_user", "Default email FROM user (i.e. 'dean@deanismyname.com' or optional)?: "),
+    ("email_host_password", "Email user's password (optional)?: "),
+    ("email_port", "Email server port (default 687): "),
+    ("email_use_ssl", "Email server uses SSL (use `True` or `False`, default False)?: "),
+    ("email_use_tls", "Email server uses TLS (use `True` or `False`, default True)?: "),
     ("git_branch", "From which git branch will the server pull the project?: "),
-    ("vault_used", "Are you utilizing a vault to store secrets for this server (yes/no)?: ")
+    ("vault_used", "Are you utilizing a vault to store secrets for this server (yes/no)?: "),
+    ("multiple_yurt_project_server",
+     "Does this server already have another Yurt-built project deployed on it (yes/no)?: ")
 ])
 
 VAULT_ATTRIBUTES_TO_QUESTIONS = OrderedDict([
@@ -72,6 +75,7 @@ def add():
 @click.option("--app_host_dns", default=None, help="DNS of App Server")
 @click.option("--db_host_ip", default=None, help="IP of DB Server")
 @click.option("--debug", default=None, help="Runs debug mode (use `True` or `False`)")
+@click.option("--multiple_yurt_project_server", default=None, help="Server has other Yurt projects (use `yes` or `no`)")
 @click.option("--num_gunicorn_workers", default=None, help="Number of Gunicorn workers")
 @click.option("--gunicorn_max_requests", default=None, help="Number of Gunicorn max requests")
 @click.option("--ssl_enabled", default=None, help="SSL is enabled on remote (use `yes` or `no`)")
@@ -79,9 +83,9 @@ def add():
 @click.option("--email_host", default=None, help="Email host DNS")
 @click.option("--email_host_user", default=None, help="Default FROM email user")
 @click.option("--email_host_password", default=None, help="FROM email user password")
-@click.option("--email_port", default=None, help="Email server port")
-@click.option("--email_use_ssl", default=None, help="Email user uses SSL (use `True` or `False`)?")
-@click.option("--email_use_tls", default=None, help="Email user uses TLS (use `True` or `False`)?")
+@click.option("--email_port", default=None, help="Email server port (default 687)")
+@click.option("--email_use_ssl", default=None, help="Email user uses SSL (use `True` or `False`, default False)?")
+@click.option("--email_use_tls", default=None, help="Email user uses TLS (use `True` or `False`, default True)?")
 @click.option("--vault_used", default=None, help="Uses 'vault_.json' file for vault lookup (use `yes` or `no`)")
 def remote_server(**kwargs):
     """
@@ -95,16 +99,10 @@ def remote_server(**kwargs):
         "secret_key": generate_printable_string(40),
         "db_password": generate_printable_string(20, False),
     }
-    try:
-        raw_input("You will be asked a bunch of questions for setting up the server.\nMake sure your "
-                  "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
-                  "the input you enter matches one of those choices.\n"
-                  "Press Enter to Continue.")
-    except (AttributeError, NameError):
-        input("You will be asked a bunch of questions for setting up the server.\nMake sure your "
-              "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
-              "the input you enter matches one of those choices.\n"
-              "Press Enter to Continue.")
+    raw_input_wrapper("You will be asked a bunch of questions for setting up the server.\nMake sure your "
+                      "input is as accurate as possible.\nIf given a choice in parentheses, make sure\n"
+                      "the input you enter matches one of those choices.\n"
+                      "Press Enter to Continue.")
 
     # TODO: Abstract this question-loop with a re-usable util function
     try:
@@ -118,8 +116,18 @@ def remote_server(**kwargs):
             # Handle gunicorn defaults
             if attribute == "num_gunicorn_workers" and settings[attribute] == "":
                 settings[attribute] = "2"
-            if attribute == "gunicorn_max_requests":
+            if attribute == "gunicorn_max_requests" and settings[attribute] == "":
                 settings[attribute] = "0"
+            # Handle email defaults
+            if attribute == "email_port" and settings[attribute] == "":
+                settings[attribute] = "687"
+            if attribute == "email_use_ssl" and settings[attribute] == "":
+                settings[attribute] = "False"
+            if attribute == "email_use_tls" and settings[attribute] == "":
+                settings[attribute] = "True"
+            # Handle other defaults
+            if attribute == "multiple_yurt_project_server" and settings[attribute] == "":
+                settings[attribute] = "no"
         else:
             settings[attribute] = kwargs[attribute]
     vagrantfile_path = find_vagrantfile_dir()
@@ -143,11 +151,10 @@ def remote_server(**kwargs):
 
     print("Current Settings:")
     pretty_print_dictionary(settings)
-    try:
-        raw_input("Press Enter to Continue or Ctrl+C to Cancel")
-    except NameError:
-        input("Press Enter to Continue or Ctrl+C to Cancel")
-    run("cp -rf {0} ./templates.tmp".format(TEMPLATES_PATH))
+    raw_input_wrapper("Press Enter to Continue or Ctrl+C to Cancel")
+    run("cp -rf {} ./templates.tmp".format(TEMPLATES_PATH))
+    for excluded_file in TEMPLATE_FILES_TO_EXCLUDE_FROM_REMOTE_SERVER:
+        run("rm -rf ./templates.tmp/{}".format(excluded_file))
     recursive_file_modify("./templates.tmp", settings)
     try:
         template_project_items = TEMPLATE_TO_PROJECT_MAPPING.iteritems()
@@ -158,7 +165,7 @@ def remote_server(**kwargs):
                                            settings.get("project_name"),
                                            settings.get("abbrev_env"),
                                            settings.get("env"))
-        run("mv {0} {1}".format(file_path, destination))
+        run("mv {} {}".format(file_path, destination))
     run("rm -rf ./templates.tmp")
 
 

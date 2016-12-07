@@ -83,9 +83,12 @@ def _perform_substitution(filepath, dictionary, pattern, all_vars_pattern):
             target_dictionary = dictionary.get(env_key).copy()
         else:
             target_dictionary = dictionary.copy()
-        file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
-    with open(filepath, 'w') as change_file:
-        change_file.write(file_text)
+        try:
+            file_text = re.sub(var_pattern, target_dictionary.get(variable), file_text)
+        except TypeError:
+            print('Variable %({})s not sourced. Unfilled variable left in file {}.'.format(variable, filepath))
+        with open(filepath, 'w') as change_file:
+            change_file.write(file_text)
 
 
 def recursive_file_modify(path, dictionary, pattern=r"%\(({0})\)s", is_dir=True):
@@ -151,6 +154,9 @@ def get_project_name_from_repo(repo_link, drop_hyphens=True):
         result = re.sub(r"\-", "", result)
     return result
 
+def get_owner_name_from_repo(repo_link):
+    result = re.search(r"\.com[/:]([^/]+)/.*(\.git)?$", repo_link).group(1)
+    return result
 
 def raw_input_wrapper(query, lower=False):
     try:
