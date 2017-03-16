@@ -148,7 +148,7 @@ def generate_ssh_keypair(in_template=True):
 
 
 def get_project_name_from_repo(repo_link, drop_hyphens=True):
-    result = re.search(r"\.com[/:][^/]+/(.*)(\.git)?$", repo_link).group(1)
+    result = re.search(r"\.\w{2,3}[/:][^/]+/(.*)(\.git)?$", repo_link).group(1)
     result = re.sub(r"\.git$", "", result)
     if drop_hyphens:
         result = re.sub(r"\-", "", result)
