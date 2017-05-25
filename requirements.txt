@@ -1,4 +1,4 @@
-ansible==2.1.1.0
+ansible==2.4.1.0
 hvac==0.2.13
 click==6.6
 invoke==0.13.0

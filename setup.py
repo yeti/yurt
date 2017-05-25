@@ -34,13 +34,13 @@ setup(
     test_suite="yurt.yurt_core.tests",
     setup_requires=[
         "invoke==0.13.0",
-        "ansible==2.1.1.0",
+        "ansible==2.4.1.0",
         "click==6.6",
         "hvac==0.2.13"
     ],
     install_requires=[
         "invoke==0.13.0",
-        "ansible==2.1.1.0",
+        "ansible==2.4.1.0",
         "click==6.6",
         "hvac==0.2.13"
     ],

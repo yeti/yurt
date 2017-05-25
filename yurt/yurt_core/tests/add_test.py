@@ -15,6 +15,27 @@ except ImportError:
     OPEN_METHOD = 'yurt.yurt_core.add.open'
     INPUT_METHOD = 'yurt.yurt_core.add.raw_input'
 
+remote_server_kwargs = {
+    'git_repo': 'git@github.com:paolopaolopaolo/the-monster-mash.git',
+    'env': 'itWasAGraveyardSmash',
+    'abbrev_env': 'theyDidTheMash',
+    'app_host_dns': 'it-caught-on-in-a-flash.com',
+    'app_host_ip': '1.2.3.4',
+    'db_host_ip': '5.6.7.8',
+    'debug': 'True',
+    'num_gunicorn_workers': '2',
+    'gunicorn_max_requests': '0',
+    'ssl_enabled': 'yes',
+    'git_branch': 'develop',
+    'vault_used': 'no',
+    'email_host': 'smtp.gmail.com',
+    'email_port': '587',
+    'email_host_user': 'hello@world.com',
+    'email_host_password': 'hello@world.com',
+    'email_use_ssl': 'False',
+    'email_use_tls': 'True',
+}
+
 
 class AddTestCase(BaseCase):
 
@@ -23,6 +44,7 @@ class AddTestCase(BaseCase):
     ############################
 
     @mock.patch('yurt.yurt_core.add.run')
+    @mock.patch('yurt.yurt_core.add.go_over_questions', return_value=remote_server_kwargs)
     @mock.patch('yurt.yurt_core.add.recursive_file_modify')
     @mock.patch('yurt.yurt_core.add.find_vagrantfile_dir', return_value=".")
     @mock.patch('yurt.yurt_core.add.raw_input_wrapper', return_value=".")
@@ -32,34 +54,16 @@ class AddTestCase(BaseCase):
                            mock_raw_input_wrapper,
                            mock_find_vagrantfile_dir,
                            mock_recursive_file_modify,
+                           mock_go_over_questions,
                            mock_run):
 
-        remote_server_kwargs = {
-            'git_repo': 'git@github.com:paolopaolopaolo/the-monster-mash.git',
-            'env': 'itWasAGraveyardSmash',
-            'abbrev_env': 'theyDidTheMash',
-            'app_host_dns': 'it-caught-on-in-a-flash.com',
-            'app_host_ip': '1.2.3.4',
-            'db_host_ip': '5.6.7.8',
-            'debug': 'True',
-            'num_gunicorn_workers': '2',
-            'gunicorn_max_requests': '0',
-            'ssl_enabled': 'yes',
-            'git_branch': 'develop',
-            'vault_used': 'no',
-            'email_host': 'smtp.gmail.com',
-            'email_port': '587',
-            'email_host_user': 'hello@world.com',
-            'email_host_password': 'hello@world.com',
-            'email_use_ssl': 'False',
-            'email_use_tls': 'True',
-        }
         cli_call = assemble_call_args_list("remote_server", remote_server_kwargs)
         self.runner.invoke(main, cli_call)
         mock_os_path_exists.assert_called_with("./templates.tmp")
-        self.assertEqual(mock_recursive_file_modify.called, True)
-        self.assertEqual(mock_find_vagrantfile_dir.called, True)
-        self.assertEqual(mock_raw_input_wrapper.called, True)
+        self.assertTrue(mock_go_over_questions.called)
+        self.assertTrue(mock_recursive_file_modify.called)
+        self.assertTrue(mock_find_vagrantfile_dir.called)
+        self.assertTrue(mock_raw_input_wrapper.called)
         expected_run_calls = [
             'cp -rf {} ./templates.tmp'.format(TEMPLATES_PATH),
             'rm -rf ./templates.tmp/yurtrc.template',

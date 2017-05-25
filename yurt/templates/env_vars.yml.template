@@ -52,3 +52,5 @@ home_path: "/{{ bashrc_user }}/"
 bashrc_path: "{{ home_path }}.bashrc"
 
 multiple_yurt_project_server: %(multiple_yurt_project_server)s
+
+# Generated Settings Below this line (DO NOT EDIT BY HAND)
