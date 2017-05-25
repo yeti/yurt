@@ -30,3 +30,5 @@ run_django_collectstatic: yes
 bashrc_user: "vagrant"
 home_path: "/home/{{ bashrc_user }}/"
 bashrc_path: "{{ home_path }}.bashrc"
+
+multiple_yurt_project_server: no
