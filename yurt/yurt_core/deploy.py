@@ -3,7 +3,7 @@ import os
 import yaml
 from invoke import run
 from yurt.yurt_core.utils import raw_input_wrapper, recursive_file_modify, find_project_folder,\
-    get_project_name_from_repo, get_owner_name_from_repo
+    get_project_name_from_repo, get_owner_name_from_repo, generate_options
 from yurt.yurt_core.paths import TEMPLATES_PATH, YURTRC_PATH
 try:
     from ConfigParser import ConfigParser
@@ -17,6 +17,7 @@ __author__ = 'deanmercado'
 @click.pass_context
 def deploy_cli(ctx):
     pass
+
 
 # TODO: make a more flexible engine for editing/reading from .yurtrc
 def create_yurtrc_with_access_token():
@@ -47,6 +48,7 @@ def output_git_user_access_key():
         github_access_token = cfg_parser.get('Yurt', 'github_access_key')
     return github_access_token
 
+
 def output_var_from_base_yml(variable):
     project_dir = find_project_folder()
     if project_dir:
@@ -59,8 +61,12 @@ def output_var_from_base_yml(variable):
         raise OSError('Not in a Yurt project folder')
 
 
-def run_playbook(selection):
-    run('ansible-playbook -i orchestration/inventory/{} orchestration/site.yml'.format(selection))
+def run_playbook(selection, first_time_setup):
+    if first_time_setup == 'n':
+        deploy_tag = '--tags "deploy"'
+    else:
+        deploy_tag = ''
+    run('ansible-playbook {} -i orchestration/inventory/{} orchestration/site.yml'.format(deploy_tag, selection))
 
 
 @deploy_cli.command()
@@ -70,7 +76,6 @@ def deploy(ctx, selection):
     """
     Starts deploy process
     """
-    ENVIRONMENT_OPTIONS = {}
     if not os.path.exists("orchestration"):
         project_path = find_project_folder()
         if project_path:
@@ -79,16 +84,18 @@ def deploy(ctx, selection):
             raise OSError('Not in a Yurt project folder')
 
     if selection is None:
-        print("Option\tInventory")
-        for index, filename in enumerate(os.listdir("./orchestration/inventory")):
-            if filename != "vagrant":
-                ENVIRONMENT_OPTIONS[str(index)] = filename
-                print("{0}:\t{1}".format(index, filename))
+        options_string, options = generate_options(
+            os.listdir("./orchestration/inventory"),
+            item_label="Inventory",
+            exclude=["vagrant"]
+        )
+        print(options_string)
         num_selection = raw_input_wrapper("Which environment do you want to deploy (use Option number)?:\t")
-        selection = ENVIRONMENT_OPTIONS[num_selection]
+        selection = options[num_selection]
 
     # Check if user has added deploy keys for the git repo
     not_first_timer = raw_input_wrapper("Have you added deploy keys for this git repo yet (y/n)?: ", True)
+    first_time_setup = raw_input_wrapper("Is this project being set up from scratch(y), or are you deploying to existing(n)?: ", True)
 
     if not_first_timer in ['n', 'y']:
         if not_first_timer == 'n':
@@ -108,7 +115,7 @@ def deploy(ctx, selection):
                 '-d \'{{"title": "{}@{}", "key": "{}"}}\''.format(project_name, selection, git_ssh_pub_key),
                 'https://api.github.com/repos/{}/{}/keys?access_token={}'.format(owner_name, project_name, access_key))),
             run(compiled_curl_command)
-        run_playbook(selection)
+        run_playbook(selection, first_time_setup)
 
     else:
         print('Bad input! Try again.')

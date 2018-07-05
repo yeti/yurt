@@ -6,8 +6,12 @@ from invoke import run
 from invoke.exceptions import Failure
 from yurt.yurt_core.utils import get_project_name_from_repo, generate_printable_string,\
                   recursive_file_modify, raw_input_wrapper, pretty_print_dictionary, \
-                  find_vagrantfile_dir, register_values_in_vault, find_project_folder
+                  find_vagrantfile_dir, register_values_in_vault, find_project_folder, \
+                  go_over_questions, generate_options, add_key_value_to_yaml, \
+                  generate_dict_of_things, get_iter, get_value_from_yaml, \
+                  remove_value_from_yaml, DeferredCallable, CallDict
 from yurt.yurt_core.paths import TEMPLATES_PATH, YURT_PATH
+
 
 TEMPLATE_FILES_TO_EXCLUDE_FROM_REMOTE_SERVER = ['yurtrc.template', 'temp_role', 'test_directory']
 
@@ -61,6 +65,18 @@ SECRETS_PARAMS = [
     "email_port",
 ]
 
+ENV_VAR_DISCLAIMER_TEMPLATE = """
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+You've successfully added a few environment
+variables to the {} deploy environment.
+
+Below are the affected files:
+- {}
+- {}
+- {}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
 
 @click.group()
 def add():
@@ -104,32 +120,26 @@ def remote_server(**kwargs):
                       "the input you enter matches one of those choices.\n"
                       "Press Enter to Continue.")
 
-    # TODO: Abstract this question-loop with a re-usable util function
-    try:
-        question_items = ATTRIBUTE_TO_QUESTION_MAPPING.iteritems()
-    except AttributeError:
-        question_items = ATTRIBUTE_TO_QUESTION_MAPPING.items()
+    defaults = {
+        "num_gunicorn_workers": "2",
+        "gunicorn_max_requests": "0",
+        "email_port": "687",
+        "email_use_ssl": "False",
+        "email_use_tls": "True",
+        "multiple_yurt_project_server": "no",
+    }
 
-    for attribute, prompt in question_items:
-        if kwargs[attribute] is None:
-            settings[attribute] = raw_input_wrapper(prompt, attribute in lowercase_attrs)
-            # Handle gunicorn defaults
-            if attribute == "num_gunicorn_workers" and settings[attribute] == "":
-                settings[attribute] = "2"
-            if attribute == "gunicorn_max_requests" and settings[attribute] == "":
-                settings[attribute] = "0"
-            # Handle email defaults
-            if attribute == "email_port" and settings[attribute] == "":
-                settings[attribute] = "687"
-            if attribute == "email_use_ssl" and settings[attribute] == "":
-                settings[attribute] = "False"
-            if attribute == "email_use_tls" and settings[attribute] == "":
-                settings[attribute] = "True"
-            # Handle other defaults
-            if attribute == "multiple_yurt_project_server" and settings[attribute] == "":
-                settings[attribute] = "no"
-        else:
-            settings[attribute] = kwargs[attribute]
+    for key, value in get_iter(settings):
+        if key in lowercase_attrs:
+            settings[key] = value.lower()
+
+    settings = go_over_questions(
+        ATTRIBUTE_TO_QUESTION_MAPPING,
+        kwargs,
+        settings,
+        defaults
+    )
+
     vagrantfile_path = find_vagrantfile_dir()
     settings["repo_name"] = get_project_name_from_repo(settings.get("git_repo"), False)
     settings["project_name"] = get_project_name_from_repo(settings.get("git_repo"))
@@ -156,10 +166,7 @@ def remote_server(**kwargs):
     for excluded_file in TEMPLATE_FILES_TO_EXCLUDE_FROM_REMOTE_SERVER:
         run("rm -rf ./templates.tmp/{}".format(excluded_file))
     recursive_file_modify("./templates.tmp", settings)
-    try:
-        template_project_items = TEMPLATE_TO_PROJECT_MAPPING.iteritems()
-    except AttributeError:
-        template_project_items = TEMPLATE_TO_PROJECT_MAPPING.items()
+    template_project_items = get_iter(TEMPLATE_TO_PROJECT_MAPPING)
     for file_path, dest_template in template_project_items:
         destination = dest_template.format(vagrantfile_path.rstrip('/'),
                                            settings.get("project_name"),
@@ -178,10 +185,7 @@ def vault(dest):
     settings = {}
     vault_UUID = ""
     protocol = ""
-    try:
-        vault_items = VAULT_ATTRIBUTES_TO_QUESTIONS.iteritems()
-    except AttributeError:
-        vault_items = VAULT_ATTRIBUTES_TO_QUESTIONS.items()
+    vault_items = get_iter(VAULT_ATTRIBUTES_TO_QUESTIONS)
     for attribute, prompt in vault_items:
         try:
             response = raw_input(prompt)
@@ -231,20 +235,8 @@ def role(**kwargs):
         ('name', 'What will you name this role?: '),
         ('remote', 'Install existing role from Ansible Galaxy (Y/N)?: '),
     ])
-    try:
-        # Python 2
-        question_items = ROLE_ATTRIBUTE_MAPPING.iteritems()
-    except AttributeError:
-        # Python 3
-        question_items = ROLE_ATTRIBUTE_MAPPING.items()
 
-    # TODO: Abstract this question-loop with a re-usable util function
-    settings = {}
-    for attribute, prompt in question_items:
-        if kwargs[attribute] is None:
-            settings[attribute] = raw_input_wrapper(prompt, True)
-        else:
-            settings[attribute] = kwargs[attribute]
+    settings = go_over_questions(ROLE_ATTRIBUTE_MAPPING, kwargs)
 
     project_path = find_project_folder()
     path_to_roles = ['orchestration', 'roles']
@@ -266,6 +258,148 @@ def role(**kwargs):
             source_role_scaffold_path = os.path.join(YURT_PATH, 'templates', 'temp_role')
             ansible_galaxy_cmd = 'cp -rf {} {}'.format(source_role_scaffold_path, roles_path)
             run(ansible_galaxy_cmd)
+
+
+# Env Vars adding flow helpers
+
+
+def get_env_question_options_tuple(orchestration_path):
+    envs_available_string, envs_available_options = generate_options(
+        [os.path.splitext(yml_path)[0] for yml_path in os.listdir(orchestration_path)],
+        item_label='Environments'
+    )
+    return envs_available_string, envs_available_options
+
+
+def get_question_flow_mapping(envs_available_string):
+    # Compile question
+    env_question = "\n".join((
+        envs_available_string,
+        "Which deployment environment are we adding these variables to? (Use option #): "
+    ))
+
+    env_var_mapping = OrderedDict([
+        ('env', env_question),
+        ('vars', "Press Enter to start generating a set of environment variables")
+    ])
+    return env_var_mapping
+
+
+def get_relevant_paths():
+    project_path = find_project_folder()
+    orchestration_path = os.path.join(project_path, "orchestration", "env_vars")
+    app_main_path = os.path.join(project_path, "orchestration", "roles", "app", "vars", "main.yml")
+    env_yml_path_template = os.path.join(
+        orchestration_path,
+        ".".join((
+            '{}',
+            "yml"
+        ))
+    )
+    return orchestration_path, app_main_path, env_yml_path_template
+
+
+def serialize_vars_from_kwargs_to_python_native(kwargs):
+    if kwargs.get("vars") is not None:
+        try:
+            kwargs["vars"] = json.loads(kwargs.get("vars"))
+        except ValueError:
+            raise ValueError("`--vars` value did not evaluate to proper JSON")
+
+
+# FILE EDITING FUNCTIONS -- Helpers
+
+
+def add_env_var_values_to_env_vars_yaml(path, settings):
+    true_path = path.format(settings.get("env"))
+    add_key_value_to_yaml(true_path, settings.get("vars"))
+    return true_path
+
+
+def add_env_var_values_to_app_main_yaml(path, settings):
+    django_environment = get_value_from_yaml(path, 'django_environment')
+    variables = settings.get("vars")
+
+    for variable, _ in get_iter(variables):
+        django_environment[variable.upper()] = "{{{{ {}|default(omit) }}}}".format(variable)
+
+    remove_value_from_yaml(path, "django_environment")
+    add_key_value_to_yaml(path, {"django_environment": django_environment})
+    return path
+
+
+def add_env_var_values_to_python_settings(path, settings):
+    env_yaml_path = path.format(settings.get("env"))
+    environment_settings_py_file = "/".join(
+        get_value_from_yaml(
+            env_yaml_path,
+            "django_settings_file",
+            "config.settings.base"
+        ).split('.')
+    ) + ".py"
+
+    django_file_path = os.path.join(
+        find_project_folder(),
+        environment_settings_py_file
+    )
+
+    string_to_add = "\n".join([
+        "{0} = os.getenv(\"{0}\")".format(key.upper()) for key in list(settings.get("vars", {}).keys())
+    ])
+    with open(django_file_path, "a") as settings_file:
+        settings_file.write(string_to_add)
+    return django_file_path
+
+
+@add.command()
+@click.option("--env", default=None, help="Name of environment")
+@click.option("--vars", default=None, help="JSON of desired env vars to be added")
+def env_vars(**kwargs):
+    """
+    Add environment variables to specific environments (EXPERIMENTAL)
+    """
+
+    # Get some paths
+    orchestration_path, app_main_path, env_yaml_path_template = get_relevant_paths()
+
+    # Compile a string that prints out the available environments with their option numbers
+    # along with a Dict representing these options
+    envs_available_string, envs_available_options = get_env_question_options_tuple(orchestration_path)
+
+    # Create the question flow
+    env_var_mapping = get_question_flow_mapping(envs_available_string)
+
+    # Make "--vars" option serialized to Python-native Dict
+    serialize_vars_from_kwargs_to_python_native(kwargs)
+
+    # Go over the questions to generate a Dict of settings
+    settings = go_over_questions(
+        env_var_mapping,
+        kwargs,
+        defaults=CallDict({
+            'vars': DeferredCallable(generate_dict_of_things, "environment variables")
+        })
+    )
+
+    # Convert number response into option response
+    settings['env'] = envs_available_options[settings['env']]
+
+    file_writes = [
+        (add_env_var_values_to_env_vars_yaml, env_yaml_path_template),
+        (add_env_var_values_to_app_main_yaml, app_main_path),
+        (add_env_var_values_to_python_settings, env_yaml_path_template)
+    ]
+
+    # Write the env var changes to the appropriate files, while yielding the right paths
+    actual_paths = [file_write_function(path, settings) for file_write_function, path in file_writes]
+
+    # Print out what files were edited
+    disclaimer = ENV_VAR_DISCLAIMER_TEMPLATE.format(
+        settings.get("env"),
+        *actual_paths
+    )
+
+    print(disclaimer)
 
 if __name__ == '__main__':
     add()
