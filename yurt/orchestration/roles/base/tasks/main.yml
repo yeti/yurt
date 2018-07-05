@@ -23,6 +23,7 @@
     - ntp
     - htop
     - sudo
+    - curl
     - git
     - libjpeg-dev
     - libpq-dev

@@ -6,6 +6,7 @@ import re
 from random import choice
 from requests import ConnectionError
 import os
+import yaml
 
 __author__ = 'deanmercado'
 
@@ -253,3 +254,153 @@ def register_values_in_vault(vagrantfile_path, vault_path, save_dict, quoted=Fal
         print('Cannot connect to vault: Connection Error')
 
 
+def go_over_questions(question_dict, current_value_dict, result=None, defaults=None):
+    """
+    :param: question_dict (OrderedDict): Dictionary of key -> question
+    :param: current_value_dict (OrderedDict): Dictionary of current key-value pairs
+    :param: result (Dict): The result dictionary
+    :param: defaults (Dict or CallDict): Defaults for values that yield empty user inputs (optional)
+    :return: (Dict)
+    """
+    if result is None:
+        result = {}
+    question_items = get_iter(question_dict)
+    for attribute, prompt in question_items:
+        if current_value_dict[attribute] is None:
+            user_response = raw_input_wrapper(prompt, True)
+            if user_response == '':
+                if defaults is not None:
+                    result[attribute] = defaults.get(attribute)
+            else:
+                result[attribute] = user_response
+        else:
+            result[attribute] = current_value_dict[attribute]
+    return result
+
+
+def generate_dict_of_things(label="things"):
+    """
+    :param label: (String)
+    :return: (Dict)
+    """
+    thing_dict = {}
+    key = None
+    value = None
+    try:
+        while True:
+            print("To quit generating {}, press (CTRL/CMD)+c ".format(label) +
+                  "or press Enter when prompted for \"Key\"")
+            key = raw_input_wrapper("Key?: ")
+            if key == "":
+                return thing_dict
+            value = raw_input_wrapper("Value?: ")
+            try:
+                # If Value is an object, validate
+                value = json.loads(value)
+            except ValueError:
+                pass
+            thing_dict[str(key)] = value
+            print("Current dictionary of {}:".format(label))
+            pretty_print_dictionary(thing_dict)
+    except KeyboardInterrupt:
+        if key is None or value is None:
+            # Proceed with keyboard interrupt
+            raise KeyboardInterrupt()
+        else:
+            return thing_dict
+
+
+def get_iter(dictionary):
+    """
+    Just a wrapper method that handles Python2->Python3 dict iterations
+    :param dictionary: (Dict)
+    :return: (Dict)
+    """
+    try:
+        return dictionary.iteritems()
+    except AttributeError:
+        return dictionary.items()
+
+
+def generate_options(options, item_label='Item', exclude=None):
+    """
+    :param options: (List)
+    :param item_label: (String)
+    :param exclude: (List)
+    :return: (Tuple (String, Dict))
+    """
+    if exclude is None:
+        exclude = []
+    result_dict = {}
+    result = "Option\t{}".format(item_label)
+    for index, option in enumerate(options):
+        if option not in exclude:
+            result_dict[str(index)] = option
+            result = "\n".join((result, "{}\t{}".format(index, option)))
+    return result, result_dict
+
+
+def add_key_value_to_yaml(yaml_path, key_values, **other_dump_attributes):
+    """
+    :param yaml_path: (String)
+    :param key_values: (Dict)
+    :param other_dump_attributes: (**kwargs)
+    :return: None
+    """
+    with open(yaml_path, "a") as yaml_file:
+        # Appends result to the yaml_file
+        yaml_file.write(yaml.safe_dump(
+            key_values,
+            default_flow_style=False,
+            **other_dump_attributes
+        ))
+
+
+def get_value_from_yaml(yaml_path, key, default=None):
+    """
+    :param yaml_path: (String)
+    :param key: (String)
+    :param default: (Any)
+    :return: Any
+    """
+    with open(yaml_path, "r") as yaml_file:
+        return yaml.load(yaml_file.read()).get(key, default)
+
+
+def remove_value_from_yaml(yaml_path, key):
+    """
+    :param yaml_path: (String)
+    :param key: (String)
+    :return: Any
+    """
+    with open(yaml_path, "r") as yaml_file_read:
+        current_yaml = yaml.load(yaml_file_read.read())
+    result = current_yaml[key]
+    del current_yaml[key]
+    with open(yaml_path, "w") as yaml_file_write:
+        yaml_file_write.write(yaml.safe_dump(
+            current_yaml,
+            default_flow_style=False,
+            explicit_start=True
+        ))
+    return result
+
+
+class DeferredCallable(object):
+
+    def __init__(self, func, *args, **kwargs):
+        self._func = func
+        self._args = args
+        self._kwargs = kwargs
+
+    def call(self):
+        return self._func(*self._args, **self._kwargs)
+
+
+class CallDict(dict):
+
+    def get(self, key, default=None):
+        value = super(CallDict, self).get(key, default)
+        if isinstance(value, DeferredCallable):
+            value = value.call()
+        return value
