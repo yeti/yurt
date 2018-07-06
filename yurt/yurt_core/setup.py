@@ -167,7 +167,7 @@ def new():
             '<project_name>'
         )
     ))
-    print('==> cd to ☝ and run `docker-compose up`︎')
+    print(b'==> cd to ☝ and run `docker-compose up`︎'.decode('utf-8'))
 
 
 @setup.command()
