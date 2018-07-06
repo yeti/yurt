@@ -121,30 +121,6 @@ class SetupTestCase(BaseCase):
                                       'echo \"batchesofcookies\" >> ~/.ssh/authorized_keys"'))
         mock_run.assert_called_with(expected_ssh_call2, warn=True)
 
-    @mock.patch('yurt.yurt_core.setup.os.chmod')
-    @mock.patch('yurt.yurt_core.setup.generate_ssh_keypair', return_value=(b'ssh-rsa ...', b'PEMKEY'))
-    @mock.patch(INPUT_METHOD, side_effect=lambda test: 'test_proj')
-    @mock.patch(OPEN_METHOD, side_effect=[mock.mock_open().return_value, mock.mock_open().return_value])
-    @mock.patch('yurt.yurt_core.setup.run')
-    def test_create_pem_file(self, *mock_calls):
-        mock_run, mock_open, _, _, _ = mock_calls
-        self.runner.invoke(main, ['create_pem_file'])
-        expected_run_calls = [
-            mock.call('mv ./test_proj.pem ~/.ssh'),
-            mock.call('mv ./test_proj.pub ~/.ssh'),
-            mock.call('ssh-add ~/.ssh/test_proj.pem'),
-        ]
-        expected_open_calls = [
-            mock.call('./test_proj.pem', 'w'),
-            mock.call('./test_proj.pub', 'w'),
-        ]
-        try:
-            self.assertItemsEqual(expected_run_calls, mock_run.call_args_list)
-            self.assertItemsEqual(expected_open_calls, mock_open.call_args_list)
-        except AttributeError:
-            self.assertEqual(expected_run_calls, mock_run.call_args_list)
-            self.assertEqual(expected_open_calls, mock_open.call_args_list)
-
     ##################
     # Helper methods #
     ##################
@@ -240,6 +216,7 @@ class SetupTestCase(BaseCase):
                              [mock.call(run_call) for run_call in expected_run_calls])
             self.assertEqual(mock_chdir.call_args_list,
                              [mock.call(run_call) for run_call in expected_chdir_calls])
+
 
 if __name__ == '__main__':
     unittest.main()

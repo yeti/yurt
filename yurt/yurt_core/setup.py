@@ -80,29 +80,10 @@ def copy_ansible_configs_to_parent(*args):
     _, project_name = args
     run('cp {0}/ansible.cfg .'.format(project_name))
 
+
 @click.group()
 def setup():
     pass
-
-
-@setup.command()
-def create_pem_file():
-    """
-    Generates an SSH Key Pair (that is added to your keychain and `~/.ssh` directory)
-    """
-    pub, pem = generate_ssh_keypair(in_template=False)
-    project_name = input("What will you name this ssh_key? \
-                         (Hint: just an alphanumeric name that describes what the key is for):\t")
-
-    with open("./{0}.pem".format(project_name), 'w') as key:
-        key.write(pem.decode('utf-8'))
-        run("mv ./{0}.pem ~/.ssh".format(project_name))
-        os.chmod(os.path.expanduser("~/.ssh/{0}.pem".format(project_name)), stat.S_IRUSR)
-    with open("./{0}.pub".format(project_name), 'w') as key:
-        key.write(pub.decode('utf-8'))
-        run("mv ./{0}.pub ~/.ssh".format(project_name))
-        run("ssh-add ~/.ssh/{0}.pem".format(project_name))
-    print("PEM-file `~/.ssh/{0}.pem` added!".format(project_name))
 
 
 @setup.command()
@@ -168,7 +149,7 @@ def new():
             '<project_name>'
         )
     ))
-    print(b'==> cd to ☝ and run `docker-compose up`︎'.decode('utf-8'))
+    print('==> cd to the above path and run `docker-compose up`︎')
 
 
 @setup.command()
