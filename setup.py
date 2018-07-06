@@ -38,7 +38,8 @@ setup(
         "click==6.6",
         "hvac==0.2.13",
         "PyYAML==3.12",
-        "pycrypto==2.6.1"
+        "pycrypto==2.6.1",
+        "cookiecutter==1.6.0"
     ],
     install_requires=[
         "invoke==0.13.0",
@@ -46,7 +47,8 @@ setup(
         "click==6.6",
         "hvac==0.2.13",
         "PyYAML==3.12",
-        "pycrypto==2.6.1"
+        "pycrypto==2.6.1",
+        "cookiecutter==1.6.0"
     ],
     entry_points={
         "console_scripts": [
