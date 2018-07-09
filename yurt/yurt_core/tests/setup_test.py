@@ -6,16 +6,16 @@ from yurt.yurt_core.setup import enable_git_repo, create_project, load_orchestra
 from yurt.yurt_core.cli import main
 from yurt.yurt_core.paths import ORCHESTRATION_PROJECT_PATH, DJANGO_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
 
+INPUT_METHOD = 'builtins.input'
+
 try:
     import unittest
     from unittest import mock
     OPEN_METHOD = 'builtins.open'
-    INPUT_METHOD = 'builtins.input'
 except ImportError:
     import mock
     import unittest
     OPEN_METHOD = '__builtin__.open'
-    INPUT_METHOD = '__builtin__.raw_input'
 
 
 class SetupTestCase(BaseCase):
@@ -41,25 +41,6 @@ class SetupTestCase(BaseCase):
     ############################
     # Top-level Click commands #
     ############################
-
-    @mock.patch('yurt.yurt_core.setup.add_all_files_to_git_repo')
-    @mock.patch('yurt.yurt_core.setup.copy_ansible_configs_to_parent')
-    @mock.patch('yurt.yurt_core.setup.move_vagrantfile_to_project_dir')
-    @mock.patch('yurt.yurt_core.setup.load_orchestration_and_requirements')
-    @mock.patch('yurt.yurt_core.setup.create_project')
-    @mock.patch('yurt.yurt_core.setup.enable_git_repo')
-    @mock.patch('yurt.yurt_core.setup.create_settings', side_effect=testmode_create_settings)
-    @mock.patch('yurt.yurt_core.setup.run')
-    def test_new_project(self, mock_run, _, *mock_calls):
-        kwargs = {
-            'git_repo': 'git@github.com:yeti/yeti-fan-page.git'
-        }
-
-        cli_call = assemble_call_args_list("new_project", kwargs)
-        self.runner.invoke(main, cli_call)
-        for mock_call in mock_calls:
-            mock_call.assert_called_with(*self.NEW_PROJECT_ARGS)
-        mock_run.assert_called_with('vagrant up')
 
     @mock.patch('yurt.yurt_core.setup.recursive_file_modify')
     @mock.patch('yurt.yurt_core.setup.run')
@@ -139,30 +120,6 @@ class SetupTestCase(BaseCase):
         expected_ssh_call2 = ''.join(('ssh dartagnan@192.168.1.4411 "mkdir -p ~/.ssh && ',
                                       'echo \"batchesofcookies\" >> ~/.ssh/authorized_keys"'))
         mock_run.assert_called_with(expected_ssh_call2, warn=True)
-
-    @mock.patch('yurt.yurt_core.setup.os.chmod')
-    @mock.patch('yurt.yurt_core.setup.generate_ssh_keypair', return_value=(b'ssh-rsa ...', b'PEMKEY'))
-    @mock.patch(INPUT_METHOD, side_effect=lambda test: 'test_proj')
-    @mock.patch(OPEN_METHOD, side_effect=[mock.mock_open().return_value, mock.mock_open().return_value])
-    @mock.patch('yurt.yurt_core.setup.run')
-    def test_create_pem_file(self, *mock_calls):
-        mock_run, mock_open, _, _, _ = mock_calls
-        self.runner.invoke(main, ['create_pem_file'])
-        expected_run_calls = [
-            mock.call('mv ./test_proj.pem ~/.ssh'),
-            mock.call('mv ./test_proj.pub ~/.ssh'),
-            mock.call('ssh-add ~/.ssh/test_proj.pem'),
-        ]
-        expected_open_calls = [
-            mock.call('./test_proj.pem', 'w'),
-            mock.call('./test_proj.pub', 'w'),
-        ]
-        try:
-            self.assertItemsEqual(expected_run_calls, mock_run.call_args_list)
-            self.assertItemsEqual(expected_open_calls, mock_open.call_args_list)
-        except AttributeError:
-            self.assertEqual(expected_run_calls, mock_run.call_args_list)
-            self.assertEqual(expected_open_calls, mock_open.call_args_list)
 
     ##################
     # Helper methods #
@@ -259,6 +216,7 @@ class SetupTestCase(BaseCase):
                              [mock.call(run_call) for run_call in expected_run_calls])
             self.assertEqual(mock_chdir.call_args_list,
                              [mock.call(run_call) for run_call in expected_chdir_calls])
+
 
 if __name__ == '__main__':
     unittest.main()
