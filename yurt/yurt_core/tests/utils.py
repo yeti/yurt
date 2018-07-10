@@ -46,3 +46,11 @@ def fake_abspath(path):
     else:
         path = current_path_components
     return "/" + os.path.join('fake', 'abspath', *path)
+
+
+def enter_test_directory(func):
+    def wrapper(self, *args, **kwargs):
+        os.chdir(os.path.join(self.root_path, self.TEST_PATH))
+        func(self, *args, **kwargs)
+        os.chdir(self.root_path)
+    return wrapper

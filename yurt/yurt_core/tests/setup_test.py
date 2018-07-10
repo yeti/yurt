@@ -1,6 +1,8 @@
 import os
-from yurt.yurt_core.tests.base import BaseCase
-from yurt.yurt_core.tests.utils import assemble_call_args_list, testmode_create_settings, fake_abspath
+
+from yurt.yurt_core.tests.base import FileSystemCase
+from yurt.yurt_core.tests.utils import assemble_call_args_list, fake_abspath, \
+    enter_test_directory
 from yurt.yurt_core.setup import enable_git_repo, create_project, load_orchestration_and_requirements, \
     move_vagrantfile_to_project_dir, add_all_files_to_git_repo
 from yurt.yurt_core.cli import main
@@ -18,7 +20,7 @@ except ImportError:
     OPEN_METHOD = '__builtin__.open'
 
 
-class SetupTestCase(BaseCase):
+class SetupTestCase(FileSystemCase):
 
     NEW_PROJECT_ARGS = [
         {
@@ -41,6 +43,19 @@ class SetupTestCase(BaseCase):
     ############################
     # Top-level Click commands #
     ############################
+
+    @enter_test_directory
+    def test_new(self):
+        cli_call = assemble_call_args_list("new", {})
+        result = self.runner.invoke(main, cli_call, input='test\n8080')
+        self.assertEqual(result.exit_code, 0)
+        self.assertTrue('test' in os.listdir('.'))
+        os.chdir('test')
+        self.assertTrue('docker-compose.yml' in os.listdir('.'))
+        self.assertTrue('django_app' in os.listdir('.'))
+        self.assertTrue('envs' in os.listdir('.'))
+        os.chdir('django_app')
+        self.assertTrue('test' in os.listdir('.'))
 
     @mock.patch('yurt.yurt_core.setup.recursive_file_modify')
     @mock.patch('yurt.yurt_core.setup.run')

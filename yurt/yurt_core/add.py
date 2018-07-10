@@ -351,55 +351,5 @@ def add_env_var_values_to_python_settings(path, settings):
     return django_file_path
 
 
-@add.command()
-@click.option("--env", default=None, help="Name of environment")
-@click.option("--vars", default=None, help="JSON of desired env vars to be added")
-def env_vars(**kwargs):
-    """
-    Add environment variables to specific environments (EXPERIMENTAL)
-    """
-
-    # Get some paths
-    orchestration_path, app_main_path, env_yaml_path_template = get_relevant_paths()
-
-    # Compile a string that prints out the available environments with their option numbers
-    # along with a Dict representing these options
-    envs_available_string, envs_available_options = get_env_question_options_tuple(orchestration_path)
-
-    # Create the question flow
-    env_var_mapping = get_question_flow_mapping(envs_available_string)
-
-    # Make "--vars" option serialized to Python-native Dict
-    serialize_vars_from_kwargs_to_python_native(kwargs)
-
-    # Go over the questions to generate a Dict of settings
-    settings = go_over_questions(
-        env_var_mapping,
-        kwargs,
-        defaults=CallDict({
-            'vars': DeferredCallable(generate_dict_of_things, "environment variables")
-        })
-    )
-
-    # Convert number response into option response
-    settings['env'] = envs_available_options[settings['env']]
-
-    file_writes = [
-        (add_env_var_values_to_env_vars_yaml, env_yaml_path_template),
-        (add_env_var_values_to_app_main_yaml, app_main_path),
-        (add_env_var_values_to_python_settings, env_yaml_path_template)
-    ]
-
-    # Write the env var changes to the appropriate files, while yielding the right paths
-    actual_paths = [file_write_function(path, settings) for file_write_function, path in file_writes]
-
-    # Print out what files were edited
-    disclaimer = ENV_VAR_DISCLAIMER_TEMPLATE.format(
-        settings.get("env"),
-        *actual_paths
-    )
-
-    print(disclaimer)
-
 if __name__ == '__main__':
     add()

@@ -22,7 +22,6 @@ class LookupModule(LookupBase):
             raise Exception('Vagrantfile not found! If running `yurt vault`, run `yurt vault --dest=.`')
         return LookupModule.find_vagrantfile_dir(os.path.dirname(path))
 
-
     @classmethod
     def get_vault_from_path(cls, path):
         with open(path, 'r') as vault_file:

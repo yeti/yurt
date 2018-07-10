@@ -2,6 +2,7 @@
 dist/
 yak_yurt.egg-info/
 build/
+/__test
 .tox/
 .idea/
 .eggs/
