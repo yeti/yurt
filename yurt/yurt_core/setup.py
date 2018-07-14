@@ -1,10 +1,9 @@
 # coding=utf-8
 import os
-import stat
 import click
 from builtins import input
 from invoke import run
-from yurt.yurt_core.utils import recursive_file_modify, generate_ssh_keypair, get_project_name_from_repo, add_settings
+from yurt.yurt_core.utils import recursive_file_modify, get_project_name_from_repo, add_settings
 from yurt.yurt_core.paths import DJANGO_PROJECT_PATH, ORCHESTRATION_PROJECT_PATH, YURT_PATH, TEMPLATES_PATH
 from cookiecutter.main import cookiecutter
 
@@ -142,14 +141,10 @@ def new():
     """
     template_location = 'gh:yeti/yurt_template-django'
     print('==> Creating a new project with Yurt Django 2.0 Template')
-    cookiecutter(template_location)
-    print('==> Project created: {}'.format(
-        os.path.join(
-            os.getcwd(),
-            '<project_name>'
-        )
-    ))
-    print('==> cd to the above path and run `docker-compose up`︎')
+    result = cookiecutter(template_location)
+    print('==> Project created: {}'.format(result))
+    print('==> To run dev project:')
+    print('👉  cd {} && docker-compose up'.format(result))
 
 
 @setup.command()

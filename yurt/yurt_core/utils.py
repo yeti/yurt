@@ -220,15 +220,35 @@ def find_project_folder(path=None):
     return project_path
 
 
-def find_vagrantfile_dir(path=None):
+def find_file_in_ancestor(
+        target_file,
+        path=None,
+        error_message='Could not find file in ancestor',
+        stack_limit=None,
+        depth=0
+):
     if path is None:
         path = os.getcwd()
-    vagrantfile_path = os.path.join(path, "Vagrantfile")
-    if os.path.exists(vagrantfile_path):
+    if os.path.exists(os.path.join(path, target_file)):
         return path
-    if os.path.expanduser("~") == path:
-        raise Exception('Vagrantfile not found! If running `yurt vault`, run `yurt vault --dest=.`')
-    return find_vagrantfile_dir(os.path.dirname(path))
+    if stack_limit is None:
+        if os.path.expanduser("~") == path:
+            raise IOError(error_message)
+    if stack_limit:
+        if depth == stack_limit:
+            raise IOError("{}: Max stack limit reached".format(error_message))
+
+    return find_file_in_ancestor(
+        target_file,
+        path=os.path.dirname(path),
+        error_message=error_message,
+        stack_limit=stack_limit,
+        depth=depth + 1
+    )
+
+
+def find_vagrantfile_dir(path=None):
+    return find_file_in_ancestor("Vagrantfile", path)
 
 
 def register_values_in_vault(vagrantfile_path, vault_path, save_dict, quoted=False):

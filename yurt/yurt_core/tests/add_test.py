@@ -134,5 +134,6 @@ class AddTestCase(BaseCase):
                      '/orchestration/roles user1.test_role'))
         )
 
+
 if __name__ == '__main__':
     unittest.main()
