@@ -7,12 +7,22 @@ def read(filepathname):
         return f.read()
 
 
-long_description = "{0}\n".format(read("README.rst"))
+def get_package_data_files():
+    package_data_files = ['django_project/ansible.cfg', 'django_project/.gitignore', 'requirements.txt']
+    for orchestration, dirnames, filenames in os.walk('yurt/orchestration/'):
+        for filename in filenames:
+            package_data_files.append(os.path.join(orchestration.split('/', 1)[1], filename))
+        for templates, dirnames, filenames in os.walk('yurt/templates/'):
+            for filename in filenames:
+                package_data_files.append(os.path.join(templates.split('/', 1)[1], filename))
+    return package_data_files
 
+long_description = "{0}\n".format(read("README.rst"))
 
 setup(
     name="yak-yurt",
     packages=find_packages(),
+    package_data={'yurt': get_package_data_files()},
     include_package_data=True,
     version="0.1.18",
     description="A tool for deploying Django Web Apps to remote servers",
@@ -23,14 +33,20 @@ setup(
     author_email="support@yeti.co",
     test_suite="yurt.yurt_core.tests",
     setup_requires=[
+        "invoke==0.13.0",
+        "ansible==2.4.1.0",
         "click==6.6",
+        "hvac==0.2.13",
         "PyYAML==3.12",
-        "cookiecutter==1.6.0"
+        "pycrypto==2.6.1"
     ],
     install_requires=[
+        "invoke==0.13.0",
+        "ansible==2.4.1.0",
         "click==6.6",
+        "hvac==0.2.13",
         "PyYAML==3.12",
-        "cookiecutter==1.6.0"
+        "pycrypto==2.6.1"
     ],
     entry_points={
         "console_scripts": [

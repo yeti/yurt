@@ -1,0 +1,5 @@
+Django==1.11.8
+django_compressor
+djangorestframework
+django-grappelli
+psycopg2
