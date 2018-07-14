@@ -1,8 +1,0 @@
-[all:vars]
-env=vagrant
-
-[appservers]
-127.0.0.1
-
-[dbservers]
-127.0.0.1

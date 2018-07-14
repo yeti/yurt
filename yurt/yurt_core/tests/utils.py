@@ -1,6 +1,5 @@
 # Testing Util Methods
 import os
-from ..setup import create_settings
 
 
 def assemble_call_args_list(subcommand, kwargs_dict={}):
@@ -32,11 +31,6 @@ def yield_vault_inputs(prompt):
 
 def fake_open_file(*args):
     return "file at: {}, {}".format(*args)
-
-
-def testmode_create_settings(vault, git_repo):
-    settings, name = create_settings(vault, git_repo, True)
-    return settings, name
 
 
 def fake_abspath(path):

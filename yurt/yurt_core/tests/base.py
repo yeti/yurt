@@ -1,6 +1,7 @@
-import unittest
-import os
 import shutil
+import unittest
+
+import os
 from click.testing import CliRunner
 
 
