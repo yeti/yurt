@@ -1,6 +1,5 @@
 # Testing Util Methods
 import os
-from ..setup import create_settings
 
 
 def assemble_call_args_list(subcommand, kwargs_dict={}):
@@ -34,11 +33,6 @@ def fake_open_file(*args):
     return "file at: {}, {}".format(*args)
 
 
-def testmode_create_settings(vault, git_repo):
-    settings, name = create_settings(vault, git_repo, True)
-    return settings, name
-
-
 def fake_abspath(path):
     current_path_components = os.path.split(path)
     if current_path_components[0] == ".":
@@ -46,3 +40,11 @@ def fake_abspath(path):
     else:
         path = current_path_components
     return "/" + os.path.join('fake', 'abspath', *path)
+
+
+def enter_test_directory(func):
+    def wrapper(self, *args, **kwargs):
+        os.chdir(os.path.join(self.root_path, self.TEST_PATH))
+        func(self, *args, **kwargs)
+        os.chdir(self.root_path)
+    return wrapper
