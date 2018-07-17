@@ -1,113 +1,136 @@
-=============================================
-Yurt: A Deployment Script powered by Ansible.
-=============================================
+====================================================
+Yurt: Django Project + Docker Boilerplate Generation
+====================================================
 
-Last Updated: June 1st, 2016
-----------------------------
+Last Updated: July 14th, 2018
+-----------------------------
 
-Supported on Mac OSX 10.11 (El Capitan)
-
-A collection of commands for generating a new Django project (running Python 3) and
-deploying using Ansible to either a Vagrant or web host instance.
+A collection of commands for generating and modifying a Django 2.0 project bundled with production-ready Dockerfiles.
 
 .. image:: https://travis-ci.org/yeti/yurt.svg?branch=master
     :target: https://travis-ci.org/yeti/yurt
 
 Dependencies
 ------------
-- Vagrant
-- Python 2.7
+- Docker for Mac/Windows
+- Python 2.7/3.x
 
 Setup
 -----
+
+Install the Pip package
+
 .. code-block:: shell
 
     pip install yak-yurt
-    vagrant plugin install vagrant-vbguest
+
+Alternatively, you can install from git
+
+.. code-block:: shell
+
+    git clone git@github.com:yeti/yurt.git
+    cd yurt
+    pip install --editable .
 
 Usage
 -----
 
 - Get HELP for a Yurt command
-.. code-block:: shell
-
-    yurt deploy --help
-
-
-- Create a Django project and a Vagrant VM instance
 
 .. code-block:: shell
 
-    cd new_proj
-    yurt new_project (--git_repo=<git repo link>) (--vault)
+    yurt [COMMAND] --help
 
-- Adds a remote server target to the Django project
-
-.. code-block:: shell
-
-    cd new_proj
-    yurt remote_server (--help)
-
-- Deploys to a remote server target (must be inside the Django project git repo)
+- Create a new Django project
 
 .. code-block:: shell
 
-    cd new_proj/project_repo
-    yurt deploy
+   yurt new
 
-- Setup a Yurt-started project (git ssh link required)
-
-.. code-block:: shell
-
-    cd new_proj
-    yurt existing (--git_repo=<git repo link>)
-
-- Create a JSON file with Vault credentials (experimental)
+- Add remote environment context to Django project
 
 .. code-block:: shell
 
-    cd new_proj
-    yurt vault (--dest=<destination directory>)
+    cd path/to/yurt-project
+    yurt env add
+
+- Import environment context from zip file
+
+.. code-block:: shell
+
+    cd path/to/yurt-project
+    yurt env import path/to/env-context.zip
+
+- Export current environment context to zip file
+
+.. code-block:: shell
+
+    cd path/to/yurt-project
+    yurt env export <context-name>
+
+- Run dev server
+
+.. code-block:: shell
+
+    cd path/to/docker-compose.yml
+    docker-compose up -V
+
+- Stop dev server
+
+.. code-block:: shell
+
+    cd path/to/docker-compose.yml
+    docker-compose down
+
+- Run remote server with `docker-compose`
+
+.. code-block:: shell
+
+    cd path/to/docker-compose.yml
+    eval `docker-machine env <server-name>`
+    docker-compose -f docker-compose.<env>.yml up -d
 
 
 Notes on Project Structure
 --------------------------
-- After running either ``yurt existing`` or ``yurt new_project`` inside an empty directory ("new_proj") this is the structure:
+- Project will have the following structure upon running `yurt new`
 
 .. code-block:: shell
 
-    new_proj
-        |_ Vagrantfile
-        |_ project_repo
-            |_ manage.py
-            |_ requirements.txt
-            |_ config
-            |   |_ settings
-            |   |   |_ base.py
-            |   |   |_ local.py
-            |   |
-            |   |_ urls.py
-            |   |_ wsgi.py
+    <project_name> (PROJECT_ROOT)
+        |
+        |_ docker-compose.yml
+        |_ docker-compose.remote.yml
+        |
+        |_ django_app
+        |   |
+        |   |_ <project_name>
+        |   |   |_ settings.py
+        |   |   |_ wsgi.py
+        |   |   |_ urls.py
+        |   |
+        |   |_ manage.py
+        |   |_ requirements.txt
+        |   |_ Dockerfile.dev
+        |   |_ Dockerfile.remote
+        |
+        |_ envs
+        |   |
+        |   |_ dev.env
+        |   |_ remote.env
+        |
+        |_ proxy
             |
-            |_ orchestration
-                |_ env_vars
-                |   |_ base.yml
-                |   |_ vagrant.yml
-                |
-                |_ inventory
-                |   |_ vagrant
-                |
-                |_ roles
-                |   |_ {{ all the Ansible roles }}
-                |
-                |_ appservers.yml
-                |_ dbservers.yml
-                |_ site.yml
-                |_ vagrant.yml
+            |_ Dockerfile
+            |_ start.sh
+            |_ <project_name>.conf
+            |_ <project_name>.ssl.conf
 
-Vagrant Notes
--------------
-- Use the command ``vagrant ssh`` to SSH into the Vagrant VM
-- On the Vagrant VM, the application code is in ``/server/<project_name>`` and the virtualenv is in ``/server/.virtualenvs/<project_name>``
-- VM is provisioned with Ansible for the first time when calling ``vagrant up``
-- Re-provisioning with Ansible can be called with ``vagrant provision``
+- Running `yurt env add` will add:
+    - Another `docker-compose.*.yml` file to the PROJECT_ROOT.
+    - Another `*.env` file to PROJECT_ROOT/envs
+
+- Editing docker-compose.remote.yml edits the template that `yurt env add` uses to add more `docker-compose.*.yml` files.
+  Add services here to affect production-level composition.
+
+- `<project_name>.ssl.conf` is provided as a convenience, but it will still take some work to get it set up.
