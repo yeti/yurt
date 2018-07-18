@@ -1,6 +1,6 @@
-=================
+#################
 How to Contribute
-=================
+#################
 
 Yurt is a project written to make starting a new codebase quickly with our specific stack
 at Yeti LLC. Our stack is a Django/PostgreSQL project with Django Rest Framework.
@@ -29,9 +29,9 @@ To contribute to the django project cookiecutter template: [go here](https://git
 
 To contribute to the environment variable cookiecutter template: [go here](https://github.com/yeti/yurt_template-envvars.git)
 
-
+**************************
 How to test in development
---------------------------
+**************************
 The commands defined in ``yurt_core`` inherit the ``main`` click group from ``cli.py``,
 which is what is called on production when the end-user types in ``yurt <COMMAND>``.
 

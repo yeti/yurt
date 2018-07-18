@@ -86,3 +86,15 @@ class EnvTestCase(FileSystemCase):
         result = self.runner.invoke(env_vars, ['env', 'add'])
         self.assertEqual(result.exit_code, -1)
         self.assertEqual(result.exc_info[0], IOError)
+
+    @enter_test_directory
+    def test_fail_when_no_arg(self):
+        path = cookiecutter('gh:yeti/yurt_template-django', no_input=True)
+
+        os.chdir(path)
+        result = self.runner.invoke(env_vars, ['env', 'export'])
+        self.assertEqual(result.exit_code, -1)
+        try:
+            self.assertTrue('`yurt env export` requires an argument' in str(result.exception))
+        except AssertionError:
+            import pdb; pdb.set_trace()

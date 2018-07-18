@@ -2,6 +2,8 @@
 import click
 from cookiecutter.main import cookiecutter
 
+from yurt.yurt_core.utils import echo_multiline
+
 __author__ = 'deanmercado'
 
 
@@ -18,9 +20,14 @@ def new():
     template_location = 'gh:yeti/yurt_template-django'
     print('==> Creating a new project with Yurt Django 2.0 Template')
     result = cookiecutter(template_location)
-    print('==> Project created: {}'.format(result))
-    print('==> To run dev project:')
-    print('👉  cd {} && docker-compose up'.format(result))
+    echo_multiline("""
+==> Yurt project created:
+{result}
+
+==> Run dev project:
+cd {result} && docker-compose up
+
+""".format(result=result))
 
 
 if __name__ == '__main__':

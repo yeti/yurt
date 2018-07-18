@@ -9,7 +9,7 @@ import click
 import yaml
 from cookiecutter.main import cookiecutter
 
-from yurt.yurt_core.utils import get_iter
+from yurt.yurt_core.utils import get_iter, echo_multiline
 
 
 def add():
@@ -39,10 +39,19 @@ def add():
         compose_contents['services'] = all_services
         yaml.dump(compose_contents, target_file_obj, default_flow_style=False)
 
-    click.echo('==> Environment variable files added to project')
-    click.echo('==> Deploy the project accordingly:')
-    click.echo('==> 👉 eval `docker-machine env <remote_machine>`')
-    click.echo('==> 👉 docker-compose -f docker-compose.{}.yml up'.format(environment))
+    post_add_instructions = """
+==> The following files have been added to project!
+✨ {}
+✨ {}
+
+==> Run/Deploy the Project with the following:
+docker-compose -f docker-compose.{}.yml up""".format(
+        os.path.abspath(env_file),
+        os.path.abspath(target_file),
+        environment
+    )
+
+    echo_multiline(post_add_instructions)
 
 
 def import_func(src):
@@ -55,7 +64,9 @@ def import_func(src):
 def export(filename):
     click.echo('==> Exporting .envs/ into ./{}.zip'.format(filename))
     make_archive(filename, 'zip', './envs')
-    click.echo('==> Success!')
-    click.echo('==> Upload this zip archive to a vault. To import:')
-    click.echo('👉  yurt env import <path-to-archive>')
+    echo_multiline("""
+==> Success!
+==> Upload this zip archive to a vault. To import:
+yurt env import <path-to-archive>
+    """)
 
