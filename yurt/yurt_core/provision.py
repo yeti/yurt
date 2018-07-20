@@ -120,14 +120,14 @@ def provision_group():
 @click.argument('args', nargs=-1)
 def provision(subcommand, args):
     """
-        Provision new Docker-powered Hosts with Docker Machine
+    Provision new Docker-powered Hosts with Docker Machine
 
-        Subcommands:
+    Subcommands:
 
-        👉 new - Provision a new remote host with Docker-Machine
+    👉 new - Provision a new remote host with Docker-Machine
 
-        👉 existing - Import docker-machine configuration for an existing Docker host
-        """
+    👉 existing - Import docker-machine configuration for an existing Docker host
+    """
     commands = (
         ('new', new),
         ('existing', existing)
