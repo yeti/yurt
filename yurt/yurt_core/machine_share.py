@@ -24,7 +24,7 @@ def check_for_target(target):
     raise IOError('{} does not exist!'.format(os.path.abspath(target)))
 
 
-def replace_home_path (source, _):
+def replace_home_path(source, _):
     return re.sub(os.path.expandvars('$HOME'), r'$HOME', source)
 
 
@@ -32,14 +32,14 @@ def replace_home_path_reverse(source, _):
     return re.sub(r'\$HOME', os.path.expandvars('$HOME'), source)
 
 
-def replace_certs_path (source, machine_name):
+def replace_certs_path(source, machine_name):
     return re.sub(
         'machine/certs',
         'machine/machines/{}/certs'.format(machine_name),
         source)
 
 
-def replace_sshkey (source, machine_name):
+def replace_sshkey(source, machine_name):
     return re.sub(
         r'\.ssh/(.*)$',
         r'.docker/machine/machines/{}/\1'.format(machine_name),
@@ -76,6 +76,15 @@ def replace_values_with_home_var(dictionary, machine_name, reverse=False):
     return dictionary
 
 
+def change_config_json(config_json_path, machine_name, to_home=True):
+    with open(config_json_path, 'r+') as config_json_stream:
+        config_object = json.loads(config_json_stream.read())
+        refined_object = replace_values_with_home_var(config_object, machine_name, reverse=(not to_home))
+        config_json_stream.seek(0)
+        config_json_stream.truncate()
+        json.dump(refined_object, config_json_stream, indent=2)
+
+
 ###
 # Commands
 ###
@@ -105,12 +114,7 @@ def export_machine(machine_name):
         )
     )
 
-    with open(config_json, 'r+') as config_json_stream:
-        config_object = json.loads(config_json_stream.read())
-        refined_object = replace_values_with_home_var(config_object, machine_name)
-        config_json_stream.seek(0)
-        config_json_stream.truncate()
-        json.dump(refined_object, config_json_stream, indent=2)
+    change_config_json(config_json, machine_name)
 
     # Put in Zip File
     make_archive(machine_name, 'zip', target_copy)
@@ -130,18 +134,20 @@ def import_machine(archive_path):
         with ZipFile(archive_path) as zip_stream:
             zip_stream.extractall(docker_machine_directory)
         os.chdir(docker_machine_directory)
-        with open('./config.json', 'r+') as config_json_stream:
-            config_object = json.loads(config_json_stream.read())
-            refined_object = replace_values_with_home_var(config_object, None, reverse=True)
-            config_json_stream.seek(0)
-            config_json_stream.truncate()
-            json.dump(refined_object, config_json_stream, indent=2)
+        change_config_json('./config.json', None, to_home=False)
+        echo_multiline('''
+==> Docker machine ({base_name}) imported!
+
+===> Run (to activate):
+eval $(docker-machine env {base_name})
+
+'''.format(base_name=base_name))
+    click.echo('==> {} does not exist. Cancelled!'.format(archive_path))
 
 
 ###
 # Entrypoints
 ###
-
 
 @click.group()
 def machine_share_group():
