@@ -19,7 +19,10 @@ class FileSystemCase(BaseCase):
     def setUp(self):
         self.root_path = os.getcwd()
         super(FileSystemCase, self).setUp()
-        os.mkdir(os.path.join(self.root_path, self.TEST_PATH))
+        test_path = os.path.join(self.root_path, self.TEST_PATH)
+        if os.path.exists(test_path):
+            shutil.rmtree(test_path)
+        os.mkdir(test_path)
         cookiecutter_home = os.path.expanduser('~/.cookiecutters')
         if os.path.exists(cookiecutter_home):
             shutil.rmtree(cookiecutter_home)

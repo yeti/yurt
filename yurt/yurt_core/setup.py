@@ -28,7 +28,3 @@ def new():
 cd {result} && docker-compose up
 
 """.format(result=result))
-
-
-if __name__ == '__main__':
-    setup()
