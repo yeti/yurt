@@ -14,7 +14,7 @@ setup(
     name="yak-yurt",
     packages=find_packages(),
     include_package_data=True,
-    version="0.1.18",
+    version="1.0.0",
     description="A tool for deploying Django Web Apps to remote servers",
     long_description=long_description,
     url="https://github.com/yeti/yurt/",
