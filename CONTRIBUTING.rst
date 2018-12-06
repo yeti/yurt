@@ -1,46 +1,50 @@
-=================
+#################
 How to Contribute
-=================
+#################
 
 Yurt is a project written to make starting a new codebase quickly with our specific stack
-at Yeti LLC. Our stack is a Django/PostgreSQL project with some additions like Django Rest Framework,
-node.js, memcached, etc. Here is the project structure, showing where some of the ``yurt`` commands live
+at Yeti LLC. Our stack is a Django/PostgreSQL project with Django Rest Framework.
+Here is the project structure, showing where some of the ``yurt`` commands live
 in the codebase:
 
 .. code-block:: shell
 
-    yurt/yurt
-        |_ django_project
-        |   |_ <file templates and boilerplate>
-        |_ orchestration
-        |   |_ <file templates and boilerplate>
+      yurt
+        |
+        |_ setup.py
         |_ yurt_core
-            |_ add.py
-            |   |_ (``yurt vault``)
-            |   |_ (``yurt remote_server``)
+            |
+            |_ env
+            |   |_ commands.py
+            |   |_ helpers.py
+            |
             |_ setup.py
-            |   |_ (``yurt new_project``)
-            |   |_ (``yurt existing``)
-            |_ deploy.py
-            |   |_ (``yurt deploy``)
             |_ utils.py
             |_ cli.py
+            |
+            |_ tests
 
 
-The directories ``yurt/yurt/django_project`` and ``yurt/yurt/orchestration`` are file-template-trees of the Django project
-and Ansible orchestration files that will be filled in with the appropriate values.
+To contribute to the django project cookiecutter template: [go here](https://github.com/yeti/yurt_template-django.git)
 
-The directory ``yurt/yurt/yurt_core`` has all the interesting bits.
+To contribute to the environment variable cookiecutter template: [go here](https://github.com/yeti/yurt_template-envvars.git)
 
+**************************
 How to test in development
---------------------------
-The files ``add.py``, ``setup.py`` and ``deploy.py`` in ``core`` inherit the ``main`` click group from ``cli.py``,
+**************************
+The commands defined in ``yurt_core`` inherit the ``main`` click group from ``cli.py``,
 which is what is called on production when the end-user types in ``yurt <COMMAND>``.
 
-To run a command ad-hoc such as ``yurt vault`` (which lives in ``yurt/yurt/yurt_core/add.py``)
-without having to deploy a new PyPI release:
+The package can be installed locally like so:
 
 .. code-block:: shell
 
-    ln -s /path/to/yurt/yurt/yurt_core .
-    python core/add.py vault
+    cd /path/to/yurt/setup.py
+    pip install --editable .
+
+Tests:
+
+.. code-block:: shell
+
+    cd /path/to/yurt/setup.py
+    python setup.py test
