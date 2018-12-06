@@ -142,8 +142,6 @@ def import_machine(archive_path):
 eval $(docker-machine env {base_name})
 
 '''.format(base_name=base_name))
-    click.echo('==> {} does not exist. Cancelled!'.format(archive_path))
-
 
 ###
 # Entrypoints
@@ -158,6 +156,15 @@ def machine_share_group():
 @click.argument('subcommand')
 @click.argument('args', nargs=-1)
 def machine(subcommand, args):
+    """
+    (Experimental) Commands for Docker-Machine management and sharing
+
+    Subcommands:
+
+    👉 import [SRC] - Import docker-machine context to zip archive
+
+    👉 export [FILENAME] - Export docker-machine context from zip archive
+    """
     subcommands = (
         ('export', export_machine),
         ('import', import_machine)
