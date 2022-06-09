@@ -25,14 +25,14 @@ setup(
     setup_requires=[
         "click==6.6",
         "PyYAML==3.12",
-        "cookiecutter==1.6.0",
+        "cookiecutter==2.1.1",
         "invoke==1.1.0",
         "colorama==0.3.9"
     ],
     install_requires=[
         "click==6.6",
         "PyYAML==3.12",
-        "cookiecutter==1.6.0",
+        "cookiecutter==2.1.1",
         "invoke==1.1.0",
         "colorama==0.3.9"
     ],
