@@ -1,5 +1,0 @@
-[run]
-source=yurt/yurt_core/
-omit=
-  yurt/yurt_core/tests/*.py
-  */__init__.py
