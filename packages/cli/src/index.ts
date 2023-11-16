@@ -17,22 +17,27 @@ const main = async () => {
     {
       type: 'input',
       name: 'repoName',
-      message: 'What is the name of the new repo?',
+      message: 'What should the repo be called?',
+      required: true,
     },
     {
       type: 'input',
       name: 'repoLocation',
-      message: 'Where should the repo be created? (pass relative path)',
+      message: 'Where should the repo be created?',
+      initial: '.',
+      required: true,
     },
     {
       type: 'confirm',
       name: 'needsFrontend',
       message: 'Does the repo need a frontend?',
+      required: true,
     },
     {
       type: 'confirm',
       name: 'needsBackend',
       message: 'Does the repo need a backend?',
+      required: true,
     },
   ]);
 
