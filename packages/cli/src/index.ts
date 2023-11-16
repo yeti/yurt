@@ -1,23 +1,29 @@
-import { exec, execSync } from 'child_process';
+import chalk from 'chalk';
+import path from 'path';
+import { execSync } from 'child_process';
 import { prompt } from 'enquirer';
-// import ProgressBar from "progress";
 import fs from 'fs-extra';
 
 interface PromptInputs {
   repoName: string;
+  readmeTitle: string;
   repoLocation: string;
   needsFrontend: boolean;
   needsBackend: boolean;
 }
 
 const main = async () => {
-  // const bar = new ProgressBar(":bar", { total: 100 });
-
   const response: PromptInputs = await prompt([
     {
       type: 'input',
       name: 'repoName',
       message: 'What should the repo be called?',
+      required: true,
+    },
+    {
+      type: 'input',
+      name: 'readmeTitle',
+      message: 'What should the readme title be? (i.e. project name)',
       required: true,
     },
     {
@@ -41,24 +47,70 @@ const main = async () => {
     },
   ]);
 
-  console.log(response);
+  const { repoName, readmeTitle, repoLocation, needsFrontend, needsBackend } =
+    response;
 
-  const { repoName, repoLocation, needsFrontend, needsBackend } = response;
+  if (!needsFrontend && !needsBackend) {
+    console.error(
+      chalk.red('You must select at least one of frontend or backend'),
+    );
+    process.exit(1);
+  }
 
-  await fs.mkdirp(`${repoLocation}/${repoName}`);
+  await fs.mkdirp(`${process.cwd()}/${repoLocation}/${repoName}`);
+  execSync(`cd ${repoLocation}/${repoName} && git init `, { stdio: 'pipe' });
+  execSync(`echo "#${readmeTitle}" >> README.md`, { stdio: 'pipe' });
+  // && echo "# ${readmeTitle}" >> README.md && git add . && git commit -m "Initial commit"
 
-  execSync(
-    `cd ${repoLocation}/${repoName} && git init && echo "# ${repoName}" >> README.md && git add . && git commit -m "Initial commit"`,
-    { stdio: 'pipe' },
-  );
+  if (needsFrontend) {
+    fs.copySync(
+      path.resolve(__dirname, '../../', 'frontend'),
+      `${repoLocation}/${repoName}/packages/frontend`,
+    );
+    // await Promise.all([
+    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/public`),
+    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/apollo`),
+    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/assets`),
+    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/modules`),
+    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/services`),
+    //   fs.mkdirp(
+    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/components`,
+    //   ),
+    //   fs.mkdirp(
+    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/types`,
+    //   ),
+    //   fs.mkdirp(
+    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/hooks`,
+    //   ),
+    //   fs.mkdirp(
+    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/mutations`,
+    //   ),
+    //   fs.mkdirp(
+    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/queries`,
+    //   ),
+    //   fs.mkdirp(
+    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/styles`,
+    //   ),
+    //   fs.mkdirp(
+    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/types`,
+    //   ),
+    //   fs.mkdirp(
+    //     `${repoLocation}/${repoName}/packages/frontend/src/static/icons`,
+    //   ),
+    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/stores`),
+    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/tests`),
+    // ]);
 
-  // setInterval(() => {
-  //   bar.tick();
-  //   if (bar.complete) {
-  //     console.log("\ncomplete\n");
-  //     process.exit();
-  //   }
-  // }, 100);
+    //TODO: Add frontend files
+  }
+
+  if (needsBackend) {
+    //TODO: Add backend files
+  }
 };
 
-main();
+main().catch((err) => {
+  console.error(chalk.red(err));
+
+  process.exit(1);
+});
