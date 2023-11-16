@@ -1,7 +1,7 @@
-import { exec, execSync } from "child_process";
-import { prompt } from "enquirer";
+import { exec, execSync } from 'child_process';
+import { prompt } from 'enquirer';
 // import ProgressBar from "progress";
-import fs from "fs-extra";
+import fs from 'fs-extra';
 
 interface PromptInputs {
   repoName: string;
@@ -15,24 +15,24 @@ const main = async () => {
 
   const response: PromptInputs = await prompt([
     {
-      type: "input",
-      name: "repoName",
-      message: "What is the name of the new repo?",
+      type: 'input',
+      name: 'repoName',
+      message: 'What is the name of the new repo?',
     },
     {
-      type: "input",
-      name: "repoLocation",
-      message: "Where should the repo be created? (pass relative path)",
+      type: 'input',
+      name: 'repoLocation',
+      message: 'Where should the repo be created? (pass relative path)',
     },
     {
-      type: "confirm",
-      name: "needsFrontend",
-      message: "Does the repo need a frontend?",
+      type: 'confirm',
+      name: 'needsFrontend',
+      message: 'Does the repo need a frontend?',
     },
     {
-      type: "confirm",
-      name: "needsBackend",
-      message: "Does the repo need a backend?",
+      type: 'confirm',
+      name: 'needsBackend',
+      message: 'Does the repo need a backend?',
     },
   ]);
 
@@ -41,9 +41,10 @@ const main = async () => {
   const { repoName, repoLocation, needsFrontend, needsBackend } = response;
 
   await fs.mkdirp(`${repoLocation}/${repoName}`);
+
   execSync(
     `cd ${repoLocation}/${repoName} && git init && echo "# ${repoName}" >> README.md && git add . && git commit -m "Initial commit"`,
-    { stdio: "pipe" }
+    { stdio: 'pipe' },
   );
 
   // setInterval(() => {
