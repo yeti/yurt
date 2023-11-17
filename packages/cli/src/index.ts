@@ -60,13 +60,6 @@ const main = async () => {
 
   await fs.mkdirp(`${repoLocation}/${repoName}`);
 
-  execSync(`cd ${repoLocation}/${repoName} && ls -al && git init `, {
-    stdio: 'pipe',
-  });
-  execSync(`echo "#${readmeTitle}" >> ${repoLocation}/${repoName}/README.md`, {
-    stdio: 'pipe',
-  });
-
   fs.copySync(
     path.resolve(__dirname, '../../../'),
     `${repoLocation}/${repoName}/`,
@@ -80,6 +73,13 @@ const main = async () => {
       },
     },
   );
+
+  execSync(`cd ${repoLocation}/${repoName} && rm -r ./.git && git init `, {
+    stdio: 'pipe',
+  });
+  execSync(`echo "#${readmeTitle}" >> ${repoLocation}/${repoName}/README.md`, {
+    stdio: 'pipe',
+  });
 
   if (needsFrontend) {
     fs.copySync(
