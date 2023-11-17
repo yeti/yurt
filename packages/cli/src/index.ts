@@ -74,9 +74,12 @@ const main = async () => {
     },
   );
 
-  execSync(`cd ${repoLocation}/${repoName} && rm -r ./.git && git init `, {
+  // Remove previous git history
+  execSync(`cd ${repoLocation}/${repoName} && rm -rf ./.git && git init `, {
     stdio: 'pipe',
   });
+
+  // Create root readme
   execSync(`echo "#${readmeTitle}" >> ${repoLocation}/${repoName}/README.md`, {
     stdio: 'pipe',
   });
@@ -93,8 +96,8 @@ const main = async () => {
   }
 
   execSync(`cd ${repoLocation}/${repoName}`, { stdio: 'pipe' });
-  execSync(`git add .`, { stdio: 'pipe' });
-  execSync(`git commit -m "Initial commit"`, { stdio: 'pipe' });
+  execSync(`git add --all`);
+  execSync(`git commit --message "Initial commit"`);
 
   console.log(chalk.green('✨ Done! ✨'));
   process.exit(0);
