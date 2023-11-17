@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "start": "lerna run start --stream"
   },
   "keywords": [],
   "author": "",
