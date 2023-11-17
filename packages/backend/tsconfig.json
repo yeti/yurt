@@ -1,0 +1,17 @@
+{
+  "ts-node": {
+    "files": true,
+    "swc": true,
+    "transpileOnly": true
+  },
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "lib": ["esnext"],
+    "outDir": "dist",
+    "paths": {
+      "~/*": ["src/*"]
+    },
+    "sourceMap": true
+  }
+}
