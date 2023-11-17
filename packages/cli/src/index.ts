@@ -63,6 +63,20 @@ const main = async () => {
   execSync(`cd ${repoLocation}/${repoName} && git init `, { stdio: 'pipe' });
   execSync(`echo "#${readmeTitle}" >> README.md`, { stdio: 'pipe' });
 
+  fs.copySync(
+    path.resolve(__dirname, '../../../'),
+    `${repoLocation}/${repoName}/`,
+    {
+      filter: (src, _dest) => {
+        if (src.includes('packages')) {
+          return false;
+        }
+
+        return true;
+      },
+    },
+  );
+
   if (needsFrontend) {
     fs.copySync(
       path.resolve(__dirname, '../../', 'frontend'),
