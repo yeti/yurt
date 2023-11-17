@@ -95,9 +95,10 @@ const main = async () => {
     //TODO: Add backend files
   }
 
-  execSync(`cd ${repoLocation}/${repoName}`, { stdio: 'pipe' });
-  execSync(`git add --all`);
-  execSync(`git commit --message "Initial commit"`);
+  execSync(
+    `cd ${repoLocation}/${repoName} && git add --all && git commit --message "Initial commit"`,
+    { stdio: 'pipe' },
+  );
 
   console.log(chalk.green('✨ Done! ✨'));
   process.exit(0);
