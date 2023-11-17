@@ -29,7 +29,7 @@ const main = async () => {
     {
       type: 'input',
       name: 'repoLocation',
-      message: 'Where should the repo be created?',
+      message: 'Where should the repo be created? (relative path)',
       initial: '.',
       required: true,
     },
@@ -54,59 +54,32 @@ const main = async () => {
     console.error(
       chalk.red('You must select at least one of frontend or backend'),
     );
+
     process.exit(1);
   }
 
-  await fs.mkdirp(`${process.cwd()}/${repoLocation}/${repoName}`);
+  await fs.mkdirp(`${repoLocation}/${repoName}`);
+
   execSync(`cd ${repoLocation}/${repoName} && git init `, { stdio: 'pipe' });
   execSync(`echo "#${readmeTitle}" >> README.md`, { stdio: 'pipe' });
-  // && echo "# ${readmeTitle}" >> README.md && git add . && git commit -m "Initial commit"
 
   if (needsFrontend) {
     fs.copySync(
       path.resolve(__dirname, '../../', 'frontend'),
       `${repoLocation}/${repoName}/packages/frontend`,
     );
-    // await Promise.all([
-    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/public`),
-    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/apollo`),
-    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/assets`),
-    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/modules`),
-    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/services`),
-    //   fs.mkdirp(
-    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/components`,
-    //   ),
-    //   fs.mkdirp(
-    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/types`,
-    //   ),
-    //   fs.mkdirp(
-    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/hooks`,
-    //   ),
-    //   fs.mkdirp(
-    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/mutations`,
-    //   ),
-    //   fs.mkdirp(
-    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/queries`,
-    //   ),
-    //   fs.mkdirp(
-    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/styles`,
-    //   ),
-    //   fs.mkdirp(
-    //     `${repoLocation}/${repoName}/packages/frontend/src/shared/types`,
-    //   ),
-    //   fs.mkdirp(
-    //     `${repoLocation}/${repoName}/packages/frontend/src/static/icons`,
-    //   ),
-    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/stores`),
-    //   fs.mkdirp(`${repoLocation}/${repoName}/packages/frontend/src/tests`),
-    // ]);
-
-    //TODO: Add frontend files
   }
 
   if (needsBackend) {
     //TODO: Add backend files
   }
+
+  execSync(`cd ${repoLocation}/${repoName}`, { stdio: 'pipe' });
+  execSync(`git add .`, { stdio: 'pipe' });
+  execSync(`git commit -m "Initial commit"`, { stdio: 'pipe' });
+
+  console.log(chalk.green('✨ Done! ✨'));
+  process.exit(0);
 };
 
 main().catch((err) => {

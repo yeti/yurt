@@ -1,11 +1,12 @@
 {
   "name": "cli",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc --build",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "watch": "tsc --watch"
   },
   "keywords": [],
   "author": "",
