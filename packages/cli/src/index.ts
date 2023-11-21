@@ -3,6 +3,7 @@ import path from 'path';
 import { execSync } from 'child_process';
 import { prompt } from 'enquirer';
 import fs from 'fs-extra';
+import untildify from './utils';
 
 interface PromptInputs {
   repoName: string;
@@ -28,7 +29,7 @@ const prompts = [
   {
     type: 'input',
     name: 'repoLocation',
-    message: 'Where should the repo be created? (relative path)',
+    message: 'Where should the repo be created? (absolute or relative path)',
     initial: '.',
     required: true,
   },
@@ -62,7 +63,9 @@ const main = async () => {
     process.exit(1);
   }
 
-  await fs.mkdirp(`${repoLocation}/${repoName}`);
+  const absolutePath = untildify(repoLocation);
+
+  await fs.mkdirp(absolutePath);
 
   const excludedRootDirectories = [
     'packages',
