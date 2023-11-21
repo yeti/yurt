@@ -1,6 +1,6 @@
 import { makeSchema } from 'nexus';
-import { NODE_ENV } from './config';
-import * as types from './schemaTypes';
+import { NODE_ENV } from '~/config';
+import * as types from '~/schemaTypes';
 import path from 'path';
 
 export const schema = makeSchema({

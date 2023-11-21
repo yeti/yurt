@@ -1,11 +1,11 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { applyMiddleware } from 'graphql-middleware';
-import { logger } from './loggers';
-import { createContext } from './context';
-import { schema } from './schema';
-import { NODE_ENV, PORT } from './config';
-import permissions from './permissions';
+import { logger } from '~/loggers';
+import { createContext } from '~/context';
+import { schema } from '~/schema';
+import { NODE_ENV, PORT } from '~/config';
+import permissions from '~/permissions';
 
 // Apollo server
 // ----------------------------------------------------------------------------

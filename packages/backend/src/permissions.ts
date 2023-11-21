@@ -1,5 +1,5 @@
 import { allow, rule, shield } from 'graphql-shield';
-import { NODE_ENV } from './config';
+import { NODE_ENV } from '~/config';
 
 const isAuthenticated = rule({ cache: 'contextual' })(async (
   _parent,

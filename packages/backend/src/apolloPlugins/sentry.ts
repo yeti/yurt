@@ -1,10 +1,9 @@
 import * as Sentry from '@sentry/node';
+import { Context } from '~/context';
 import {
   ApolloServerPlugin,
   GraphQLRequestContextDidEncounterErrors,
-} from 'apollo-server-plugin-base';
-
-import { Context } from '../context';
+} from '@apollo/server';
 
 const sentryPlugin: ApolloServerPlugin<Context> = {
   async requestDidStart() {
