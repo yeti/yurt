@@ -67,13 +67,9 @@ const main = async () => {
 
   await fs.mkdirp(absolutePath);
 
-  const excludedRootDirectories = [
-    'packages',
-    'node_modules',
-    'postgres',
-    '.git',
-  ];
+  const excludedRootDirectories = ['packages', 'node_modules', 'postgres'];
 
+  console.log(chalk.green('📦 Creating repo 📦'));
   fs.copySync(
     //TODO: resolve this path properly when command is invoked
     path.resolve(__dirname, '../../../'),
@@ -89,10 +85,11 @@ const main = async () => {
     },
   );
 
-  execSync(`cd ${repoLocation}/${repoName} && git init `, {
+  execSync(`cd ${repoLocation}/${repoName} && rm -rf .git && git init .`, {
     stdio: 'pipe',
   });
 
+  //TODO: add README template
   // Create root readme
   execSync(`echo "# ${readmeTitle}" >> ${repoLocation}/${repoName}/README.md`, {
     stdio: 'pipe',
@@ -134,38 +131,47 @@ const main = async () => {
     );
   }
 
+  console.log(chalk.green('📦 Installing dependencies 📦'));
+  execSync(`cd ${repoLocation}/${repoName} &&  pnpm install`, {
+    stdio: 'pipe',
+  });
+
+  if (needsBackend) {
+    console.log(
+      chalk.green(
+        '🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨',
+      ),
+    );
+    execSync(
+      `cd ${repoLocation}/${repoName}/packages/backend && pnpm generate`,
+      {
+        stdio: 'pipe',
+      },
+    );
+  }
+
+  console.log(chalk.green('📝 Creating initial commit 📝'));
   execSync(
     `cd ${repoLocation}/${repoName} && git add --all && git commit --message "Initial commit"`,
     { stdio: 'pipe' },
   );
 
-  console.log(chalk.green('📦 Installing dependencies...'));
-  execSync(`cd ${repoLocation}/${repoName} &&  pnpm install`, {
-    stdio: 'pipe',
-  });
-
-  console.log(chalk.green('🔨 Generating GraphQL schema and types...'));
-  execSync(`cd ${repoLocation}/${repoName}/packages/backend && pnpm generate`, {
-    stdio: 'pipe',
-  });
-
   const endTime = performance.now();
 
   console.log(
     chalk.green(
-      `🚀 Successfully created ${repoName} in ${(
+      `✨ Successfully created ${repoName} in ${(
         (endTime - startTime) /
         1000
-      ).toFixed(2)}s!`,
+      ).toFixed(2)}s! ✨`,
     ),
   );
 
-  console.log(chalk.green('✨ Done! ✨'));
   process.exit(0);
 };
 
-main().catch((err) => {
-  console.error(chalk.red(err));
+main().catch((error) => {
+  console.error(chalk.red(error));
 
   process.exit(1);
 });

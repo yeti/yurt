@@ -2,11 +2,13 @@
   "name": "backend",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.ts",
   "scripts": {
     "generate": "pnpm generate:prisma && pnpm generate:nexus",
     "generate:nexus": "ts-node --transpileOnly src/schema.ts",
     "generate:prisma": "prisma generate",
+    "dev": "nodemon",
+    "build": "tsc && resolve-tspaths && pnpm generate --nexusTypegen",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -41,6 +43,7 @@
     "regenerator-runtime": "^0.14.0",
     "resolve-tspaths": "^0.8.15",
     "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2"
   }
 }

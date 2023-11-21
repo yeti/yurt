@@ -3,5 +3,10 @@
   "useNx": true,
   "useWorkspaces": true,
   "version": "0.1.0",
-  "npmClient": "pnpm"
+  "npmClient": "pnpm",
+  "command": {
+    "publish": {
+      "directory": "{workspaceRoot}/packages/cli"
+    }
+  }
 }

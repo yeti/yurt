@@ -1,24 +1,26 @@
-import { useState } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import ErrorPage from '~/shared/components/ErrorPage';
+import LoginPage from '~/modules/auth/LoginPage';
+import { Box } from '@mui/material';
 
-function App() {
-  const [count, setCount] = useState(0);
+const App = () => {
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <LoginPage />,
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: '/test',
+      element: <Box>Test</Box>,
+    },
+    {
+      path: '*',
+      element: <Box>404</Box>,
+    },
+  ]);
 
-  return (
-    <>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  );
-}
+  return <RouterProvider router={router} />;
+};
 
 export default App;

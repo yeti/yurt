@@ -1,4 +1,4 @@
-import { rule, shield } from 'graphql-shield';
+import { allow, rule, shield } from 'graphql-shield';
 import { NODE_ENV } from './config';
 
 const isAuthenticated = rule({ cache: 'contextual' })(async (
@@ -23,7 +23,9 @@ const shouldDebug = NODE_ENV === 'development';
 
 const permissions = shield(
   {
-    Query: {},
+    Query: {
+      user: allow,
+    },
     Mutation: {},
   },
   {
