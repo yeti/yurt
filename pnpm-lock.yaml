@@ -123,9 +123,6 @@ importers:
       progress:
         specifier: ^2.0.3
         version: 2.0.3
-      untildify:
-        specifier: ^5.0.0
-        version: 5.0.0
     devDependencies:
       '@types/fs-extra':
         specifier: ^11.0.4
@@ -6834,11 +6831,6 @@ packages:
   /unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
     engines: {node: '>= 0.8'}
-    dev: false
-
-  /untildify@5.0.0:
-    resolution: {integrity: sha512-bOgQLUnd2G5rhzaTvh1VCI9Fo6bC5cLTpH17T5aFfamyXFYDbbdzN6IXdeoc3jBS7T9hNTmJtYUzJCJ2Xlc9gA==}
-    engines: {node: '>=16'}
     dev: false
 
   /upath@2.0.1:
