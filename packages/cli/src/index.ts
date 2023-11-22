@@ -63,35 +63,33 @@ const main = async () => {
     process.exit(1);
   }
 
-  const absolutePath = untildify(repoLocation);
+  const repoLocationAbsolutePath = untildify(repoLocation);
+  const repoAbsolutePath = `${repoLocationAbsolutePath}/${repoName}`;
 
-  await fs.mkdirp(absolutePath);
+  await fs.mkdirp(repoLocationAbsolutePath);
 
   const excludedRootDirectories = ['packages', 'node_modules', 'postgres'];
 
   console.log(chalk.green('📦 Creating repo 📦'));
-  fs.copySync(
-    //TODO: resolve this path properly when command is invoked
-    path.resolve(__dirname, '../../../'),
-    `${repoLocation}/${repoName}/`,
-    {
-      filter: (src) => {
-        if (excludedRootDirectories.some((item) => src.includes(item))) {
-          return false;
-        }
+  fs.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
+    filter: (src) => {
+      if (excludedRootDirectories.some((item) => src.includes(item))) {
+        return false;
+      }
 
-        return true;
-      },
+      return true;
     },
-  );
+    dereference: true,
+    recursive: true,
+  });
 
-  execSync(`cd ${repoLocation}/${repoName} && rm -rf .git && git init .`, {
+  execSync(`cd ${repoAbsolutePath} && rm -rf .git && git init .`, {
     stdio: 'pipe',
   });
 
   //TODO: add README template
   // Create root readme
-  execSync(`echo "# ${readmeTitle}" >> ${repoLocation}/${repoName}/README.md`, {
+  execSync(`echo "# ${readmeTitle}" >> ${repoAbsolutePath}/README.md`, {
     stdio: 'pipe',
   });
 
@@ -100,7 +98,7 @@ const main = async () => {
 
     fs.copySync(
       path.resolve(__dirname, '../../', 'frontend'),
-      `${repoLocation}/${repoName}/packages/frontend`,
+      `${repoAbsolutePath}/packages/frontend`,
       {
         filter: (src) => {
           if (excludedFrontendDirectories.some((item) => src.includes(item))) {
@@ -118,7 +116,7 @@ const main = async () => {
 
     fs.copySync(
       path.resolve(__dirname, '../../', 'backend'),
-      `${repoLocation}/${repoName}/packages/backend`,
+      `${repoAbsolutePath}/packages/backend`,
       {
         filter: (src) => {
           if (excludedBackendDirectories.some((item) => src.includes(item))) {
@@ -132,7 +130,7 @@ const main = async () => {
   }
 
   console.log(chalk.green('📦 Installing dependencies 📦'));
-  execSync(`cd ${repoLocation}/${repoName} &&  pnpm install`, {
+  execSync(`cd ${repoAbsolutePath} &&  pnpm install`, {
     stdio: 'pipe',
   });
 
@@ -142,17 +140,14 @@ const main = async () => {
         '🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨',
       ),
     );
-    execSync(
-      `cd ${repoLocation}/${repoName}/packages/backend && pnpm generate`,
-      {
-        stdio: 'pipe',
-      },
-    );
+    execSync(`cd ${repoAbsolutePath}/packages/backend && pnpm generate`, {
+      stdio: 'pipe',
+    });
   }
 
   console.log(chalk.green('📝 Creating initial commit 📝'));
   execSync(
-    `cd ${repoLocation}/${repoName} && git add --all && git commit --message "Initial commit"`,
+    `cd ${repoAbsolutePath} && git add --all && git commit --message "Initial commit"`,
     { stdio: 'pipe' },
   );
 
