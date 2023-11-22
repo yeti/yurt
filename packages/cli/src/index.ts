@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import path from 'path';
 import { execSync } from 'child_process';
 import { prompt } from 'enquirer';
-import fs from 'fs-extra';
+import fse from 'fs-extra';
 import untildify from './utils';
 
 interface PromptInputs {
@@ -66,12 +66,12 @@ const main = async () => {
   const repoLocationAbsolutePath = untildify(repoLocation);
   const repoAbsolutePath = `${repoLocationAbsolutePath}/${repoName}`;
 
-  await fs.mkdirp(repoLocationAbsolutePath);
+  await fse.mkdirp(repoLocationAbsolutePath);
 
   const excludedRootDirectories = ['packages', 'node_modules', 'postgres'];
 
   console.log(chalk.green('📦 Creating repo 📦'));
-  fs.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
+  fse.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
     filter: (src) => {
       if (excludedRootDirectories.some((item) => src.includes(item))) {
         return false;
@@ -96,7 +96,7 @@ const main = async () => {
   if (needsFrontend) {
     const excludedFrontendDirectories = ['node_modules'];
 
-    fs.copySync(
+    fse.copySync(
       path.resolve(__dirname, '../../', 'frontend'),
       `${repoAbsolutePath}/packages/frontend`,
       {
@@ -114,7 +114,7 @@ const main = async () => {
   if (needsBackend) {
     const excludedBackendDirectories = ['node_modules'];
 
-    fs.copySync(
+    fse.copySync(
       path.resolve(__dirname, '../../', 'backend'),
       `${repoAbsolutePath}/packages/backend`,
       {
