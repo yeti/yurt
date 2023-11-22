@@ -6,9 +6,9 @@ export const handlers = [
       {
         data: {
           user: {
-            id: 'abc-123',
-            firstName: 'John',
-            lastName: 'Maverick',
+            id: 'top-gun-123',
+            name: 'Maverick',
+            email: 'talk-to-me-goose@aol.com',
           },
         },
       },
