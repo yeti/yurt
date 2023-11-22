@@ -20,12 +20,12 @@ const enableMocking = async () => {
 enableMocking().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <ApolloProvider client={apolloClient}>
-        <ThemeProvider theme={theme}>
-          <GlobalStyles styles={globalStyles} />
-          <App />
-        </ThemeProvider>
-      </ApolloProvider>
+      <GlobalStyles styles={globalStyles} />
+      <App />
     </React.StrictMode>,
   );
 });
+// <ApolloProvider client={apolloClient}>
+//   <ThemeProvider theme={theme}>
+//   </ThemeProvider>
+// </ApolloProvider>

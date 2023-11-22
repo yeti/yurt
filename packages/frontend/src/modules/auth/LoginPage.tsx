@@ -8,8 +8,6 @@ const LoginPage = () => {
   const [count, setCount] = useState(0);
   const { loading, error, data } = useQuery(GET_USER);
 
-  console.log(data);
-
   if (loading) return <p>Loading...</p>;
 
   if (error) return <p>Error : {error.message}</p>;
@@ -18,7 +16,7 @@ const LoginPage = () => {
     <Stack direction="column" component="main" height="100vh">
       <Stack direction="row" alignContent="center">
         <Stack direction="column" justifyContent="center">
-          <Typography variant="h3" fontSize="30px">
+          <Typography variant="h1" fontSize="30px">
             Login Page
           </Typography>
           <Typography variant="h3" fontSize="30px">
