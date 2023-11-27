@@ -1,6 +1,6 @@
 import React from 'react';
 import { ApolloProvider } from '@apollo/client';
-import { GlobalStyles, ThemeProvider } from '@mui/material';
+import { CssBaseline, GlobalStyles, ThemeProvider } from '@mui/material';
 import ReactDOM from 'react-dom/client';
 import App from '~/App.tsx';
 import { globalStyles } from '~/shared/styles/global';
@@ -23,6 +23,7 @@ enableMocking().then(() => {
       <ApolloProvider client={apolloClient}>
         <ThemeProvider theme={theme}>
           <GlobalStyles styles={globalStyles} />
+          <CssBaseline enableColorScheme />
           <App />
         </ThemeProvider>
       </ApolloProvider>
