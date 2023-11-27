@@ -9,6 +9,6 @@ export const globalStyles = css`
     margin: 0;
     padding: 0;
     background-color: ${theme.palette.common.white};
-    font-family: 'Source Sans 3', sans-serif;
+    font-family: sans-serif;
   }
 `;

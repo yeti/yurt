@@ -1,31 +1,9 @@
 import { CSSProperties } from 'react';
 
 declare module '@mui/material/styles' {
-  export interface Theme {
-    shape: {
-      borderRadius: {
-        10: CSSProperties['borderRadius'];
-        20: CSSProperties['borderRadius'];
-        35: CSSProperties['borderRadius'];
-        50: CSSProperties['borderRadius'];
-        100: CSSProperties['borderRadius'];
-        circle: CSSProperties['borderRadius'];
-      };
-    };
-  }
+  export interface Theme {}
 
-  export interface ThemeOptions {
-    shape: {
-      borderRadius: {
-        10: CSSProperties['borderRadius'];
-        20: CSSProperties['borderRadius'];
-        35: CSSProperties['borderRadius'];
-        50: CSSProperties['borderRadius'];
-        100: CSSProperties['borderRadius'];
-        circle: CSSProperties['borderRadius'];
-      };
-    };
-  }
+  export interface ThemeOptions {}
 
   interface PaletteColor {
     blue?: string;
