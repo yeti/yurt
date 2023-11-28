@@ -11,6 +11,10 @@ export const UserQuery = extendType({
           where: {
             id: Number(userId),
           },
+          select: {
+            id: true,
+            email: true,
+          },
         });
       },
     });

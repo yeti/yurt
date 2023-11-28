@@ -21,4 +21,5 @@ type User {
 
 input UserInput {
   email: String!
+  name: String
 }

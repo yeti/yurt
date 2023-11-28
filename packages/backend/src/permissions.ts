@@ -24,12 +24,13 @@ const shouldDebug = NODE_ENV === 'development';
 const permissions = shield(
   {
     Query: {
-      user: allow,
+      '*': allow,
     },
-    Mutation: {},
+    Mutation: {
+      '*': allow,
+    },
   },
   {
-    fallbackRule: isAuthenticated,
     allowExternalErrors: shouldDebug,
     debug: shouldDebug,
   },

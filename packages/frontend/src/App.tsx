@@ -1,24 +1,8 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import ErrorPage from '~/shared/components/ErrorPage';
-import LoginPage from '~/modules/auth/LoginPage';
-import { Box } from '@mui/material';
+import { routes } from '~/routes.tsx';
 
 const App = () => {
-  const router = createBrowserRouter([
-    {
-      path: '/',
-      element: <LoginPage />,
-      errorElement: <ErrorPage />,
-    },
-    {
-      path: '/test',
-      element: <Box>Test</Box>,
-    },
-    {
-      path: '*',
-      element: <Box>404</Box>,
-    },
-  ]);
+  const router = createBrowserRouter([...routes]);
 
   return <RouterProvider router={router} />;
 };
