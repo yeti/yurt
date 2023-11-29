@@ -21,7 +21,7 @@ const start = async () => {
   app.use(
     helmet({
       contentSecurityPolicy: {
-        // these directives are needed for the apollo sandbox
+        // these directives are required for the Apollo sandbox to work
         directives: {
           imgSrc: [
             `'self'`,
