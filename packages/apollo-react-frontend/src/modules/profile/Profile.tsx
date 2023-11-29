@@ -6,8 +6,6 @@ import { GET_USER } from '~/shared/queries';
 const Profile = () => {
   const params = useParams();
 
-  console.log(params.userId);
-
   const { loading, error, data } = useQuery(GET_USER, {
     variables: { userId: Number(params.userId) },
   });
@@ -15,8 +13,6 @@ const Profile = () => {
   if (loading) return <p>Loading...</p>;
 
   if (error) return <p>Error : {error.message}</p>;
-
-  console.log(data);
 
   return (
     <Box>
