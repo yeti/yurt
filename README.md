@@ -2,10 +2,10 @@
 
 This is a monorepo containing the Yurt CLI project scaffolding tool, in addition to several template packages representing different application types.
 
-The following application types are supported by the CLI:
+The following application types are currently supported:
 
-- Standalone React App
-- React App with Apollo + Node Apollo/Nexus GraphQL Server
+- Standalone React + Vite App
+- React + Vite App with Apollo + Node Apollo/Nexus GraphQL Server
 
 ## Getting Started
 
