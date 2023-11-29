@@ -1,18 +1,27 @@
 {
   "ts-node": {
     "files": true,
-    "require": ["tsconfig-paths/register"],
+    "require": [
+      "tsconfig-paths/register"
+    ],
     "swc": true,
     "transpileOnly": true
   },
   "compilerOptions": {
     "baseUrl": ".",
     "esModuleInterop": true,
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "outDir": "dist",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": [
+        "src/*"
+      ]
     },
-    "sourceMap": true
+    "sourceMap": true,
+    "types": [
+      "vitest/globals"
+    ]
   }
 }

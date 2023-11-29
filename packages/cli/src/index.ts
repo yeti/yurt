@@ -9,8 +9,7 @@ interface PromptInputs {
   repoName: string;
   readmeTitle: string;
   repoLocation: string;
-  needsFrontend: boolean;
-  needsBackend: boolean;
+  appType: 'react' | 'react-apollo';
 }
 
 const prompts = [
@@ -34,41 +33,41 @@ const prompts = [
     required: true,
   },
   {
-    type: 'confirm',
-    name: 'needsFrontend',
-    message: 'Does the repo need a frontend?',
-    required: true,
-  },
-  {
-    type: 'confirm',
-    name: 'needsBackend',
-    message: 'Does the repo need a backend?',
-    required: true,
+    type: 'select',
+    name: 'appType',
+    message: 'What type of app is this?',
+    choices: [
+      { name: 'React app', value: 'react' },
+      { name: 'React app + Apollo GraphQL server', value: 'react-apollo' },
+    ],
+    //TODO: type this properly
+    result(value: any): string {
+      console.log(value);
+      //@ts-ignore
+      return this.focused.value;
+    },
   },
 ];
 
 const main = async () => {
   const response: PromptInputs = await prompt(prompts);
-
   const startTime = performance.now();
 
-  const { repoName, readmeTitle, repoLocation, needsFrontend, needsBackend } =
-    response;
+  const { repoName, readmeTitle, repoLocation, appType } = response;
 
-  if (!needsFrontend && !needsBackend) {
-    console.error(
-      chalk.red('You must select at least one of frontend or backend'),
-    );
-
-    process.exit(1);
-  }
-
-  const repoLocationAbsolutePath = untildify(repoLocation);
+  const repoLocationAbsolutePath = untildify(path.resolve(repoLocation));
   const repoAbsolutePath = `${repoLocationAbsolutePath}/${repoName}`;
+
+  console.log(repoAbsolutePath);
 
   await fse.mkdirp(repoLocationAbsolutePath);
 
-  const excludedRootDirectories = ['packages', 'node_modules', 'postgres'];
+  const excludedRootDirectories = [
+    'packages',
+    'node_modules',
+    'postgres',
+    'codegen.yml',
+  ];
 
   console.log(chalk.green('📦 Creating repo 📦'));
   fse.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
@@ -93,56 +92,18 @@ const main = async () => {
     stdio: 'pipe',
   });
 
-  if (needsFrontend) {
-    const excludedFrontendDirectories = ['node_modules'];
+  console.log(response);
 
-    fse.copySync(
-      path.resolve(__dirname, '../../', 'frontend'),
-      `${repoAbsolutePath}/packages/frontend`,
-      {
-        filter: (src) => {
-          if (excludedFrontendDirectories.some((item) => src.includes(item))) {
-            return false;
-          }
-
-          return true;
-        },
-      },
-    );
-  }
-
-  if (needsBackend) {
-    const excludedBackendDirectories = ['node_modules'];
-
-    fse.copySync(
-      path.resolve(__dirname, '../../', 'backend'),
-      `${repoAbsolutePath}/packages/backend`,
-      {
-        filter: (src) => {
-          if (excludedBackendDirectories.some((item) => src.includes(item))) {
-            return false;
-          }
-
-          return true;
-        },
-      },
-    );
-  }
-
-  console.log(chalk.green('📦 Installing dependencies 📦'));
-  execSync(`cd ${repoAbsolutePath} &&  pnpm install`, {
-    stdio: 'pipe',
-  });
-
-  if (needsBackend) {
-    console.log(
-      chalk.green(
-        '🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨',
-      ),
-    );
-    execSync(`cd ${repoAbsolutePath}/packages/backend && pnpm generate`, {
-      stdio: 'pipe',
-    });
+  switch (appType) {
+    case 'react': {
+      // createReactApp(repoAbsolutePath);
+      break;
+    }
+    case 'react-apollo': {
+      createReactApolloApp(repoAbsolutePath);
+      createGraphQLServer(repoAbsolutePath);
+      break;
+    }
   }
 
   console.log(chalk.green('📝 Creating initial commit 📝'));
@@ -170,3 +131,93 @@ main().catch((error) => {
 
   process.exit(1);
 });
+
+const createReactApolloApp = (repoAbsolutePath: string) => {
+  const excludedFrontendDirectories = ['node_modules'];
+
+  fse.copySync(
+    path.resolve(__dirname, '../../', 'apollo-react-frontend'),
+    `${repoAbsolutePath}/packages/frontend`,
+    {
+      filter: (src) => {
+        if (excludedFrontendDirectories.some((item) => src.includes(item))) {
+          return false;
+        }
+
+        return true;
+      },
+    },
+  );
+
+  installDependencies(repoAbsolutePath);
+};
+
+const createGraphQLServer = (repoAbsolutePath: string) => {
+  // fse.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
+  //   filter: (src) => {
+  //     if (src === 'codegen.yml') {
+  //       return true;
+  //     }
+  //
+  //     return false;
+  //   },
+  //   dereference: true,
+  //   recursive: true,
+  // });
+
+  const excludedBackendDirectories = ['node_modules'];
+
+  fse.cpSync(
+    path.resolve(__dirname, '../../', 'backend'),
+    `${repoAbsolutePath}/packages/backend`,
+    {
+      filter: (src) => {
+        if (excludedBackendDirectories.some((item) => src.includes(item))) {
+          return false;
+        }
+
+        return true;
+      },
+      dereference: true,
+      recursive: true,
+    },
+  );
+
+  installDependencies(repoAbsolutePath);
+
+  console.log(
+    chalk.green(
+      '🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨',
+    ),
+  );
+  execSync(`cd ${repoAbsolutePath}/packages/backend && pnpm generate`, {
+    stdio: 'pipe',
+  });
+};
+
+// const createExpressServer = (repoAbsolutePath: string) => {
+//   const excludedBackendDirectories = ['node_modules'];
+//
+//   fse.copySync(
+//     path.resolve(__dirname, '../../', 'express-backend'),
+//     `${repoAbsolutePath}/packages/backend`,
+//     {
+//       filter: (src) => {
+//         if (excludedBackendDirectories.some((item) => src.includes(item))) {
+//           return false;
+//         }
+//
+//         return true;
+//       },
+//     },
+//   );
+// };
+
+// const createReactExpressApp = (repoAbsolutePath: string) => {
+
+const installDependencies = (repoAbsolutePath: string) => {
+  console.log(chalk.green('📦 Installing dependencies 📦'));
+  execSync(`cd ${repoAbsolutePath} &&  pnpm install`, {
+    stdio: 'pipe',
+  });
+};

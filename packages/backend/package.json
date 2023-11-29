@@ -9,7 +9,8 @@
     "generate:prisma": "prisma generate",
     "dev": "nodemon",
     "build": "tsc && resolve-tspaths && pnpm generate --nexusTypegen",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -44,6 +45,7 @@
     "resolve-tspaths": "^0.8.15",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
   }
 }
