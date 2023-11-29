@@ -12,15 +12,11 @@ import { createContext } from '~/context';
 import { schema } from '~/schema';
 import { NODE_ENV, PORT } from '~/config';
 import permissions from '~/permissions';
-import pino from 'pino';
-import { nanoid } from 'nanoid';
-import sentryPlugin from './apolloPlugins/sentry';
+// import sentryPlugin from '~/apolloPlugins/sentry';
+import pinoLogger from '~/apolloPlugins/logger';
 
 const start = async () => {
   const app = express();
-
-  // The request handler must be the first middleware on the app
-  // app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
   app.use(
     helmet({
@@ -49,8 +45,7 @@ const start = async () => {
     }),
   );
 
-  // app.use(Sentry.Handlers.errorHandler());
-
+  // health check endpoint
   app.get('/healthz', (_req, res) => {
     res.send('Ok');
   });
@@ -67,28 +62,7 @@ const start = async () => {
     plugins: [
       // sentryPlugin,
       ApolloServerPluginDrainHttpServer({ httpServer }),
-      {
-        requestDidStart(ctx) {
-          ctx.logger = pino({
-            requestId: nanoid(),
-            transport: {
-              target: 'pino-pretty',
-            },
-          });
-
-          ctx.logger.info({
-            operationName: ctx.request.operationName,
-            query: ctx.request.query,
-            variables: ctx.request.variables,
-          });
-
-          return {
-            didEncounterErrors({ logger, errors }) {
-              errors.forEach((error) => logger.warn(error));
-            },
-          };
-        },
-      },
+      pinoLogger,
     ],
   });
 
