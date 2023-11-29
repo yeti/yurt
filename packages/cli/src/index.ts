@@ -55,7 +55,7 @@ const main = async () => {
 
   const { repoName, readmeTitle, repoLocation, appType } = response;
 
-  const repoLocationAbsolutePath = untildify(path.resolve(repoLocation));
+  const repoLocationAbsolutePath = untildify(repoLocation);
   const repoAbsolutePath = `${repoLocationAbsolutePath}/${repoName}`;
 
   await fse.mkdirp(repoLocationAbsolutePath);
@@ -182,7 +182,7 @@ const createGraphQLServer = (repoAbsolutePath: string) => {
 const createReactApp = (repoAbsolutePath: string) => {
   const excludedFrontendDirectories = ['node_modules'];
 
-  fse.copySync(
+  fse.cpSync(
     path.resolve(__dirname, '../../', 'react-frontend'),
     `${repoAbsolutePath}/packages/frontend`,
     {
@@ -193,6 +193,8 @@ const createReactApp = (repoAbsolutePath: string) => {
 
         return true;
       },
+      recursive: true,
+      dereference: true,
     },
   );
 
