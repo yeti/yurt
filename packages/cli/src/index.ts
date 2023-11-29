@@ -65,6 +65,7 @@ const main = async () => {
     'node_modules',
     'postgres',
     'codegen.yml',
+    'README.md',
   ];
 
   console.log(chalk.green('📦 Creating repo 📦'));
