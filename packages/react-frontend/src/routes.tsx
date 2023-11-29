@@ -1,8 +1,10 @@
-import { Box } from '@mui/material';
-import { Outlet, type RouteObject } from 'react-router-dom';
+import { Box, Typography } from '@mui/material';
+import { Outlet } from 'react-router-dom';
+import type { RouteObject } from 'react-router-dom';
 import ErrorPage from '~/shared/components/ErrorPage';
 import LoginPage from '~/modules/auth/LoginPage';
 import Profile from '~/modules/profile/Profile';
+import Home from '~/modules/home/Home';
 
 const routes: RouteObject[] = [
   {
@@ -12,15 +14,15 @@ const routes: RouteObject[] = [
   },
   {
     element: (
-      <Box sx={{ backgroundColor: 'tomato' }}>
-        Test
+      <Box sx={{ backgroundColor: 'darkgray' }}>
+        <Typography>Layout</Typography>
         <Outlet />
       </Box>
     ),
     children: [
       {
         path: '/home',
-        element: <Box>Boop</Box>,
+        element: <Home />,
       },
       {
         path: '/user/:userId',

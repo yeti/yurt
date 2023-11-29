@@ -58,8 +58,6 @@ const main = async () => {
   const repoLocationAbsolutePath = untildify(path.resolve(repoLocation));
   const repoAbsolutePath = `${repoLocationAbsolutePath}/${repoName}`;
 
-  console.log(repoAbsolutePath);
-
   await fse.mkdirp(repoLocationAbsolutePath);
 
   const excludedRootDirectories = [
@@ -92,11 +90,9 @@ const main = async () => {
     stdio: 'pipe',
   });
 
-  console.log(response);
-
   switch (appType) {
     case 'react': {
-      // createReactApp(repoAbsolutePath);
+      createReactApp(repoAbsolutePath);
       break;
     }
     case 'react-apollo': {
@@ -153,18 +149,6 @@ const createReactApolloApp = (repoAbsolutePath: string) => {
 };
 
 const createGraphQLServer = (repoAbsolutePath: string) => {
-  // fse.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
-  //   filter: (src) => {
-  //     if (src === 'codegen.yml') {
-  //       return true;
-  //     }
-  //
-  //     return false;
-  //   },
-  //   dereference: true,
-  //   recursive: true,
-  // });
-
   const excludedBackendDirectories = ['node_modules'];
 
   fse.cpSync(
@@ -195,25 +179,25 @@ const createGraphQLServer = (repoAbsolutePath: string) => {
   });
 };
 
-// const createExpressServer = (repoAbsolutePath: string) => {
-//   const excludedBackendDirectories = ['node_modules'];
-//
-//   fse.copySync(
-//     path.resolve(__dirname, '../../', 'express-backend'),
-//     `${repoAbsolutePath}/packages/backend`,
-//     {
-//       filter: (src) => {
-//         if (excludedBackendDirectories.some((item) => src.includes(item))) {
-//           return false;
-//         }
-//
-//         return true;
-//       },
-//     },
-//   );
-// };
+const createReactApp = (repoAbsolutePath: string) => {
+  const excludedFrontendDirectories = ['node_modules'];
 
-// const createReactExpressApp = (repoAbsolutePath: string) => {
+  fse.copySync(
+    path.resolve(__dirname, '../../', 'react-frontend'),
+    `${repoAbsolutePath}/packages/frontend`,
+    {
+      filter: (src) => {
+        if (excludedFrontendDirectories.some((item) => src.includes(item))) {
+          return false;
+        }
+
+        return true;
+      },
+    },
+  );
+
+  installDependencies(repoAbsolutePath);
+};
 
 const installDependencies = (repoAbsolutePath: string) => {
   console.log(chalk.green('📦 Installing dependencies 📦'));

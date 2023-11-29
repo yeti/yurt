@@ -1,21 +1,14 @@
 import { Button, Stack, Typography } from '@mui/material';
-import { useQuery } from '@apollo/client';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { GET_USER } from '~/shared/queries';
 
 const LoginPage = () => {
   const [count, setCount] = useState(0);
-  const { loading, error, data } = useQuery(GET_USER);
-
-  if (loading) return <p>Loading...</p>;
-
-  if (error) return <p>Error : {error.message}</p>;
 
   return (
     <Stack direction="column" component="main" height="100vh">
       <Stack direction="row" alignContent="center">
-        <Stack direction="column" justifyContent="center">
+        <Stack direction="column" justifyContent="center" gap="10px">
           <Typography variant="h3" fontSize="30px">
             Login Page
           </Typography>
@@ -25,10 +18,9 @@ const LoginPage = () => {
           <Button variant="contained" onClick={() => setCount(count + 1)}>
             Click
           </Button>
-          <Link to="/test">Test Page</Link>
-          <Typography variant="h3" fontSize="30px">
-            {data.user.name}
-          </Typography>
+          <Button variant="contained">
+            <Link to="/home">Login</Link>
+          </Button>
         </Stack>
       </Stack>
     </Stack>
