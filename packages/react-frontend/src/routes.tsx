@@ -1,10 +1,9 @@
-import { Box, Typography } from '@mui/material';
-import { Outlet } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 import ErrorPage from '~/shared/components/ErrorPage';
 import LoginPage from '~/modules/auth/LoginPage';
-import Profile from '~/modules/profile/Profile';
 import Home from '~/modules/home/Home';
+import Layout from '~/shared/components/Layout';
+import NotFound from '~/shared/components/NotFound';
 
 const routes: RouteObject[] = [
   {
@@ -13,26 +12,17 @@ const routes: RouteObject[] = [
     errorElement: <ErrorPage />,
   },
   {
-    element: (
-      <Box sx={{ backgroundColor: 'darkgray' }}>
-        <Typography>Layout</Typography>
-        <Outlet />
-      </Box>
-    ),
+    element: <Layout />,
     children: [
       {
         path: '/home',
         element: <Home />,
       },
-      {
-        path: '/user/:userId',
-        element: <Profile />,
-      },
     ],
   },
   {
     path: '*',
-    element: <Box>404</Box>,
+    element: <NotFound />,
   },
 ];
 
