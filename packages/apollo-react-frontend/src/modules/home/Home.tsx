@@ -75,7 +75,9 @@ const Home = () => {
             />
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" variant="contained">
+          Submit
+        </Button>
       </Box>
       <Link to="/user/1">User 1</Link>
     </Box>
