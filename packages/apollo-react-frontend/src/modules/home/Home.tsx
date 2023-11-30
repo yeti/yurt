@@ -28,7 +28,7 @@ const Home = () => {
       return;
     }
 
-    const { data, errors } = await createUser({
+    const { data } = await createUser({
       variables: {
         input: {
           name: formData.name,
