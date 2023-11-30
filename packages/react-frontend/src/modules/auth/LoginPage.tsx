@@ -18,9 +18,9 @@ const LoginPage = () => {
           <Button variant="contained" onClick={() => setCount(count + 1)}>
             Click
           </Button>
-          <Button variant="contained">
-            <Link to="/home">Login</Link>
-          </Button>
+          <Link to="/home">
+            <Button variant="contained">Login</Button>
+          </Link>
         </Stack>
       </Stack>
     </Stack>
