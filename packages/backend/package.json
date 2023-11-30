@@ -10,7 +10,7 @@
     "dev": "nodemon",
     "build": "tsc && resolve-tspaths && pnpm generate --nexusTypegen",
     "test": "vitest",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node --transpileOnly prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -48,5 +48,8 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
+  },
+  "prisma": {
+    "seed": "ts-node --transpileOnly prisma/seed.ts"
   }
 }
