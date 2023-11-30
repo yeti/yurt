@@ -37,8 +37,8 @@ const prompts = [
     name: 'appType',
     message: 'What type of app is this?',
     choices: [
-      { name: 'React app', value: 'react' },
-      { name: 'React app + Apollo GraphQL server', value: 'react-apollo' },
+      { name: 'React/Vite App', value: 'react' },
+      { name: 'React/Vite App + Apollo GraphQL server', value: 'react-apollo' },
     ],
     //TODO: type this properly
     result(value: any): string {
@@ -64,9 +64,12 @@ const main = async () => {
     'packages',
     'node_modules',
     'postgres',
-    'codegen.yml',
     'README.md',
   ];
+
+  if (appType === 'react') {
+    excludedRootDirectories.push('docker-compose.yaml');
+  }
 
   console.log(chalk.green('📦 Creating repo 📦'));
   fse.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
