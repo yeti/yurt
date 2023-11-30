@@ -1,5 +1,3 @@
-import { CSSProperties } from 'react';
-
 declare module '@mui/material/styles' {
   export interface Theme {}
 
