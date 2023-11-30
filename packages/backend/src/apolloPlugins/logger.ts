@@ -7,6 +7,10 @@ const pinoLogger: ApolloServerPlugin<Context> = {
     //@ts-ignore
     ctx.logger = logger;
 
+    if (ctx.request.operationName === 'IntrospectionQuery') {
+      return;
+    }
+
     ctx.logger.info({
       operationName: ctx.request.operationName,
       query: ctx.request.query,

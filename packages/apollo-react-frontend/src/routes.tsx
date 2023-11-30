@@ -14,7 +14,7 @@ const routes: RouteObject[] = [
   },
   {
     element: (
-      <Box sx={{ backgroundColor: 'darkgray' }}>
+      <Box sx={{ backgroundColor: 'lightgrey' }}>
         <Outlet />
       </Box>
     ),
