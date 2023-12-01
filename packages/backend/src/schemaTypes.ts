@@ -9,14 +9,14 @@ export * from './schemaModules/user';
 
 export const Query = objectType({
   name: 'Query',
-  definition(t) {
+  definition() {
     null;
   },
 });
 
 export const Mutation = objectType({
   name: 'Mutation',
-  definition(t) {
+  definition() {
     null;
   },
 });
