@@ -7,13 +7,6 @@ async function main() {
     create: {
       email: 'alice@test.com',
       name: 'Alice',
-      posts: {
-        create: {
-          title: 'Check out Prisma with Next.js',
-          content: 'https://www.prisma.io/nextjs',
-          published: true,
-        },
-      },
     },
   });
 
