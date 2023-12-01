@@ -228,6 +228,12 @@ const createGraphQLServer = (repoAbsolutePath: string) => {
     },
   );
 
+  // Copy .env.example to .env
+  fse.cpSync(
+    path.resolve(__dirname, '../../', `${TEMPLATES[BACKEND]}/.env.example`),
+    `${repoAbsolutePath}/packages/backend/.env`,
+  );
+
   console.log(chalk.blue('📦 Installing backend dependencies 📦'));
   installDependencies(repoAbsolutePath);
 
