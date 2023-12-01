@@ -12,6 +12,16 @@ interface PromptInputs {
   appType: 'react' | 'react-apollo';
 }
 
+const REACT = 'react';
+const REACT_APOLLO = 'react-apollo';
+const BACKEND = 'backend';
+
+const TEMPLATES = {
+  [BACKEND]: 'backend',
+  [REACT]: 'react-frontend',
+  [REACT_APOLLO]: 'apollo-react-frontend',
+};
+
 const prompts = [
   {
     type: 'input',
@@ -37,12 +47,12 @@ const prompts = [
     name: 'appType',
     message: 'What type of app is this?',
     choices: [
-      { name: 'React/Vite App', value: 'react' },
-      { name: 'React/Vite App + Apollo GraphQL server', value: 'react-apollo' },
+      { name: 'React/Vite App', value: REACT },
+      { name: 'React/Vite App + Apollo GraphQL server', value: REACT_APOLLO },
     ],
-    //TODO: type this properly
-    result(value: any): string {
-      console.log(value);
+    result(_value: string): string {
+      // This makes it so that the choice value is returned for appType,
+      // instead of the choice name which is the default behavior
       //@ts-ignore
       return this.focused.value;
     },
@@ -51,6 +61,7 @@ const prompts = [
 
 const main = async () => {
   const response: PromptInputs = await prompt(prompts);
+
   const startTime = performance.now();
 
   const { repoName, readmeTitle, repoLocation, appType } = response;
@@ -67,11 +78,11 @@ const main = async () => {
     'README.md',
   ];
 
-  if (appType === 'react') {
+  if (appType === REACT) {
     excludedRootDirectories.push('docker-compose.yaml');
   }
 
-  console.log(chalk.green('📦 Creating repo 📦'));
+  console.log(chalk.green('🍳 Creating repo 🍳'));
   fse.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
     filter: (src) => {
       if (excludedRootDirectories.some((item) => src.includes(item))) {
@@ -95,11 +106,11 @@ const main = async () => {
   });
 
   switch (appType) {
-    case 'react': {
+    case REACT: {
       createReactApp(repoAbsolutePath);
       break;
     }
-    case 'react-apollo': {
+    case REACT_APOLLO: {
       createReactApolloApp(repoAbsolutePath);
       createGraphQLServer(repoAbsolutePath);
       break;
@@ -136,7 +147,7 @@ const createReactApolloApp = (repoAbsolutePath: string) => {
   const excludedFrontendDirectories = ['node_modules'];
 
   fse.copySync(
-    path.resolve(__dirname, '../../', 'apollo-react-frontend'),
+    path.resolve(__dirname, '../../', TEMPLATES[REACT_APOLLO]),
     `${repoAbsolutePath}/packages/frontend`,
     {
       filter: (src) => {
@@ -149,6 +160,7 @@ const createReactApolloApp = (repoAbsolutePath: string) => {
     },
   );
 
+  console.log(chalk.blue('📦 Installing frontend dependencies 📦'));
   installDependencies(repoAbsolutePath);
 };
 
@@ -156,7 +168,7 @@ const createGraphQLServer = (repoAbsolutePath: string) => {
   const excludedBackendDirectories = ['node_modules'];
 
   fse.cpSync(
-    path.resolve(__dirname, '../../', 'backend'),
+    path.resolve(__dirname, '../../', TEMPLATES[BACKEND]),
     `${repoAbsolutePath}/packages/backend`,
     {
       filter: (src) => {
@@ -171,23 +183,29 @@ const createGraphQLServer = (repoAbsolutePath: string) => {
     },
   );
 
+  console.log(chalk.blue('📦 Installing backend dependencies 📦'));
   installDependencies(repoAbsolutePath);
 
   console.log(
-    chalk.green(
+    chalk.blue(
       '🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨',
     ),
   );
   execSync(`cd ${repoAbsolutePath}/packages/backend && pnpm generate`, {
     stdio: 'pipe',
   });
+  console.log(
+    chalk.green(
+      '✅ Prisma schema, GraphQL schema, and GraphQL types generated ✅',
+    ),
+  );
 };
 
 const createReactApp = (repoAbsolutePath: string) => {
   const excludedFrontendDirectories = ['node_modules'];
 
   fse.cpSync(
-    path.resolve(__dirname, '../../', 'react-frontend'),
+    path.resolve(__dirname, '../../', TEMPLATES[REACT]),
     `${repoAbsolutePath}/packages/frontend`,
     {
       filter: (src) => {
@@ -202,12 +220,13 @@ const createReactApp = (repoAbsolutePath: string) => {
     },
   );
 
+  console.log(chalk.blue('📦 Installing frontend dependencies 📦'));
   installDependencies(repoAbsolutePath);
 };
 
 const installDependencies = (repoAbsolutePath: string) => {
-  console.log(chalk.green('📦 Installing dependencies 📦'));
   execSync(`cd ${repoAbsolutePath} &&  pnpm install`, {
     stdio: 'pipe',
   });
+  console.log(chalk.green('✅ Dependencies installed ✅'));
 };

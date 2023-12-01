@@ -1,6 +1,5 @@
 import { Box, Button, TextField } from '@mui/material';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { Link } from 'react-router-dom';
 
 interface FormData {
   email: string;
@@ -62,7 +61,6 @@ const Home = () => {
           Submit
         </Button>
       </Box>
-      <Link to="/user/1">User 1</Link>
     </Box>
   );
 };
