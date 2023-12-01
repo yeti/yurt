@@ -11,8 +11,7 @@ The following application types are currently supported:
 
 1. Make sure you have `pnpm` version 8+ installed. You can find installation instructions [here](https://pnpm.io/installation).
 2. From `packages/cli` run `pnpm install`.
-3. From `packages/cli` run `pnpm build`.
-4. From `packages/cli` run `pnpm start` and answer the prompts.
+3. From `packages/cli` run `pnpm yurt` and answer the prompts.
 
 ## Current Templates
 
