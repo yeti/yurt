@@ -5,21 +5,14 @@ import { prompt } from 'enquirer';
 import fse from 'fs-extra';
 import untildify from './utils';
 
-interface PromptInputs {
-  repoName: string;
-  readmeTitle: string;
-  repoLocation: string;
-  appType: 'react' | 'react-apollo';
-}
-
 const REACT = 'react';
 const REACT_APOLLO = 'react-apollo';
 const BACKEND = 'backend';
 
 const TEMPLATES = {
   [BACKEND]: 'backend',
-  [REACT]: 'react-frontend',
-  [REACT_APOLLO]: 'apollo-react-frontend',
+  [REACT]: 'react',
+  [REACT_APOLLO]: 'react-apollo',
 };
 
 const prompts = [
@@ -47,7 +40,7 @@ const prompts = [
     name: 'appType',
     message: 'What type of app is this?',
     choices: [
-      { name: 'React/Vite App', value: REACT },
+      { name: 'Standalone React/Vite App', value: REACT },
       { name: 'React/Vite App + Apollo GraphQL server', value: REACT_APOLLO },
     ],
     result(_value: string): string {
@@ -58,6 +51,13 @@ const prompts = [
     },
   },
 ];
+
+interface PromptInputs {
+  repoName: string;
+  readmeTitle: string;
+  repoLocation: string;
+  appType: 'react' | 'react-apollo';
+}
 
 const main = async () => {
   const response: PromptInputs = await prompt(prompts);
@@ -83,6 +83,7 @@ const main = async () => {
   }
 
   console.log(chalk.green('🍳 Creating repo 🍳'));
+  // Copy monorepo root files
   fse.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
     filter: (src) => {
       if (excludedRootDirectories.some((item) => src.includes(item))) {
@@ -95,16 +96,55 @@ const main = async () => {
     recursive: true,
   });
 
+  // Initialize git repo
   execSync(`cd ${repoAbsolutePath} && rm -rf .git && git init .`, {
     stdio: 'pipe',
   });
 
-  //TODO: add README template
   // Create root readme
-  execSync(`echo "# ${readmeTitle}" >> ${repoAbsolutePath}/README.md`, {
-    stdio: 'pipe',
-  });
+  await fse.appendFile(
+    `${repoAbsolutePath}/README.md`,
+    `# ${readmeTitle}
 
+> A monorepo managed through [lerna](https://github.com/lerna/lerna) that houses packages related to the ${readmeTitle} project.
+
+## Getting Started
+
+### Install node
+
+\`\`\`bash
+nvm install 18.18.2
+\`\`\`
+
+The \`.nvmrc\` file in the root of this project should default to node 18.12 if you run \`nvm use\`.
+Confirm that this is the case by running \`node --version\` on the command line.
+
+### Install pnpm
+
+Follow the [pnpm installation instructions](https://pnpm.io/installation).
+
+### Install dependencies
+
+We use [pnpm workspaces](https://pnpm.io/workspaces), which allows for dependency sharing between packages. This allows us to just do a single install at the root folder.
+
+\`\`\`bash
+pnpm install
+\`\`\`
+
+## Deployments
+
+We use Render to handle deployments.
+
+### Staging Deploy
+
+Staging deploys are started automatically when a commit is merged into the \`develop\` branch.
+
+### Production Deploy
+
+Production deploys are started automatically when a commit is merged into the \`main\` branch. Merge with caution!`,
+  );
+
+  // Create application packages
   switch (appType) {
     case REACT: {
       createReactApp(repoAbsolutePath);
@@ -119,7 +159,12 @@ const main = async () => {
 
   console.log(chalk.green('📝 Creating initial commit 📝'));
   execSync(
-    `cd ${repoAbsolutePath} && git add --all && git commit --message "Initial commit"`,
+    `
+    cd ${repoAbsolutePath} && 
+    git add --all && 
+    git commit --message "Initial commit" && 
+    git branch -M main && 
+    git branch develop`,
     { stdio: 'pipe' },
   );
 

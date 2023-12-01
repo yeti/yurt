@@ -4,8 +4,8 @@ This is a monorepo containing the Yurt CLI project scaffolding tool, in addition
 
 The following application types are currently supported:
 
-- Standalone React + Vite App
-- React + Vite App with Apollo + Node Apollo/Nexus GraphQL Server
+- Standalone React/Vite App
+- React/Vite App + Node Apollo GraphQL Server
 
 ## Getting Started
 
@@ -13,3 +13,9 @@ The following application types are currently supported:
 2. From `packages/cli` run `pnpm install`.
 3. From `packages/cli` run `pnpm build`.
 4. From `packages/cli` run `pnpm start` and answer the prompts.
+
+## Current Templates
+
+### React/Vite App
+
+### React/Vite App + Node Apollo GraphQL Server
