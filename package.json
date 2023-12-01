@@ -1,18 +1,20 @@
 {
   "name": "yurt",
-  "vertion": "1.0.0",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev --no-cache --parallel --continue",
-    "lint": "turbo run lint"
+    "prepare": "husky install"
   },
+  "keywords": [],
+  "author": "",
   "devDependencies": {
-    "eslint": "^8.20.0",
-    "turbo": "^1.3.4"
+    "husky": "^8.0.3",
+    "lerna": "^8.0.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
   },
-  "packageManager": "yarn@1.22.19"
+  "lint-staged": {
+    "*.{ts,js,tsx,jsx,css,md}": "prettier --write"
+  }
 }
