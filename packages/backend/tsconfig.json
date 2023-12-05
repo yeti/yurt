@@ -1,18 +1,21 @@
 {
   "ts-node": {
-    "transpileOnly": true,
-    "swc": true
+    "files": true,
+    "require": ["tsconfig-paths/register"],
+    "swc": true,
+    "transpileOnly": true
   },
   "compilerOptions": {
-    "lib": ["es2021", "dom"],
-    "module": "esnext",
-    "target": "esnext",
-    "strict": true,
+    "baseUrl": ".",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "lib": ["esnext"],
+    "module": "commonjs",
+    "outDir": "dist",
+    "paths": {
+      "~/*": ["src/*"]
+    },
     "sourceMap": true,
-    "outDir": "dist"
+    "target": "esnext",
+    "types": ["vitest/globals", "@types/nexus-typegen"]
   }
 }
