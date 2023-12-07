@@ -1,0 +1,21 @@
+{
+  "ts-node": {
+    "files": true,
+    "require": ["tsconfig-paths/register"],
+    "swc": true,
+    "transpileOnly": true
+  },
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "lib": ["esnext"],
+    "module": "commonjs",
+    "outDir": "dist",
+    "paths": {
+      "~/*": ["src/*"]
+    },
+    "sourceMap": true,
+    "target": "esnext",
+    "types": ["vitest/globals", "@types/nexus-typegen"]
+  }
+}

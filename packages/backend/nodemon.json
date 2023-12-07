@@ -1,0 +1,14 @@
+{
+  "restartable": "rs",
+  "ignore": [
+    ".git",
+    "node_modules/**/node_modules",
+    "dist/**/*",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "execMap": {
+    "ts": "node --inspect --loader ts-node/esm src/server.ts"
+  },
+  "ext": "ts,js,json"
+}
