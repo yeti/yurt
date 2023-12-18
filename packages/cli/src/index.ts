@@ -26,6 +26,7 @@ const prompts = [
     type: 'input',
     name: 'readmeTitle',
     message: 'What should the readme title be? (i.e. project name)',
+    initial: 'README',
     required: true,
   },
   {
