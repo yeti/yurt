@@ -33,7 +33,7 @@ const prompts = [
     type: 'input',
     name: 'repoLocation',
     message: 'Where should the repo be created? (absolute or relative path)',
-    initial: '.',
+    initial: '~',
     required: true,
   },
   {
@@ -206,6 +206,16 @@ const createReactApolloApp = (repoAbsolutePath: string) => {
     },
   );
 
+  // Copy .env.example to .env
+  fse.cpSync(
+    path.resolve(
+      __dirname,
+      '../../',
+      `${TEMPLATES[REACT_APOLLO]}/.env.example`,
+    ),
+    `${repoAbsolutePath}/packages/frontend/.env`,
+  );
+
   console.log(chalk.blue('📦 Installing frontend dependencies 📦'));
   installDependencies(repoAbsolutePath);
 };
@@ -270,6 +280,12 @@ const createReactApp = (repoAbsolutePath: string) => {
       recursive: true,
       dereference: true,
     },
+  );
+
+  // Copy .env.example to .env
+  fse.cpSync(
+    path.resolve(__dirname, '../../', `${TEMPLATES[REACT]}/.env.example`),
+    `${repoAbsolutePath}/packages/frontend/.env`,
   );
 
   console.log(chalk.blue('📦 Installing frontend dependencies 📦'));
