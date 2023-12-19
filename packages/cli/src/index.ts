@@ -33,7 +33,7 @@ const prompts = [
     type: 'input',
     name: 'repoLocation',
     message: 'Where should the repo be created? (absolute or relative path)',
-    initial: '.',
+    initial: '~',
     required: true,
   },
   {
