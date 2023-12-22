@@ -16,6 +16,6 @@
     },
     "sourceMap": true,
     "target": "esnext",
-    "types": ["vitest/globals", "@types/nexus-typegen"]
+    "types": ["@types/nexus-typegen", "@types/jest"]
   }
 }
