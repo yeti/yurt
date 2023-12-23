@@ -11,6 +11,7 @@
     "lib": ["esnext"],
     "module": "commonjs",
     "outDir": "dist",
+    "rootDir": "../backend",
     "paths": {
       "~/*": ["src/*"]
     },
