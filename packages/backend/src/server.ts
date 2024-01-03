@@ -18,6 +18,12 @@ const start = async () => {
   const app = express();
 
   app.use(
+    cors({
+      exposedHeaders: ['Authorization'],
+    }),
+  );
+
+  app.use(
     helmet({
       contentSecurityPolicy: {
         // these directives are required for the Apollo sandbox to work
@@ -35,12 +41,6 @@ const start = async () => {
           frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
         },
       },
-    }),
-  );
-
-  app.use(
-    cors({
-      exposedHeaders: ['Authorization'],
     }),
   );
 
