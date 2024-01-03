@@ -7,6 +7,8 @@
     "generate": "pnpm generate:prisma && pnpm generate:nexus",
     "generate:nexus": "ts-node --transpileOnly src/schema.ts",
     "generate:prisma": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "migrate:create": "pnpm prisma migrate dev --create-only",
     "dev": "nodemon",
     "lint": "eslint --ext .ts src",
     "build": "tsc && resolve-tspaths && pnpm generate --nexusTypegen",
