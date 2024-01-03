@@ -10,6 +10,8 @@
 
 ## Updating Models
 
+After updating the schema in `packages/backend/prisma/schema.prisma`, you'll need to run the following commands from `packages/backend` to update the Prisma and Nexus schemas:
+
 1. `pnpm generate:prisma`
 2. `pnpm migrate:create`
 3. `pnpm migrate`
