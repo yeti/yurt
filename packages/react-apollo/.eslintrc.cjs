@@ -1,8 +1,8 @@
 module.exports = {
-  plugins: ['@typescript-eslint', 'react', '@stylistic'],
+  plugins: ['@typescript-eslint', 'react', 'unicorn'],
   env: {
     browser: true,
-    es2021: true,
+    es2024: true,
   },
   extends: [
     'eslint:recommended',
@@ -29,6 +29,7 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'no-console': 'error',
     curly: 'error',
+    'unicorn/switch-case-braces': 'error',
   },
   settings: {
     react: {
