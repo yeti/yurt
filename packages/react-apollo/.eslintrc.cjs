@@ -31,6 +31,7 @@ module.exports = {
     curly: 'error',
     'unicorn/switch-case-braces': 'error',
     'no-nested-ternary': 'error',
+    radix: 'error',
   },
   settings: {
     react: {
