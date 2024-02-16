@@ -1,4 +1,5 @@
 module.exports = {
+  plugins: ['@typescript-eslint', 'react'],
   env: {
     browser: true,
     es2021: true,
@@ -24,10 +25,10 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'react'],
   rules: {
     'react/react-in-jsx-scope': 'off',
     'no-console': 'error',
+    curly: 'error',
   },
   settings: {
     react: {

@@ -23,5 +23,6 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/ban-ts-comment': 'off',
+    curly: 'error',
   },
 };
