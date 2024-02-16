@@ -30,6 +30,7 @@ module.exports = {
     'no-console': 'error',
     curly: 'error',
     'unicorn/switch-case-braces': 'error',
+    'no-nested-ternary': 'error',
   },
   settings: {
     react: {

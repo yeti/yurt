@@ -24,5 +24,6 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 'off',
     curly: 'error',
     'unicorn/switch-case-braces': 'error',
+    'no-nested-ternary': 'error',
   },
 };
