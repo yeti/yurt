@@ -25,3 +25,10 @@ If you are developing a production application, we recommend updating the config
 - Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+
+## Deploying to Render
+
+When deploying to Render, you'll need to add some environment variables to the Render service:
+
+- `HUSKY="0"` to disable Husky
+- `SKIP_INSTALL_DEPS="true"` to prevent Render from using `npm` to install dependencies. This is necessary because Render uses `npm` to install dependencies by default, but this project uses `pnpm` to manage dependencies.
