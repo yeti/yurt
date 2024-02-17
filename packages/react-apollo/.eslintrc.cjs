@@ -1,7 +1,8 @@
 module.exports = {
+  plugins: ['@typescript-eslint', 'react', 'unicorn'],
   env: {
     browser: true,
-    es2021: true,
+    es2024: true,
   },
   extends: [
     'eslint:recommended',
@@ -24,9 +25,13 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'react'],
   rules: {
     'react/react-in-jsx-scope': 'off',
+    'no-console': 'error',
+    curly: 'error',
+    'unicorn/switch-case-braces': 'error',
+    'no-nested-ternary': 'error',
+    radix: 'error',
   },
   settings: {
     react: {
