@@ -2717,30 +2717,6 @@ packages:
     dev: true
     optional: true
 
-  /@swc/core@1.3.99:
-    resolution: {integrity: sha512-8O996RfuPC4ieb4zbYMfbyCU9k4gSOpyCNnr7qBQ+o7IEmh8JCV6B8wwu+fT/Om/6Lp34KJe1IpJ/24axKS6TQ==}
-    engines: {node: '>=10'}
-    requiresBuild: true
-    peerDependencies:
-      '@swc/helpers': ^0.5.0
-    peerDependenciesMeta:
-      '@swc/helpers':
-        optional: true
-    dependencies:
-      '@swc/counter': 0.1.2
-      '@swc/types': 0.1.5
-    optionalDependencies:
-      '@swc/core-darwin-arm64': 1.3.99
-      '@swc/core-darwin-x64': 1.3.99
-      '@swc/core-linux-arm64-gnu': 1.3.99
-      '@swc/core-linux-arm64-musl': 1.3.99
-      '@swc/core-linux-x64-gnu': 1.3.99
-      '@swc/core-linux-x64-musl': 1.3.99
-      '@swc/core-win32-arm64-msvc': 1.3.99
-      '@swc/core-win32-ia32-msvc': 1.3.99
-      '@swc/core-win32-x64-msvc': 1.3.99
-    dev: true
-
   /@swc/core@1.3.99(@swc/helpers@0.5.3):
     resolution: {integrity: sha512-8O996RfuPC4ieb4zbYMfbyCU9k4gSOpyCNnr7qBQ+o7IEmh8JCV6B8wwu+fT/Om/6Lp34KJe1IpJ/24axKS6TQ==}
     engines: {node: '>=10'}
@@ -3274,7 +3250,7 @@ packages:
     peerDependencies:
       vite: ^4 || ^5
     dependencies:
-      '@swc/core': 1.3.99
+      '@swc/core': 1.3.99(@swc/helpers@0.5.3)
       vite: 5.0.10(@types/node@20.10.1)
     transitivePeerDependencies:
       - '@swc/helpers'
