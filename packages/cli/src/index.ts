@@ -114,10 +114,10 @@ const main = async () => {
 ### Install node
 
 \`\`\`bash
-nvm install 18.18.2
+nvm install 20.11
 \`\`\`
 
-The \`.nvmrc\` file in the root of this project should default to node 18.12 if you run \`nvm use\`.
+The \`.nvmrc\` file in the root of this project should default to node 20.11 if you run \`nvm use\`.
 Confirm that this is the case by running \`node --version\` on the command line.
 
 ### Install pnpm
