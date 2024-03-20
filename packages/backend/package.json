@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "description": "",
   "main": "server.ts",
+  "type": "module",
   "scripts": {
     "generate": "pnpm generate:prisma && pnpm generate:nexus",
-    "generate:nexus": "ts-node --transpileOnly src/schema.ts",
+    "generate:nexus": "tsx src/schema.ts",
     "generate:prisma": "prisma generate",
     "migrate": "prisma migrate dev",
     "migrate:create": "pnpm prisma migrate dev --create-only",
