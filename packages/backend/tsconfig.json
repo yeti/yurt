@@ -1,15 +1,10 @@
 {
-  "ts-node": {
-    "files": true,
-    "require": ["tsconfig-paths/register"],
-    "swc": true,
-    "transpileOnly": true
-  },
   "compilerOptions": {
     "baseUrl": ".",
     "esModuleInterop": true,
     "lib": ["esnext"],
-    "module": "commonjs",
+    "module": "es2022",
+    "moduleResolution": "node",
     "outDir": "dist",
     "rootDir": "../backend",
     "paths": {
