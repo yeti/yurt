@@ -16,3 +16,21 @@ After updating the schema in `packages/backend/prisma/schema.prisma`, you'll nee
 2. `pnpm migrate:create`
 3. `pnpm migrate`
 4. `pnpm generate:nexus`
+
+## Deploying to Render
+
+When deploying the backend to Render, you will first need to create a PostgreSQL database for your backend to connnect to.
+
+Upon creation of the database, you will then create a web service for the backend. The prompts should be filled in as follows:
+
+Branch: `develop` or `main` depending on whether this is for staging or production,
+
+Root Directory: `packages/backend`
+
+Build Command: `pnpm install; pnpm generate; pnpm build; pnpm prisma migrate deploy;`
+
+Start Command: `node dist/src/server.js`
+
+Generally speaking we can select the `Starter` plan unless otherwise specified by the projects needs.
+
+Add any required env variables including the `DATABASE_URL` from the database you created earlier.
