@@ -1,0 +1,5 @@
+{
+  "watch": ["src/schemaTypes.ts", "src/schemaModules/**/*"],
+  "exec": "ts-node --transpile-only src/schema.ts",
+  "ext": "ts"
+}
