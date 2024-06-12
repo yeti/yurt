@@ -27,7 +27,7 @@ importers:
         specifier: ^4.9.5
         version: 4.9.5(graphql@16.8.1)
       '@prisma/client':
-        specifier: 5.11.0
+        specifier: ^5.11.0
         version: 5.11.0(prisma@5.11.0)
       '@sentry/node':
         specifier: ^7.80.1
