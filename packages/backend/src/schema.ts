@@ -13,7 +13,7 @@ export const schema = makeSchema({
     schema: path.join(__dirname, '/../schema.graphql'),
     typegen: path.join(
       __dirname,
-      '../node_modules/@types/nexus-typegen/index.d.ts',
+      './shared/types/gen/nexus-typegen/index.d.ts',
     ),
   },
   ...(NODE_ENV === 'development' && {
