@@ -8,6 +8,8 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+    'plugin:prettier/recommended', // Make sure this is always the last entry in list
   ],
   overrides: [
     {
