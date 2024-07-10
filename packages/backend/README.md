@@ -27,7 +27,7 @@ Branch: `develop` or `main` depending on whether this is for staging or producti
 
 Root Directory: `packages/backend`
 
-Build Command: `pnpm install; pnpm generate; pnpm build; pnpm prisma migrate deploy;`
+Build Command: `pnpm build;`
 
 Start Command: `node dist/src/server.js`
 
