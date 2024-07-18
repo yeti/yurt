@@ -19,7 +19,7 @@ describe('createUser', () => {
     const uniqueEmail = `john${Date.now()}@test.com`;
     const mutationData = {
       query: `
-      mutation Mutation($input: UserInput!) {
+      mutation CreateUser($input: UserInput!) {
         createUser(input: $input) {
           email
           name
