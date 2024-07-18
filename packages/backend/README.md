@@ -17,6 +17,14 @@ After updating the schema in `packages/backend/prisma/schema.prisma`, you'll nee
 3. `pnpm migrate`
 4. `pnpm generate:nexus`
 
+## Tests
+
+[Jest](https://jestjs.io/) is used for unit and integration testing.
+In order to run integration tests, you'll need to run the following commands from `packages/backend`:
+
+1. `pnpm db:test:start`
+2. `pnpm test`
+
 ## Deploying to Render
 
 When deploying the backend to Render, you will first need to create a PostgreSQL database for your backend to connnect to.

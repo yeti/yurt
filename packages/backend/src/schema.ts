@@ -4,21 +4,20 @@ import * as types from '~/schemaTypes';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const directoryPath = path.dirname(fileURLToPath(import.meta.url));
 
 export const schema = makeSchema({
   types,
   outputs: {
-    schema: path.join(__dirname, '/../schema.graphql'),
+    schema: path.join(directoryPath, '/../schema.graphql'),
     typegen: path.join(
-      __dirname,
+      directoryPath,
       './shared/types/gen/nexus-typegen/index.d.ts',
     ),
   },
   ...(NODE_ENV === 'development' && {
     contextType: {
-      module: path.join(__dirname, 'context.ts'),
+      module: path.join(directoryPath, 'context.ts'),
       export: 'Context',
     },
   }),
