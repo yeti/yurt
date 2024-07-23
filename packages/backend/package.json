@@ -18,7 +18,7 @@
     "seed": "tsx prisma/seed.ts",
     "run-test": "DATABASE_URL=postgresql://prisma:prisma@localhost:5434/tests jest --runInBand",
     "migrate:test": "DATABASE_URL=postgresql://prisma:prisma@localhost:5434/tests pnpm prisma migrate dev",
-    "db:test:start": "docker-compose -f ../../docker-compose.jest.yml down && docker-compose -f ../../docker-compose.jest.yml up -d"
+    "db:test:start": "docker-compose -p test -f ../../docker-compose.jest.yml down && docker-compose -p test -f ../../docker-compose.jest.yml up -d"
   },
   "keywords": [],
   "author": "",
