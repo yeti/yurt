@@ -3,20 +3,20 @@ import { NODE_ENV } from '~/config';
 import * as types from '~/schemaTypes';
 import path from 'path';
 
-const rootDir = process.cwd();
+const packageRootDir = process.cwd();
 
 export const schema = makeSchema({
   types,
   outputs: {
-    schema: path.join(rootDir, '/schema.graphql'),
+    schema: path.join(packageRootDir, '/schema.graphql'),
     typegen: path.join(
-      rootDir,
+      packageRootDir,
       '/src/shared/types/gen/nexus-typegen/index.d.ts',
     ),
   },
   ...(NODE_ENV === 'development' && {
     contextType: {
-      module: path.join(rootDir, '/src/context.ts'),
+      module: path.join(packageRootDir, '/src/context.ts'),
       export: 'Context',
     },
   }),
