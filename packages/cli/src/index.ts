@@ -81,6 +81,7 @@ const main = async () => {
 
   if (appType === REACT) {
     excludedRootDirectories.push('docker-compose.yaml');
+    excludedRootDirectories.push('docker-compose.jest.yml');
   }
 
   console.log(chalk.green('🍳 Creating repo 🍳'));
@@ -161,10 +162,10 @@ Production deploys are started automatically when a commit is merged into the \`
   console.log(chalk.green('📝 Creating initial commit 📝'));
   execSync(
     `
-    cd ${repoAbsolutePath} && 
-    git add --all && 
-    git commit --message "Initial commit" && 
-    git branch -M main && 
+    cd ${repoAbsolutePath} &&
+    git add --all &&
+    git commit --message "Initial commit" &&
+    git branch -M main &&
     git branch develop`,
     { stdio: 'pipe' },
   );
