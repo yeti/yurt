@@ -19,6 +19,8 @@ const Home = () => {
   });
 
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
+    // disable eslint for console.log
+    // eslint-disable-next-line no-console
     console.log(formData);
   };
 
