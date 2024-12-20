@@ -10,7 +10,7 @@ const getStorageObject = (type: StorageType) => {
 const useBrowserStorage = <T,>(
   key: string,
   initialValue: T,
-  storageType: StorageType = 'localStorage',
+  storageType: StorageType,
 ) => {
   const storage = getStorageObject(storageType);
   const cachedValue = useRef<T>(initialValue);
