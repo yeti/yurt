@@ -1,7 +1,7 @@
 import { LocalStorageKeys } from '~/shared/constants';
 import { useBrowserStorage } from './useBrowserStorage';
 
-export const useLocalStorage = <T,>(key: string, initialValue: T) => {
+const useLocalStorage = <T,>(key: string, initialValue: T) => {
   return useBrowserStorage(key, initialValue, 'localStorage');
 };
 
