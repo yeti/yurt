@@ -45,10 +45,10 @@ export const useBrowserStorage = <T,>(
 
   const setValue = (value: T | ((prev: T) => T)) => {
     try {
-      const currentValue = getSnapshot();
+      const currentValue = cachedValue.current;
       const newValue = value instanceof Function ? value(currentValue) : value;
 
-      window.sessionStorage.setItem(key, JSON.stringify(newValue));
+      storage.setItem(key, JSON.stringify(newValue));
       cachedValue.current = newValue;
 
       window.dispatchEvent(
