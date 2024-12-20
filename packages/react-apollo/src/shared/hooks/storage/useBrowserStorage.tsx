@@ -1,5 +1,5 @@
 import { useSyncExternalStore, useRef } from 'react';
-import { IS_DEV } from '../constants';
+import { IS_DEV } from '../../constants';
 
 type StorageType = 'localStorage' | 'sessionStorage';
 
@@ -7,7 +7,7 @@ const getStorageObject = (type: StorageType) => {
   return type === 'localStorage' ? window.localStorage : window.sessionStorage;
 };
 
-const useBrowserStorage = <T,>(
+export const useBrowserStorage = <T,>(
   key: string,
   initialValue: T,
   storageType: StorageType,
@@ -66,15 +66,3 @@ const useBrowserStorage = <T,>(
 
   return [value, setValue] as const;
 };
-
-// Convenience hooks to instantiate either a localStorage or sessionStorage
-// hook
-export const useLocalStorage = <T,>(key: string, initialValue: T) => {
-  return useBrowserStorage(key, initialValue, 'localStorage');
-};
-
-export const useSessionStorage = <T,>(key: string, initialValue: T) => {
-  return useBrowserStorage(key, initialValue, 'sessionStorage');
-};
-
-export default useBrowserStorage;
