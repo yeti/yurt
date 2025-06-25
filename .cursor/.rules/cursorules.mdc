@@ -24,13 +24,13 @@ Code Style and Structure
 
 Naming Conventions
 
-- Use lowercase with dashes for directories (e.g., components/auth-wizard).
+- Use PascalCase for React components (e.g., components/AuthWizard).
 - Favor named exports for components.
 
 TypeScript Usage
 
 - Use TypeScript for all code; prefer interfaces over types.
-- Avoid enums; use maps instead.
+- use enums where possible
 - Use functional components with TypeScript interfaces.
 
 Syntax and Formatting
