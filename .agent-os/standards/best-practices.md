@@ -18,11 +18,14 @@ ELSE:
 - Implement code in the fewest lines possible
 - Avoid over-engineering solutions
 - Choose straightforward approaches over clever ones
+- Avoid redundant layers of abstraction
 
 ### Optimize for Readability
 
 - Prioritize code clarity over micro-optimizations
-- Write self-documenting code with clear variable names
+- Write self-documenting code with clear, descriptive variable names. Avoid
+  single-letter abbreviations (e.g., x, y, i) unless they are conventional in
+  context (such as loop counters or mathematical formulas).
 - Add comments for "why" not "what"
 
 ### DRY (Don't Repeat Yourself)

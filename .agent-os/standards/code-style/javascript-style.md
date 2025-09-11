@@ -16,3 +16,5 @@ npx lint-staged
 **Never** use the `any` type to bypass the TypeScript compiler. If you are
 unable to determine the correct type for a value, stop and prompt the developer
 for help.
+
+**Never** nest ternary functions.

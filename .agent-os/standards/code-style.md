@@ -42,6 +42,7 @@ ELSE:
 - Never remove existing comments unless removing the associated code
 - Update comments when modifying code to maintain accuracy
 - Keep comments concise and relevant
+- Never use comments as section markers in React trees (TSX or JSX)
   </conditional-block>
 
 <conditional-block task-condition="html-css-tailwind" context-check="html-css-style">
