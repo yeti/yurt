@@ -1,0 +1,44 @@
+version: 2.0.3
+base_install: true
+
+# ================================================
+# MULTI-AGENT MODE
+#
+# Use this mode if you're using a tool that supports multiple agents (a.k.a. subagents).
+# In multi-agent mode, you initiate commands (new-spec, create-spec, implement-spec, etc.)
+# your main agent orchestrates multiple subagents to perform long-running tasks autonomously.
+#
+# You can override this by running:
+# ~/.agent-os/scripts/project-install.sh --multi-agent-mode [true/false] --multi-agent-tool [tool-name]
+# ================================================
+
+multi_agent_mode: true
+
+# Currently supported tools: claude-code
+multi_agent_tool: claude-code
+
+
+# ================================================
+# SINGLE-AGENT MODE
+#
+# Use this mode if you're using a tool that doesn't support multiple agents (a.k.a. subagents).
+# In single-agent mode, you deliver prompts to your main agent to perform tasks step-by-step.
+#
+# You can override this by running:
+# ~/.agent-os/scripts/project-install.sh --single-agent-mode [true/false] --single-agent-tool [tool-name]
+# ================================================
+
+single_agent_mode: false
+single_agent_tool: generic
+
+
+# ================================================
+# PROFILE
+#
+# Use this profile by default.
+#
+# You can override this by running:
+# ~/.agent-os/scripts/project-install.sh --profile [profile-name]
+# ================================================
+
+profile: default
