@@ -1,0 +1,12 @@
+---
+description: Requirements for loading and error states in async flows
+globs:
+alwaysApply: true
+---
+
+Loading and Error States
+
+- All async operations must render explicit loading states.
+- Provide error states with actionable messaging where possible.
+- Prefer skeletons for content lists/details; avoid spinner-only pages.
+- Propagate loading/error from Apollo hooks into UI elements consistently.

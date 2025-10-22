@@ -1,0 +1,20 @@
+---
+description: Styling and accessibility rules
+globs:
+alwaysApply: true
+---
+
+Styling
+
+- Use styled-components and MUI components; avoid inline styles.
+- Prefer design tokens over magic numbers. Centralize spacing, colors, and typography via theme.
+- Favor margin-bottom for vertical rhythm; avoid margin-top except for exceptions.
+
+Positioning
+
+- Avoid `position: absolute` except for decorative or non-essential elements. Provide a11y labels if used.
+
+Accessibility
+
+- Ensure interactive elements have proper roles, labels, and focus states.
+- Respect prefers-reduced-motion and color-contrast guidelines when feasible.

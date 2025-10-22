@@ -1,0 +1,9 @@
+---
+description: Out-of-scope or conditional rules for this repository
+globs:
+alwaysApply: true
+---
+
+Out of Scope
+
+- Expo-router file-structure guidance does not apply in this web repo.

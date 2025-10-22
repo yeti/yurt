@@ -1,0 +1,11 @@
+---
+description: Inline/prop styles guidance; prefer styled-components
+globs:
+alwaysApply: true
+---
+
+Inline Styles
+
+- Avoid inline styles. Prefer styled-components. Use MUI SX only when functionally necessary.
+- Keep inline style usage minimal; never exceed a single short line.
+- Extract repeated styles into theme tokens or styled components.

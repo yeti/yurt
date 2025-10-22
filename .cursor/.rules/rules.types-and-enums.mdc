@@ -1,0 +1,16 @@
+---
+description: Type system guidance for interfaces, enums, and literal unions
+globs:
+alwaysApply: true
+---
+
+Interfaces vs Types
+
+- Use interfaces for object shapes exported from modules and for public APIs.
+- Use `type` for aliases, unions/intersections, and function types where interfaces are not suitable.
+
+Enums and Literals
+
+- Prefer `enum` for stable sets of options over object literal maps.
+- Use narrow string literal unions for small, local UI states.
+- Avoid widening to `string`/`any`; keep types precise at boundaries.

@@ -1,0 +1,12 @@
+---
+description: Minimal testing expectations
+globs:
+alwaysApply: true
+---
+
+Testing Expectations
+
+- Add unit tests around critical logic and hooks.
+- Prefer integration tests for data fetching boundaries and cache updates.
+<!-- - Mock network via MSW in frontend tests. -->
+- Keep tests deterministic and fast.
