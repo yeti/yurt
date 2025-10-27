@@ -13,7 +13,7 @@ Control Flow
 Booleans
 
 - Use descriptive boolean names (e.g., `isLoading`, `hasError`, `shouldRedirect`).
-- Use `!!` for coercion rather than `Boolean(value)` in shared code.
+- Use `Boolean(value)` for coercion rather than `!!` in shared code.
 
 General
 

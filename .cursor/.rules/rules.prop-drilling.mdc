@@ -7,5 +7,5 @@ alwaysApply: true
 Prop Drilling
 
 - Linear prop drilling is acceptable.
-- Introduce React Context when state crosses multiple branches or components need the same state non-linearly.
+- Introduce Zustand when state crosses multiple branches or components need the same state non-linearly.
 - Avoid premature Context; prefer explicit props first.

@@ -46,7 +46,7 @@ UI and Styling
 
 Apollo Client
 
-- Default fetch policy: cache-first unless a feature requires fresh data.
+- Default fetch policy: cache-first unless a our data source updates frequently
 
 Performance Optimization
 
