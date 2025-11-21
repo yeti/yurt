@@ -7,7 +7,7 @@ alwaysApply: true
 Query Rules
 
 - Default fetch policy: cache-first unless a feature requires fresh data.
-- `useQuery`: Prefer `onCompleted` and `onError` for side-effects. Keep render logic pure.
+- `useQuery`: use async await inside try/catch blocks.
 - Encapsulate query options in typed wrapper hooks when reused.
 
 Mutation/Lazy Query Rules

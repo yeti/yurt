@@ -14,7 +14,7 @@ Principles
 Decision Heuristics
 
 - State: Use React Context for cross-cutting app/data state; use Zustand only for ephemeral global UI state.
-- Data fetching: Use Apollo Client; default to cache-first; use `onCompleted`/`onError` for `useQuery` side-effects and async/await with try/catch for `useMutation`/`useLazyQuery`.
+- Data fetching: Use Apollo Client; default to cache-first; use async/await with try/catch for `useMutation`/`useLazyQuery`/`useQuery`.
 - Types: Prefer interfaces for object shapes, enums over object literal maps for option sets, and limited union literals for small local UI states.
 - Styling: Prefer styled-components and design tokens over inline styles and magic numbers. Favor margin-bottom stacking.
 - Control flow: Avoid nested ternaries; extract named booleans; prefer guard returns over if/else ladders; use braces for returns.
