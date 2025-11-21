@@ -1,0 +1,11 @@
+---
+description: Prop drilling guidelines and when to introduce Context
+globs:
+alwaysApply: true
+---
+
+Prop Drilling
+
+- Linear prop drilling is acceptable.
+- Introduce Zustand when state crosses multiple branches or components need the same state non-linearly.
+- Avoid premature Context; prefer explicit props first.

@@ -1,0 +1,13 @@
+---
+description: Rules for React state management (Context vs Zustand)
+globs:
+alwaysApply: true
+---
+
+State Management Rules
+
+- Use Zustand for cross-cutting app/data state and configuration shared across branches of the tree.
+- Use Zustand only for ephemeral UI state (e.g., modal visibility, local UI toggles). Do not store server-derived entities in Zustand.
+- Prefer query cache (Apollo) and derived selectors over duplicating remote data in local stores.
+- Avoid prop drilling only when branching/cross-cutting concerns arise. Linear drilling is acceptable.
+- Keep store shape minimal and focused; avoid global singletons for unrelated concerns.

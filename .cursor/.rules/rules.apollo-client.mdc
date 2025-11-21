@@ -1,0 +1,22 @@
+---
+description: Apollo Client usage for queries, mutations, and cache policy
+globs:
+alwaysApply: true
+---
+
+Query Rules
+
+- Default fetch policy: cache-first unless a feature requires fresh data.
+- `useQuery`: use async await inside try/catch blocks.
+- Encapsulate query options in typed wrapper hooks when reused.
+
+Mutation/Lazy Query Rules
+
+- Use `useMutation` and `useLazyQuery` with async/await inside try/catch blocks.
+- Handle errors explicitly; surface user-facing error states.
+- Update cache with field policies or `update` functions, not ad-hoc local state copies.
+
+UI States
+
+- Always render explicit loading and error states for async operations.
+- Avoid duplicate spinners; prefer skeletons where appropriate.

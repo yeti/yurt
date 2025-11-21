@@ -1,0 +1,30 @@
+---
+description: High-level priorities and decision heuristics for Cursor Plan Mode
+globs:
+alwaysApply: true
+---
+
+Principles
+
+- Prefer minimal, focused edits that align with existing patterns.
+- Optimize for readability and maintainability over cleverness.
+- Encode domain decisions in small utilities/hooks to avoid repetition.
+- Prefer composition over inheritance; avoid deep abstractions without need.
+
+Decision Heuristics
+
+- State: Use React Context for cross-cutting app/data state; use Zustand only for ephemeral global UI state.
+- Data fetching: Use Apollo Client; default to cache-first; use async/await with try/catch for `useMutation`/`useLazyQuery`/`useQuery`.
+- Types: Prefer interfaces for object shapes, enums over object literal maps for option sets, and limited union literals for small local UI states.
+- Styling: Prefer styled-components and design tokens over inline styles and magic numbers. Favor margin-bottom stacking.
+- Control flow: Avoid nested ternaries; extract named booleans; prefer guard returns over if/else ladders; use braces for returns.
+- UX: All async flows must show explicit loading and error states.
+
+Scoping
+
+- Apply these rules to both frontend and backend unless a rule explicitly targets UI or Apollo.
+
+When in Doubt
+
+- Prefer small wrapper hooks/components (e.g., typed hooks around queries) to centralize options and policy.
+- Use design tokens and shared components before introducing new primitives.

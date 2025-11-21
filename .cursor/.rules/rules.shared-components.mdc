@@ -1,0 +1,11 @@
+---
+description: Guidance for shared component usage and design tokens
+globs:
+alwaysApply: true
+---
+
+Shared Components
+
+- Prefer composition of existing shared components before creating new ones.
+- Use design tokens (spacing, color, typography) via theme rather than hard-coded values.
+- Co-locate small helpers with components; promote to shared only after repeated reuse.

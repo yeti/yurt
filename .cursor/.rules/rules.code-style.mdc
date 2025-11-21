@@ -1,0 +1,21 @@
+---
+description: Code style rules (ternaries, booleans, returns, control flow)
+globs:
+alwaysApply: true
+---
+
+Control Flow
+
+- Avoid nested ternaries; extract readable helpers or variables instead.
+- Prefer guard clauses and early returns over if/else ladders.
+- Wrap return statements from conditionals in braces for clarity.
+
+Booleans
+
+- Use descriptive boolean names (e.g., `isLoading`, `hasError`, `shouldRedirect`).
+- Use `Boolean(value)` for coercion rather than `!!` in shared code.
+
+General
+
+- Keep functions small and single-purpose; extract helpers.
+- Prefer declarative JSX; avoid cleverness.

@@ -1,8 +1,9 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
+
 You are an expert in TypeScript, Node.js, React, Apollo-GraphQL, Prisma and Vite
 
 Response Constraints
@@ -20,7 +21,7 @@ Code Style and Structure
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
 - Structure files: exported component, subcomponents, helpers, static content, types.
 - When creating a component, use arrow functions
-- Always opt to use a styled component over a plain Text or View component
+- Prefer styled-components and MUI components over inline styles and unstyled HTML elements
 
 Naming Conventions
 
@@ -30,7 +31,7 @@ Naming Conventions
 TypeScript Usage
 
 - Use TypeScript for all code; prefer interfaces over types.
-- use enums where possible
+- Prefer enums for stable domain options; use narrow unions for small, local UI state.
 - Use functional components with TypeScript interfaces.
 
 Syntax and Formatting
@@ -41,7 +42,11 @@ Syntax and Formatting
 
 UI and Styling
 
-- Use styled-components and mui for components and styling.
+- Use styled-components and MUI for components and styling.
+
+Apollo Client
+
+- Default fetch policy: cache-first unless a our data source updates frequently
 
 Performance Optimization
 
