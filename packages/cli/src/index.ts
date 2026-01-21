@@ -159,6 +159,27 @@ Production deploys are started automatically when a commit is merged into the \`
     }
   }
 
+  // Install dependencies after all packages are created
+  console.log(chalk.blue('📦 Installing dependencies 📦'));
+  installDependencies(repoAbsolutePath);
+
+  // Generate Prisma and GraphQL schemas for backend if it exists
+  if (appType === REACT_APOLLO) {
+    console.log(
+      chalk.blue(
+        '🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨',
+      ),
+    );
+    execSync(`cd ${repoAbsolutePath}/packages/backend && pnpm generate`, {
+      stdio: 'inherit',
+    });
+    console.log(
+      chalk.green(
+        '✅ Prisma schema, GraphQL schema, and GraphQL types generated ✅',
+      ),
+    );
+  }
+
   console.log(chalk.green('📝 Creating initial commit 📝'));
   execSync(
     `
@@ -216,9 +237,6 @@ const createReactApolloApp = (repoAbsolutePath: string) => {
     ),
     `${repoAbsolutePath}/packages/frontend/.env`,
   );
-
-  console.log(chalk.blue('📦 Installing frontend dependencies 📦'));
-  installDependencies(repoAbsolutePath);
 };
 
 const createGraphQLServer = (repoAbsolutePath: string) => {
@@ -244,23 +262,6 @@ const createGraphQLServer = (repoAbsolutePath: string) => {
   fse.cpSync(
     path.resolve(__dirname, '../../', `${TEMPLATES[BACKEND]}/.env.example`),
     `${repoAbsolutePath}/packages/backend/.env`,
-  );
-
-  console.log(chalk.blue('📦 Installing backend dependencies 📦'));
-  installDependencies(repoAbsolutePath);
-
-  console.log(
-    chalk.blue(
-      '🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨',
-    ),
-  );
-  execSync(`cd ${repoAbsolutePath}/packages/backend && pnpm generate`, {
-    stdio: 'pipe',
-  });
-  console.log(
-    chalk.green(
-      '✅ Prisma schema, GraphQL schema, and GraphQL types generated ✅',
-    ),
   );
 };
 
@@ -288,14 +289,11 @@ const createReactApp = (repoAbsolutePath: string) => {
     path.resolve(__dirname, '../../', `${TEMPLATES[REACT]}/.env.example`),
     `${repoAbsolutePath}/packages/frontend/.env`,
   );
-
-  console.log(chalk.blue('📦 Installing frontend dependencies 📦'));
-  installDependencies(repoAbsolutePath);
 };
 
 const installDependencies = (repoAbsolutePath: string) => {
   execSync(`cd ${repoAbsolutePath} &&  pnpm install`, {
-    stdio: 'pipe',
+    stdio: 'inherit',
   });
   console.log(chalk.green('✅ Dependencies installed ✅'));
 };

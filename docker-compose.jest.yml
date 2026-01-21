@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16.1
+    image: postgres:17.6
     restart: always
     container_name: integration-tests-prisma
     ports:
