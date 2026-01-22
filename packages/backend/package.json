@@ -18,8 +18,6 @@
     "migrate:deploy": "prisma migrate deploy && prisma generate",
     "build": "pnpm install --prod=false && pnpm generate && tsc && resolve-tspaths && pnpm migrate:deploy",
     "test": "NODE_ENV=test pnpm migrate:test && vitest run",
-    "test:watch": "DATABASE_URL=postgresql://prisma:prisma@localhost:5434/tests vitest",
-    "test:ui": "DATABASE_URL=postgresql://prisma:prisma@localhost:5434/tests vitest --ui",
     "seed": "tsx prisma/seed.ts",
     "migrate:test": "DATABASE_URL=postgresql://prisma:prisma@localhost:5434/tests prisma migrate dev && prisma generate",
     "db:test:start": "docker-compose -p test -f ../../docker-compose.jest.yml down && docker-compose -p test -f ../../docker-compose.jest.yml up -d"
