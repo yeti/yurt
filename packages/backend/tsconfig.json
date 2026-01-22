@@ -4,8 +4,8 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "lib": ["esnext"],
-    "module": "es2022",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "outDir": "dist",
     "rootDir": "../backend",
     "paths": {
@@ -13,6 +13,6 @@
     },
     "sourceMap": true,
     "target": "esnext",
-    "types": ["@types/jest"]
+    "types": ["vitest/globals"]
   }
 }

@@ -1,9 +1,15 @@
 import axios from 'axios';
 import { HttpService } from './Http.service';
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 // Mock the whole axios module
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+vi.mock('axios');
+const mockedAxios = axios as typeof axios & {
+  get: Mock;
+  post: Mock;
+  create: Mock;
+};
 let httpService: HttpService;
 
 describe('HttpService', () => {
@@ -14,7 +20,7 @@ describe('HttpService', () => {
 
   afterEach(() => {
     // Clear all mocks after each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should make a GET request with correct parameters', async () => {

@@ -1,2 +1,5 @@
 packages:
-  - "packages/*"
+  - packages/*
+
+patchedDependencies:
+  graphql-shield@7.6.5: patches/graphql-shield@7.6.5.patch
