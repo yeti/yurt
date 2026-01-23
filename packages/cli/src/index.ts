@@ -82,6 +82,8 @@ const main = async () => {
   if (appType === REACT) {
     excludedRootDirectories.push('docker-compose.yaml');
     excludedRootDirectories.push('docker-compose.jest.yml');
+    excludedRootDirectories.push('patches');
+    excludedRootDirectories.push('pnpm-workspace.yaml');
   }
 
   console.log(chalk.green('🍳 Creating repo 🍳'));
@@ -150,6 +152,11 @@ Production deploys are started automatically when a commit is merged into the \`
   switch (appType) {
     case REACT: {
       createReactApp(repoAbsolutePath);
+      // Create pnpm-workspace.yaml without patchedDependencies (no backend patches needed)
+      fse.writeFileSync(
+        `${repoAbsolutePath}/pnpm-workspace.yaml`,
+        `packages:\n  - packages/*\n`,
+      );
       break;
     }
     case REACT_APOLLO: {
