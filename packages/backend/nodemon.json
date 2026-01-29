@@ -7,8 +7,6 @@
     "**/*.test.ts",
     "**/*.spec.ts"
   ],
-  "execMap": {
-    "ts": "tsx src/server.ts"
-  },
+  "exec": "tsx src/server.ts",
   "ext": "ts,js,json"
 }
