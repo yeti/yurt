@@ -1,34 +1,26 @@
-import { extendType, inputObjectType, nonNull } from 'nexus';
+import { builder } from '~/schema';
+import { getRequestLogger } from '~/loggers';
+import UserService from '~/services/User/User.service';
 
-export const UserInput = inputObjectType({
-  name: 'UserInput',
-  definition(t) {
-    t.nonNull.string('email');
-    t.nullable.string('name');
-  },
+const UserInput = builder.inputType('UserInput', {
+  fields: (t) => ({
+    email: t.string({ required: true }),
+    firstName: t.string({ required: false }),
+  }),
 });
 
-export const UserMutation = extendType({
-  type: 'Mutation',
-  definition(t) {
-    t.nonNull.field('createUser', {
-      type: 'User',
-      args: {
-        input: nonNull(UserInput),
-      },
-      resolve(_root, { input: { email, name } }, { prisma }) {
-        return prisma.user.create({
-          data: {
-            email,
-            name,
-          },
-          select: {
-            id: true,
-            email: true,
-            name: true,
-          },
-        });
-      },
-    });
-  },
-});
+builder.mutationField('createUser', (t) =>
+  t.prismaField({
+    type: 'User',
+    args: {
+      input: t.arg({ type: UserInput, required: true }),
+    },
+    resolve: async (_query, _root, { input }, { prisma }) => {
+      getRequestLogger().info({ email: input.email }, 'Creating user');
+      return UserService.create(
+        { email: input.email, name: input.firstName ?? undefined },
+        { prisma },
+      );
+    },
+  }),
+);

@@ -1,22 +1,18 @@
-import { extendType, intArg, nonNull } from 'nexus';
+import { builder } from '~/schema';
+import { getRequestLogger } from '~/loggers';
+import UserService from '~/services/User/User.service';
 
-export const UserQuery = extendType({
-  type: 'Query',
-  definition(t) {
-    t.field('user', {
-      type: 'User',
-      args: { userId: nonNull(intArg()) },
-      async resolve(_root, { userId }, { prisma }) {
-        return await prisma.user.findUnique({
-          where: {
-            id: Number(userId),
-          },
-          select: {
-            id: true,
-            email: true,
-          },
-        });
-      },
-    });
-  },
-});
+builder.queryField('user', (t) =>
+  t.prismaField({
+    type: 'User',
+    nullable: true,
+    args: {
+      userId: t.arg.int({ required: true }),
+    },
+    resolve: async (_query, _root, { userId }, { prisma }) => {
+      getRequestLogger().info({ userId }, 'Fetching user by ID');
+
+      return UserService.findById(userId, { prisma });
+    },
+  }),
+);

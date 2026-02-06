@@ -1,9 +1,11 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client"
-  output   = "./generated/client"
+  output   = "../src/generated/prisma"
+}
+
+generator pothos {
+  provider = "prisma-pothos-types"
+  output   = "../src/generated/pothos-types.ts"
 }
 
 datasource db {
@@ -11,9 +13,9 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  firstName String? @map("first_name")
 
   @@map("user")
 }

@@ -15,5 +15,14 @@
   },
   "lint-staged": {
     "*.{ts,js,tsx,jsx,css,md}": "prettier --write"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "@swc/core",
+      "esbuild",
+      "msw",
+      "prisma"
+    ]
   }
 }

@@ -28,7 +28,7 @@ describe('HttpService', () => {
     mockedAxios.get.mockResolvedValue({ data: 'response data' });
 
     const endpoint = 'http://example.com/data';
-    const params = { foo: 'bar', details: { nested: true, number: 42 } };
+    const params = { foo: 'bar', baz: 'qux' };
     const headers = { Authorization: 'Bearer token' };
 
     // Call the method

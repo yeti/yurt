@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { PrismaClient } from './generated/client/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
+import { PrismaClient } from '~/generated/prisma/client';
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
@@ -15,7 +15,7 @@ async function main() {
     update: {},
     create: {
       email: 'alice@test.com',
-      name: 'Alice',
+      firstName: 'Alice',
     },
   });
 
@@ -24,7 +24,7 @@ async function main() {
     update: {},
     create: {
       email: 'bob@test.com',
-      name: 'Bob',
+      firstName: 'Bob',
     },
   });
 

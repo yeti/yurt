@@ -1,5 +1,6 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { nanoid } from 'nanoid';
-import pino from 'pino';
+import pino, { type Logger } from 'pino';
 import { LOG_LEVEL } from '~/config';
 
 export const logger = pino({
@@ -11,3 +12,15 @@ export const logger = pino({
     },
   },
 });
+
+const requestLoggerStore = new AsyncLocalStorage<Logger>();
+
+export function getRequestLogger(): Logger {
+  return requestLoggerStore.getStore() ?? logger;
+}
+
+export function runWithRequestLogger<T>(fn: () => T): T {
+  const child = logger.child({ requestId: nanoid() });
+
+  return requestLoggerStore.run(child, fn);
+}

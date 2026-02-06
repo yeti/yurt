@@ -1,16 +1,20 @@
 import type { IncomingHttpHeaders } from 'http';
 import prisma from '~/prismaClient';
-import type { PrismaClient } from '../prisma/generated/client/client.js';
-import type { BaseContext } from '@apollo/server';
+import type { PrismaClient } from '~/generated/prisma/client.js';
+import type { Request } from 'express';
 
-export interface Context extends BaseContext {
+export interface Context {
   headers: IncomingHttpHeaders;
   prisma: PrismaClient;
 }
 
-export async function createContext({ req }: { req: any }): Promise<Context> {
+export async function createContext({
+  req,
+}: {
+  req: Request;
+}): Promise<Context> {
   return {
     headers: req.headers,
-    prisma: prisma,
+    prisma,
   };
 }

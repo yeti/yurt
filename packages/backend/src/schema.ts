@@ -1,24 +1,60 @@
-import { makeSchema } from 'nexus';
-import { NODE_ENV } from '~/config';
-import * as types from '~/schemaTypes';
-import path from 'path';
+import SchemaBuilder from '@pothos/core';
+import PrismaPlugin from '@pothos/plugin-prisma';
+import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
+import type PrismaTypes from '~/generated/pothos-types';
+import { getDatamodel } from '~/generated/pothos-types';
+import { Context } from '~/context';
+import prisma from '~/prismaClient';
+import { Kind } from 'graphql';
+import {
+  getAuthScopes,
+  defaultQueryScopes,
+  defaultMutationScopes,
+  AuthScopes,
+} from '~/permissions';
 
-const packageRootDir = process.cwd();
-
-export const schema = makeSchema({
-  types,
-  outputs: {
-    schema: path.join(packageRootDir, '/schema.graphql'),
-    typegen: path.join(
-      packageRootDir,
-      '/src/shared/types/gen/nexus-typegen/index.d.ts',
-    ),
+export const builder = new SchemaBuilder<{
+  PrismaTypes: PrismaTypes;
+  Context: Context;
+  Scalars: {
+    Date: { Input: Date; Output: Date };
+  };
+  AuthScopes: AuthScopes;
+}>({
+  plugins: [ScopeAuthPlugin, PrismaPlugin],
+  prisma: {
+    client: prisma,
+    dmmf: getDatamodel(),
   },
-  ...(NODE_ENV === 'development' && {
-    contextType: {
-      module: path.join(packageRootDir, '/src/context.ts'),
-      export: 'Context',
-    },
-  }),
-  shouldExitAfterGenerateArtifacts: process.argv.includes('--nexusTypegen'),
+  scopeAuth: {
+    authScopes: async () => getAuthScopes(),
+  },
+});
+
+builder.scalarType('Date', {
+  description: 'Date custom scalar type',
+  serialize: (value: Date) => value.getTime(),
+  parseValue: (value: unknown) => {
+    if (typeof value === 'number') {
+      return new Date(value);
+    }
+    if (typeof value === 'string') {
+      return new Date(value);
+    }
+    throw new Error('Invalid Date input');
+  },
+  parseLiteral: (ast) => {
+    if (ast.kind === Kind.INT) {
+      return new Date(Number.parseInt(ast.value, 10));
+    }
+    throw new Error('Invalid Date literal');
+  },
+});
+
+builder.queryType({
+  authScopes: defaultQueryScopes,
+});
+
+builder.mutationType({
+  authScopes: defaultMutationScopes,
 });

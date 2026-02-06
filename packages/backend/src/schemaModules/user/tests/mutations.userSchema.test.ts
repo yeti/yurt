@@ -1,7 +1,6 @@
 import { createTestContext, TestContext } from '~/tests/__helpers';
 import { GRAPHQL_PATH } from '~/config';
 import prisma from '~/prismaClient';
-import { ApolloServerErrorCode } from '@apollo/server/errors';
 
 describe('createUser', () => {
   let ctx: TestContext;
@@ -22,7 +21,7 @@ describe('createUser', () => {
       mutation CreateUser($input: UserInput!) {
         createUser(input: $input) {
           email
-          name
+          firstName
           id
         }
       }
@@ -30,7 +29,7 @@ describe('createUser', () => {
       variables: {
         input: {
           email: uniqueEmail,
-          name: 'John',
+          firstName: 'John',
         },
       },
     };
@@ -68,13 +67,10 @@ describe('createUser', () => {
 
     const response = await ctx.request.post(GRAPHQL_PATH).send(mutationData);
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(400);
     expect(response.body.errors).toBeDefined();
     expect(response.body.errors[0].message).toMatch(
       'Variable "$input" got invalid value { name: "Bob" }; Field "email" of required type "String!" was not provided.',
-    );
-    expect(response.body.errors[0].extensions.code).toContain(
-      ApolloServerErrorCode.BAD_USER_INPUT,
     );
   });
 });
