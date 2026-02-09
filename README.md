@@ -17,4 +17,4 @@ The following application types are currently supported:
 
 ### React/Vite App
 
-### React/Vite App + Node Apollo GraphQL Server
+### React/Vite App + Node Yoga GraphQL Server

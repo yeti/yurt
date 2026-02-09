@@ -4,10 +4,10 @@ import { AxiosInstance } from 'axios';
 // Need to export the class itself instead of the
 // instance to be able to mock axios correctly
 export class HttpService {
-  private axios: AxiosInstance;
+  #axios: AxiosInstance;
 
   public constructor() {
-    this.axios = axios.create();
+    this.#axios = axios.create();
   }
 
   public get({
@@ -16,10 +16,10 @@ export class HttpService {
     headers,
   }: {
     endpoint: string;
-    queryParameters?: Record<string, any>;
-    headers?: Record<string, any>;
+    queryParameters?: Record<string, string>;
+    headers?: Record<string, string>;
   }) {
-    return this.axios.get(endpoint, { headers, params: queryParameters });
+    return this.#axios.get(endpoint, { headers, params: queryParameters });
   }
 
   public post({
@@ -28,9 +28,9 @@ export class HttpService {
     headers,
   }: {
     endpoint: string;
-    body?: Record<string, any>;
-    headers?: Record<string, any>;
+    body?: Record<string, unknown>;
+    headers?: Record<string, string>;
   }) {
-    return this.axios.post(endpoint, body, { headers });
+    return this.#axios.post(endpoint, body, { headers });
   }
 }

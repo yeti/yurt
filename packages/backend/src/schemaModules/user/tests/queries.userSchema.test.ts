@@ -19,7 +19,7 @@ describe('user', () => {
     const user = await prisma.user.create({
       data: {
         email: uniqueEmail,
-        name: 'Alice',
+        firstName: 'Alice',
       },
     });
 

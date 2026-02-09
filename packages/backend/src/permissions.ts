@@ -1,21 +1,17 @@
-import { allow, shield } from 'graphql-shield';
-import { NODE_ENV } from '~/config';
+export type AuthScopes = {
+  public: boolean;
+};
 
-const shouldDebug = NODE_ENV === 'development';
+export function getAuthScopes(): AuthScopes {
+  return {
+    public: true,
+  };
+}
 
-const permissions = shield(
-  {
-    Query: {
-      '*': allow,
-    },
-    Mutation: {
-      '*': allow,
-    },
-  },
-  {
-    allowExternalErrors: shouldDebug,
-    debug: shouldDebug,
-  },
-);
+export const defaultQueryScopes = {
+  public: true,
+} as const satisfies Partial<AuthScopes>;
 
-export default permissions;
+export const defaultMutationScopes = {
+  public: true,
+} as const satisfies Partial<AuthScopes>;

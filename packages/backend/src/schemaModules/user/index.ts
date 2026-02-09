@@ -1,3 +1,3 @@
-export * from './mutations.userSchema';
-export * from './objectTypes.userSchema';
-export * from './queries.userSchema';
+import './objectTypes.userSchema';
+import './queries.userSchema';
+import './mutations.userSchema';

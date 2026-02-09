@@ -1,44 +1,60 @@
 # Backend
 
+A Node.js GraphQL API built with Express, GraphQL Yoga, Pothos, and Prisma.
+
+## Tech Stack
+
+- [Express](https://expressjs.com/) v5 HTTP server
+- [GraphQL Yoga](https://the-guild.dev/graphql/yoga-server) for the GraphQL server
+- [Pothos](https://pothos-graphql.dev/) for code-first GraphQL schema building
+- [Prisma](https://www.prisma.io/) ORM with PostgreSQL
+- [Auth0](https://auth0.com/) via `express-oauth2-jwt-bearer` for authentication
+- [Zod](https://zod.dev/) for validation
+- [Pino](https://getpino.io/) for logging
+- [Sentry](https://sentry.io/) for error monitoring
+- [Vitest](https://vitest.dev/) for testing
+
+## Prerequisites
+
+- Node.js >= 24.7.0
+- `pnpm` version 8+
+- Docker (for the local PostgreSQL database)
+
 ## Getting Started
 
-1. Make sure you have `pnpm` version 8+ installed. You can find installation instructions [here](https://pnpm.io/installation).
-2. Make sure you've started your dev database by running `docker compose up` from the project's root.
-3. From `packages/backend` run `pnpm install`
-4. From `packages/backend` run `pnpm generate` to generate the Prisma and Nexus schemas.
-5. From `packages/backend` run `pnpm dev` to start the local dev server. You should be able to visit the Apollo Server sandbox at `localhost:8080/api/graphql`.
+1. Start the dev database by running `docker compose up -d` from the project root.
+2. From `packages/backend` run `pnpm install`.
+3. From `packages/backend` run `pnpm generate` to generate the Prisma client.
+4. From `packages/backend` run `pnpm migrate` to apply database migrations.
+5. From `packages/backend` run `pnpm dev` to start the local dev server. The
+   GraphQL endpoint will be available at `http://localhost:8080/api/graphql`.
+
+## Available Scripts
+
+| Command               | Description                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| `pnpm dev`            | Start the dev server with nodemon                                                        |
+| `pnpm generate`       | Generate the Prisma client                                                               |
+| `pnpm migrate`        | Run Prisma migrations and regenerate the client                                          |
+| `pnpm migrate:create` | Create a new migration without applying it                                               |
+| `pnpm migrate:deploy` | Deploy migrations (used in production builds)                                            |
+| `pnpm build`          | Install deps, generate schemas, compile TypeScript, resolve paths, and deploy migrations |
+| `pnpm seed`           | Seed the database                                                                        |
+| `pnpm lint`           | Run ESLint                                                                               |
+| `pnpm type`           | Run TypeScript type-checking                                                             |
+| `pnpm test`           | Run the test database migration and execute tests                                        |
+| `pnpm db:test:start`  | Start a fresh test database via Docker                                                   |
 
 ## Updating Models
 
-After updating the schema in `packages/backend/prisma/schema.prisma`, you'll need to run the following commands from `packages/backend` to update the Prisma and Nexus schemas:
+After updating the schema in `packages/backend/prisma/schema.prisma`:
 
-1. `pnpm generate:prisma`
-2. `pnpm migrate:create`
-3. `pnpm migrate`
-4. `pnpm generate:nexus`
+1. `pnpm migrate:create` — create the migration
+2. `pnpm migrate` — apply the migration and regenerate the Prisma client
 
 ## Tests
 
-[Jest](https://jestjs.io/) is used for unit and integration testing.
-In order to run integration tests, you'll need to run the following commands from `packages/backend`:
+[Vitest](https://vitest.dev/) is used for testing. To run integration tests:
 
-1. `pnpm db:test:start`
-2. `pnpm test`
-
-## Deploying to Render
-
-When deploying the backend to Render, you will first need to create a PostgreSQL database for your backend to connnect to.
-
-Upon creation of the database, you will then create a web service for the backend. The prompts should be filled in as follows:
-
-Branch: `develop` or `main` depending on whether this is for staging or production,
-
-Root Directory: `packages/backend`
-
-Build Command: `pnpm build;`
-
-Start Command: `node dist/src/server.js`
-
-Generally speaking we can select the `Starter` plan unless otherwise specified by the projects needs.
-
-Add any required env variables including the `DATABASE_URL` from the database you created earlier.
+1. `pnpm db:test:start` — start a clean test database
+2. `pnpm test` — run all tests

@@ -1,6 +1,7 @@
 import supertest, { Agent } from 'supertest';
 import http from 'http';
-import { createExpressApp, createApolloServer } from '~/serverSetup';
+import { createExpressApp, createYogaServer } from '~/serverSetup';
+import { GRAPHQL_PATH } from '~/config';
 
 export type TestContext = {
   request: Agent;
@@ -9,16 +10,19 @@ export type TestContext = {
 
 async function createTestContext() {
   const app = createExpressApp();
-  const httpServer = http.createServer(app);
+  const yoga = await createYogaServer();
 
-  const server = await createApolloServer(app, httpServer);
+  app.use(GRAPHQL_PATH, async (req, res) => {
+    await yoga(req, res);
+  });
+
+  const httpServer = http.createServer(app);
 
   const request: Agent = supertest(app);
 
   return {
     request,
     stopServer: async () => {
-      await server.stop();
       httpServer.close();
     },
   };

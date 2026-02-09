@@ -26,6 +26,7 @@ export const useBrowserStorage = <T,>(
 
       return cachedValue.current as T;
     } catch (error) {
+      // eslint-disable-next-line no-console
       IS_DEV && console.error(error);
 
       return initialValue;
@@ -58,6 +59,7 @@ export const useBrowserStorage = <T,>(
         }),
       );
     } catch (error) {
+      // eslint-disable-next-line no-console
       IS_DEV && console.error(error);
     }
   };

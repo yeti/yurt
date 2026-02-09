@@ -1,19 +1,19 @@
 import http from 'http';
 import { logger } from '~/loggers';
 import { PORT, GRAPHQL_PATH } from '~/config';
-import { createExpressApp, createApolloServer } from './serverSetup';
+import { createExpressApp, createYogaServer } from './serverSetup';
 
-export async function startServer(): Promise<void> {
-  const app = createExpressApp();
-  const httpServer = http.createServer(app);
+const app = createExpressApp();
+const yoga = await createYogaServer();
 
-  await createApolloServer(app, httpServer);
+app.use(GRAPHQL_PATH, async (req, res) => {
+  await yoga(req, res);
+});
 
-  await new Promise<void>((resolve) =>
-    httpServer.listen({ port: PORT }, resolve),
-  );
+const httpServer = http.createServer(app);
 
-  logger.info(`🚀 Server ready at http://localhost:${PORT}${GRAPHQL_PATH}`);
-}
+await new Promise<void>((resolve) =>
+  httpServer.listen({ port: PORT }, resolve),
+);
 
-startServer();
+logger.info(`Server ready on port ${PORT}${GRAPHQL_PATH}`);

@@ -1,10 +1,9 @@
-import { objectType } from 'nexus';
+import { builder } from '~/schema';
 
-export const User = objectType({
-  name: 'User',
-  definition(t) {
-    t.nonNull.int('id');
-    t.nonNull.string('email');
-    t.string('name');
-  },
+builder.prismaObject('User', {
+  fields: (t) => ({
+    id: t.exposeInt('id', { nullable: false }),
+    email: t.exposeString('email', { nullable: false }),
+    name: t.exposeString('firstName', { nullable: true }),
+  }),
 });

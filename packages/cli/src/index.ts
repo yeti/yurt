@@ -6,13 +6,13 @@ import fse from 'fs-extra';
 import untildify from './utils';
 
 const REACT = 'react';
-const REACT_APOLLO = 'react-apollo';
+const REACT_YOGA = 'react-yoga';
 const BACKEND = 'backend';
 
 const TEMPLATES = {
   [BACKEND]: 'backend',
   [REACT]: 'react',
-  [REACT_APOLLO]: 'react-apollo',
+  [REACT_YOGA]: 'react-yoga',
 };
 
 const prompts = [
@@ -42,7 +42,7 @@ const prompts = [
     message: 'What type of app is this?',
     choices: [
       { name: 'Standalone React/Vite App', value: REACT },
-      { name: 'React/Vite App + Apollo GraphQL server', value: REACT_APOLLO },
+      { name: 'React/Vite App + Yoga GraphQL server', value: REACT_YOGA },
     ],
     result(_value: string): string {
       // This makes it so that the choice value is returned for appType,
@@ -57,7 +57,7 @@ interface PromptInputs {
   repoName: string;
   readmeTitle: string;
   repoLocation: string;
-  appType: 'react' | 'react-apollo';
+  appType: 'react' | 'react-yoga';
 }
 
 const main = async () => {
@@ -82,7 +82,6 @@ const main = async () => {
   if (appType === REACT) {
     excludedRootDirectories.push('docker-compose.yaml');
     excludedRootDirectories.push('docker-compose.jest.yml');
-    excludedRootDirectories.push('patches');
     excludedRootDirectories.push('pnpm-workspace.yaml');
   }
 
@@ -152,15 +151,14 @@ Production deploys are started automatically when a commit is merged into the \`
   switch (appType) {
     case REACT: {
       createReactApp(repoAbsolutePath);
-      // Create pnpm-workspace.yaml without patchedDependencies (no backend patches needed)
       fse.writeFileSync(
         `${repoAbsolutePath}/pnpm-workspace.yaml`,
         `packages:\n  - packages/*\n`,
       );
       break;
     }
-    case REACT_APOLLO: {
-      createReactApolloApp(repoAbsolutePath);
+    case REACT_YOGA: {
+      createReactYogaApp(repoAbsolutePath);
       createGraphQLServer(repoAbsolutePath);
       break;
     }
@@ -171,7 +169,7 @@ Production deploys are started automatically when a commit is merged into the \`
   installDependencies(repoAbsolutePath);
 
   // Generate Prisma and GraphQL schemas for backend if it exists
-  if (appType === REACT_APOLLO) {
+  if (appType === REACT_YOGA) {
     console.log(
       chalk.blue(
         '🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨',
@@ -218,11 +216,11 @@ main().catch((error) => {
   process.exit(1);
 });
 
-const createReactApolloApp = (repoAbsolutePath: string) => {
+const createReactYogaApp = (repoAbsolutePath: string) => {
   const excludedFrontendDirectories = ['node_modules'];
 
   fse.copySync(
-    path.resolve(__dirname, '../../', TEMPLATES[REACT_APOLLO]),
+    path.resolve(__dirname, '../../', TEMPLATES[REACT_YOGA]),
     `${repoAbsolutePath}/packages/frontend`,
     {
       filter: (src) => {
@@ -237,11 +235,7 @@ const createReactApolloApp = (repoAbsolutePath: string) => {
 
   // Copy .env.example to .env
   fse.cpSync(
-    path.resolve(
-      __dirname,
-      '../../',
-      `${TEMPLATES[REACT_APOLLO]}/.env.example`,
-    ),
+    path.resolve(__dirname, '../../', `${TEMPLATES[REACT_YOGA]}/.env.example`),
     `${repoAbsolutePath}/packages/frontend/.env`,
   );
 };
