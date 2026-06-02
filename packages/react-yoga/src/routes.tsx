@@ -1,8 +1,8 @@
 import type { RouteObject } from "react-router-dom";
-import ErrorPage from "~/shared/components/ErrorPage";
 import LoginPage from "~/modules/auth/LoginPage";
-import Profile from "~/modules/profile/Profile";
 import Home from "~/modules/home/Home";
+import Profile from "~/modules/profile/Profile";
+import ErrorPage from "~/shared/components/ErrorPage";
 import NotFound from "~/shared/components/NotFound";
 import Layout from "./shared/components/Layout";
 

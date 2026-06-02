@@ -1,5 +1,5 @@
 import { Box, Button, TextField } from "@mui/material";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import { Controller, type SubmitHandler, useForm } from "react-hook-form";
 
 interface FormData {
   email: string;
@@ -27,36 +27,36 @@ const Home = () => {
     <Box padding="16px">
       <Box
         component="form"
-        onSubmit={handleSubmit(onSubmit)}
         display="flex"
         flexDirection="column"
-        maxWidth="600px"
         gap="16px"
+        maxWidth="600px"
+        onSubmit={handleSubmit(onSubmit)}
       >
         <Controller
-          name="name"
           control={control}
+          name="name"
           render={({ field }) => (
             <TextField
-              label="Name"
               aria-invalid={errors.name ? "true" : "false"}
+              label="Name"
               {...field}
             />
           )}
         />
         <Controller
-          name="email"
           control={control}
-          rules={{ required: true }}
+          name="email"
           render={({ field }) => (
             <TextField
-              label="Email"
               aria-invalid={errors.email ? "true" : "false"}
               error={Boolean(errors.email)}
+              label="Email"
               required
               {...field}
             />
           )}
+          rules={{ required: true }}
         />
         <Button type="submit" variant="contained">
           Submit

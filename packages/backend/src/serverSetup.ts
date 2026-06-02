@@ -1,12 +1,12 @@
-import { createYoga } from "graphql-yoga";
-import express from "express";
-import helmet from "helmet";
 import cors from "cors";
+import express from "express";
+import { createYoga } from "graphql-yoga";
+import helmet from "helmet";
+import { NODE_ENV } from "~/config";
 import { createContext } from "~/context";
 import { runWithRequestLogger } from "~/loggers";
 import pinoLogger from "~/plugins/logger";
 import sentryPlugin from "~/plugins/sentry";
-import { NODE_ENV } from "~/config";
 
 export function createExpressApp() {
   const app = express();

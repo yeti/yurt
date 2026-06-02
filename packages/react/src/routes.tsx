@@ -1,7 +1,7 @@
 import type { RouteObject } from "react-router-dom";
-import ErrorPage from "~/shared/components/ErrorPage";
 import LoginPage from "~/modules/auth/LoginPage";
 import Home from "~/modules/home/Home";
+import ErrorPage from "~/shared/components/ErrorPage";
 import Layout from "~/shared/components/Layout";
 import NotFound from "~/shared/components/NotFound";
 

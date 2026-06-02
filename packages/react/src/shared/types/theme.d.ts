@@ -13,9 +13,9 @@ declare module "@mui/material/styles" {
   }
 
   interface SimplePaletteColorOptions {
+    dark?: string;
     light?: string;
     main: string;
-    dark?: string;
   }
 
   export interface TypeBackground {}
@@ -25,8 +25,8 @@ declare module "@mui/material/styles" {
   interface TypographyVariantsOptions {}
 
   interface ZIndex {
-    min: number;
     default: number;
+    min: number;
   }
 }
 

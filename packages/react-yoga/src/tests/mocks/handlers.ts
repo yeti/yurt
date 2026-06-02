@@ -1,8 +1,8 @@
 import { graphql, HttpResponse } from "msw";
 
 export const handlers = [
-  graphql.query("GetUser", () => {
-    return HttpResponse.json(
+  graphql.query("GetUser", () =>
+    HttpResponse.json(
       {
         data: {
           user: {
@@ -17,6 +17,6 @@ export const handlers = [
           "x-custom-header": "foo",
         },
       }
-    );
-  }),
+    )
+  ),
 ];

@@ -1,17 +1,17 @@
 import SchemaBuilder from "@pothos/core";
 import PrismaPlugin from "@pothos/plugin-prisma";
 import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
+import { Kind } from "graphql";
+import type { Context } from "~/context";
 import type PrismaTypes from "~/generated/pothos-types";
 import { getDatamodel } from "~/generated/pothos-types";
-import { Context } from "~/context";
-import prisma from "~/prismaClient";
-import { Kind } from "graphql";
 import {
-  getAuthScopes,
-  defaultQueryScopes,
+  type AuthScopes,
   defaultMutationScopes,
-  AuthScopes,
+  defaultQueryScopes,
+  getAuthScopes,
 } from "~/permissions";
+import prisma from "~/prismaClient";
 
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;

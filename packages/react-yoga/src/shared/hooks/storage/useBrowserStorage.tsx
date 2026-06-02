@@ -1,11 +1,10 @@
-import { useSyncExternalStore, useRef } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { IS_DEV } from "../../constants";
 
 type StorageType = "localStorage" | "sessionStorage";
 
-const getStorageObject = (type: StorageType) => {
-  return type === "localStorage" ? window.localStorage : window.sessionStorage;
-};
+const getStorageObject = (type: StorageType) =>
+  type === "localStorage" ? window.localStorage : window.sessionStorage;
 
 export const useBrowserStorage = <T,>(
   key: string,

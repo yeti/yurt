@@ -1,7 +1,7 @@
-import { createTheme, ThemeOptions } from "@mui/material";
-import { typography } from "./typography";
-import { palette } from "./palette";
+import { createTheme, type ThemeOptions } from "@mui/material";
 import { components } from "./components";
+import { palette } from "./palette";
+import { typography } from "./typography";
 
 const themeOptions: ThemeOptions = {
   typography,

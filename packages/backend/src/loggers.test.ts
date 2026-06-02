@@ -1,4 +1,4 @@
-import { logger, getRequestLogger, runWithRequestLogger } from "~/loggers";
+import { getRequestLogger, logger, runWithRequestLogger } from "~/loggers";
 
 describe("getRequestLogger", () => {
   it("returns global logger when called outside request context", () => {

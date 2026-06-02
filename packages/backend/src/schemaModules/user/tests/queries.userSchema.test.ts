@@ -1,6 +1,6 @@
-import { createTestContext, TestContext } from "~/tests/__helpers";
 import { GRAPHQL_PATH } from "~/config";
 import prisma from "~/prismaClient";
+import { createTestContext, type TestContext } from "~/tests/__helpers";
 
 describe("user", () => {
   let ctx: TestContext;

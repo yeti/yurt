@@ -1,7 +1,7 @@
 import axios from "axios";
-import { HttpService } from "./Http.service";
-import { vi } from "vitest";
 import type { Mock } from "vitest";
+import { vi } from "vitest";
+import { HttpService } from "./Http.service";
 
 // Mock the whole axios module
 vi.mock("axios");

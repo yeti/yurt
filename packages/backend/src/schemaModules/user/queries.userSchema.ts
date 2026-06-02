@@ -1,5 +1,5 @@
-import { builder } from "~/schema";
 import { getRequestLogger } from "~/loggers";
+import { builder } from "~/schema";
 import UserService from "~/services/User/User.service";
 
 builder.queryField("user", (t) =>
