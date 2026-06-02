@@ -3,7 +3,7 @@ import axios, { type AxiosInstance } from "axios";
 // Need to export the class itself instead of the
 // instance to be able to mock axios correctly
 export class HttpService {
-  #axios: AxiosInstance;
+  readonly #axios: AxiosInstance;
 
   public constructor() {
     this.#axios = axios.create();

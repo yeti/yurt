@@ -1,4 +1,4 @@
-import http from "http";
+import http from "node:http";
 import { GRAPHQL_PATH, PORT } from "~/config";
 import { logger } from "~/loggers";
 import { createExpressApp, createYogaServer } from "./serverSetup";

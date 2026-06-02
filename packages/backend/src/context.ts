@@ -1,5 +1,5 @@
+import type { IncomingHttpHeaders } from "node:http";
 import type { Request } from "express";
-import type { IncomingHttpHeaders } from "http";
 import type { PrismaClient } from "~/generated/prisma/client.js";
 import prisma from "~/prismaClient";
 

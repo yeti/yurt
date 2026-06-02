@@ -1,8 +1,8 @@
+import { execSync } from "node:child_process";
+import path from "node:path";
 import chalk from "chalk";
-import { execSync } from "child_process";
 import { prompt } from "enquirer";
 import fse from "fs-extra";
-import path from "path";
 import untildify from "./utils";
 
 const REACT = "react";

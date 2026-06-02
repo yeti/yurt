@@ -1,12 +1,12 @@
-import http from "http";
+import http from "node:http";
 import supertest, { type Agent } from "supertest";
 import { GRAPHQL_PATH } from "~/config";
 import { createExpressApp, createYogaServer } from "~/serverSetup";
 
-export type TestContext = {
+export interface TestContext {
   request: Agent;
   stopServer: () => Promise<void>;
-};
+}
 
 async function createTestContext() {
   const app = createExpressApp();
