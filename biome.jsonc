@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/biome/core"],
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    // Ultracite core already force-ignores (!!) dist, generated, *.gen.*,
+    // codegen, __generated__, lockfiles, coverage, etc. Add the repo-specific
+    // generated/build dirs its list misses: the graphql-codegen output dir is
+    // literally named "gen" (packages/react-yoga/src/graphql/gen), and Vite's
+    // SSR build dir is dist-ssr.
+    "includes": ["!!**/gen", "!!**/dist-ssr", "!!**/mockServiceWorker.js"]
+  }
+}

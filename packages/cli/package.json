@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "lint": "biome check .",
     "start": "node dist/index.js",
     "watch": "tsc --watch",
     "yurt": "tsc && node dist/index.js"
