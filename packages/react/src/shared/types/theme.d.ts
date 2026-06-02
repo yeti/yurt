@@ -1,4 +1,4 @@
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   export interface Theme {}
 
   export interface ThemeOptions {}
@@ -30,10 +30,10 @@ declare module '@mui/material/styles' {
   }
 }
 
-declare module '@mui/material/Button' {
+declare module "@mui/material/Button" {
   export interface ButtonPropsVariantOverrides {}
 }
 
-declare module '@mui/material/Typography' {
+declare module "@mui/material/Typography" {
   export interface TypographyPropsVariantOverrides {}
 }

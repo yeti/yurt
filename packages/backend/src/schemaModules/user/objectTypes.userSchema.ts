@@ -1,9 +1,9 @@
-import { builder } from '~/schema';
+import { builder } from "~/schema";
 
-builder.prismaObject('User', {
+builder.prismaObject("User", {
   fields: (t) => ({
-    id: t.exposeInt('id', { nullable: false }),
-    email: t.exposeString('email', { nullable: false }),
-    name: t.exposeString('firstName', { nullable: true }),
+    id: t.exposeInt("id", { nullable: false }),
+    email: t.exposeString("email", { nullable: false }),
+    name: t.exposeString("firstName", { nullable: true }),
   }),
 });

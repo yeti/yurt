@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from "express";
 
 export const unless = function (paths: string[], middleware: express.Handler) {
   return function (req: Request, res: Response, next: NextFunction) {

@@ -1,5 +1,5 @@
-import { ApolloClient, InMemoryCache, HttpLink, from } from '@apollo/client';
-import { GRAPHQL_URL } from '~/shared/config';
+import { ApolloClient, InMemoryCache, HttpLink, from } from "@apollo/client";
+import { GRAPHQL_URL } from "~/shared/config";
 
 const httpLink = new HttpLink({
   uri: GRAPHQL_URL,

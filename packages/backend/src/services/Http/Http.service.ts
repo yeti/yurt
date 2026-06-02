@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { AxiosInstance } from 'axios';
+import axios from "axios";
+import { AxiosInstance } from "axios";
 
 // Need to export the class itself instead of the
 // instance to be able to mock axios correctly

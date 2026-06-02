@@ -1,18 +1,18 @@
-import { builder } from '~/schema';
-import { getRequestLogger } from '~/loggers';
-import UserService from '~/services/User/User.service';
+import { builder } from "~/schema";
+import { getRequestLogger } from "~/loggers";
+import UserService from "~/services/User/User.service";
 
-builder.queryField('user', (t) =>
+builder.queryField("user", (t) =>
   t.prismaField({
-    type: 'User',
+    type: "User",
     nullable: true,
     args: {
       userId: t.arg.int({ required: true }),
     },
     resolve: async (_query, _root, { userId }, { prisma }) => {
-      getRequestLogger().info({ userId }, 'Fetching user by ID');
+      getRequestLogger().info({ userId }, "Fetching user by ID");
 
       return UserService.findById(userId, { prisma });
     },
-  }),
+  })
 );

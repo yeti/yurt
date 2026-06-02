@@ -1,21 +1,21 @@
-import type { CodegenConfig } from '@graphql-codegen/cli';
+import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
-  schema: '../backend/schema.graphql',
-  documents: ['src/graphql/**/*.ts'],
+  schema: "../backend/schema.graphql",
+  documents: ["src/graphql/**/*.ts"],
   generates: {
-    './src/graphql/gen/graphql.ts': {
+    "./src/graphql/gen/graphql.ts": {
       plugins: [
-        'typescript',
-        'typescript-operations',
-        'typescript-react-apollo',
+        "typescript",
+        "typescript-operations",
+        "typescript-react-apollo",
       ],
       config: {
         withHooks: true,
         scalars: {
-          DateTime: 'string',
+          DateTime: "string",
         },
-        maybeValue: 'T | null',
+        maybeValue: "T | null",
       },
     },
   },

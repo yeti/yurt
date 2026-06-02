@@ -1,16 +1,16 @@
-import { useSyncExternalStore, useRef } from 'react';
-import { IS_DEV } from '../../constants';
+import { useSyncExternalStore, useRef } from "react";
+import { IS_DEV } from "../../constants";
 
-type StorageType = 'localStorage' | 'sessionStorage';
+type StorageType = "localStorage" | "sessionStorage";
 
 const getStorageObject = (type: StorageType) => {
-  return type === 'localStorage' ? window.localStorage : window.sessionStorage;
+  return type === "localStorage" ? window.localStorage : window.sessionStorage;
 };
 
 export const useBrowserStorage = <T,>(
   key: string,
   initialValue: T,
-  storageType: StorageType,
+  storageType: StorageType
 ) => {
   const storage = getStorageObject(storageType);
   const cachedValue = useRef<T>(initialValue);
@@ -40,8 +40,8 @@ export const useBrowserStorage = <T,>(
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   };
 
   const setValue = (value: T | ((prev: T) => T)) => {
@@ -53,10 +53,10 @@ export const useBrowserStorage = <T,>(
       cachedValue.current = newValue;
 
       window.dispatchEvent(
-        new StorageEvent('storage', {
+        new StorageEvent("storage", {
           key,
           newValue: JSON.stringify(newValue),
-        }),
+        })
       );
     } catch (error) {
       // eslint-disable-next-line no-console
