@@ -51,14 +51,14 @@
     "@types/pg": "^8.11.10",
     "@types/supertest": "^6.0.2",
     "@vitest/coverage-v8": "^4.1.8",
-    "@vitest/ui": "^4.0.15",
+    "@vitest/ui": "^4.1.8",
     "nodemon": "^3.0.1",
     "prisma": "^7.2.0",
     "resolve-tspaths": "^0.8.15",
     "supertest": "^7.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.9.2",
-    "vitest": "^4.0.15"
+    "vitest": "^4.1.8"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

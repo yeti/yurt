@@ -18,7 +18,13 @@
     {
       // React packages keep the React convention (PascalCase components,
       // camelCase hooks/utils) instead of Ultracite's default kebab-case.
-      "includes": ["packages/react/**", "packages/react-yoga/**"],
+      // `packages/frontend` is the path the CLI scaffolds the React template
+      // into, so apps generated from this boilerplate inherit the override.
+      "includes": [
+        "packages/react/**",
+        "packages/react-yoga/**",
+        "packages/frontend/**"
+      ],
       "linter": {
         "rules": {
           "style": {
