@@ -5,7 +5,7 @@ import UserService from "~/services/User/user.service";
 const UserInput = builder.inputType("UserInput", {
   fields: (t) => ({
     email: t.string({ required: true }),
-    firstName: t.string({ required: false }),
+    name: t.string({ required: false }),
   }),
 });
 
@@ -18,7 +18,7 @@ builder.mutationField("createUser", (t) =>
     resolve: async (_query, _root, { input }, { prisma }) => {
       getRequestLogger().info({ email: input.email }, "Creating user");
       return await UserService.create(
-        { email: input.email, name: input.firstName ?? undefined },
+        { email: input.email, firstName: input.name ?? undefined },
         { prisma }
       );
     },

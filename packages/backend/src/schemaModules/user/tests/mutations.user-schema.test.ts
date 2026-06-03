@@ -21,7 +21,7 @@ describe("createUser", () => {
       mutation CreateUser($input: UserInput!) {
         createUser(input: $input) {
           email
-          firstName
+          name
           id
         }
       }
@@ -29,7 +29,7 @@ describe("createUser", () => {
       variables: {
         input: {
           email: uniqueEmail,
-          firstName: "John",
+          name: "John",
         },
       },
     };

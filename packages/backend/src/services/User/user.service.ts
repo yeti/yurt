@@ -8,7 +8,7 @@ class UserService {
   }
 
   create(
-    data: { email: string; name?: string },
+    data: { email: string; firstName?: string },
     { prisma, tx }: PrismaContext
   ) {
     return withTransaction({
