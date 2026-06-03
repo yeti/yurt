@@ -5,8 +5,9 @@ import { IS_DEV } from "~/shared/constants";
 export default function ErrorPage() {
   const error = useRouteError();
 
-  // eslint-disable-next-line no-console
-  IS_DEV && console.error("Error caught at boundary:", error);
+  if (IS_DEV) {
+    console.error("Error caught at boundary:", error);
+  }
 
   return (
     <div id="error-page">

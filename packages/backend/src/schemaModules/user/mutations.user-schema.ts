@@ -17,7 +17,7 @@ builder.mutationField("createUser", (t) =>
     },
     resolve: async (_query, _root, { input }, { prisma }) => {
       getRequestLogger().info({ email: input.email }, "Creating user");
-      return UserService.create(
+      return await UserService.create(
         { email: input.email, name: input.firstName ?? undefined },
         { prisma }
       );

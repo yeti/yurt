@@ -87,7 +87,7 @@ const main = async () => {
 
   console.log(chalk.green("🍳 Creating repo 🍳"));
   // Copy monorepo root files
-  fse.cpSync(path.resolve(import.meta.dirname, "../../../"), repoAbsolutePath, {
+  fse.cpSync(path.resolve(__dirname, "../../../"), repoAbsolutePath, {
     filter: (src) => {
       if (excludedRootDirectories.some((item) => src.includes(item))) {
         return false;
@@ -162,6 +162,9 @@ Production deploys are started automatically when a commit is merged into the \`
       createGraphQLServer(repoAbsolutePath);
       break;
     }
+    default: {
+      throw new Error(`Unknown app type: ${appType}`);
+    }
   }
 
   // Install dependencies after all packages are created
@@ -219,7 +222,7 @@ const createReactYogaApp = (repoAbsolutePath: string) => {
   const excludedFrontendDirectories = ["node_modules"];
 
   fse.copySync(
-    path.resolve(import.meta.dirname, "../../", TEMPLATES[REACT_YOGA]),
+    path.resolve(__dirname, "../../", TEMPLATES[REACT_YOGA]),
     `${repoAbsolutePath}/packages/frontend`,
     {
       filter: (src) => {
@@ -234,11 +237,7 @@ const createReactYogaApp = (repoAbsolutePath: string) => {
 
   // Copy .env.example to .env
   fse.cpSync(
-    path.resolve(
-      import.meta.dirname,
-      "../../",
-      `${TEMPLATES[REACT_YOGA]}/.env.example`
-    ),
+    path.resolve(__dirname, "../../", `${TEMPLATES[REACT_YOGA]}/.env.example`),
     `${repoAbsolutePath}/packages/frontend/.env`
   );
 };
@@ -247,7 +246,7 @@ const createGraphQLServer = (repoAbsolutePath: string) => {
   const excludedBackendDirectories = ["node_modules"];
 
   fse.cpSync(
-    path.resolve(import.meta.dirname, "../../", TEMPLATES[BACKEND]),
+    path.resolve(__dirname, "../../", TEMPLATES[BACKEND]),
     `${repoAbsolutePath}/packages/backend`,
     {
       filter: (src) => {
@@ -264,11 +263,7 @@ const createGraphQLServer = (repoAbsolutePath: string) => {
 
   // Copy .env.example to .env
   fse.cpSync(
-    path.resolve(
-      import.meta.dirname,
-      "../../",
-      `${TEMPLATES[BACKEND]}/.env.example`
-    ),
+    path.resolve(__dirname, "../../", `${TEMPLATES[BACKEND]}/.env.example`),
     `${repoAbsolutePath}/packages/backend/.env`
   );
 };
@@ -277,7 +272,7 @@ const createReactApp = (repoAbsolutePath: string) => {
   const excludedFrontendDirectories = ["node_modules"];
 
   fse.cpSync(
-    path.resolve(import.meta.dirname, "../../", TEMPLATES[REACT]),
+    path.resolve(__dirname, "../../", TEMPLATES[REACT]),
     `${repoAbsolutePath}/packages/frontend`,
     {
       filter: (src) => {
@@ -294,11 +289,7 @@ const createReactApp = (repoAbsolutePath: string) => {
 
   // Copy .env.example to .env
   fse.cpSync(
-    path.resolve(
-      import.meta.dirname,
-      "../../",
-      `${TEMPLATES[REACT]}/.env.example`
-    ),
+    path.resolve(__dirname, "../../", `${TEMPLATES[REACT]}/.env.example`),
     `${repoAbsolutePath}/packages/frontend/.env`
   );
 };

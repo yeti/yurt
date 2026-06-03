@@ -5,11 +5,11 @@ import axios, { type AxiosInstance } from "axios";
 export class HttpService {
   readonly #axios: AxiosInstance;
 
-  public constructor() {
+  constructor() {
     this.#axios = axios.create();
   }
 
-  public get({
+  get({
     endpoint,
     queryParameters,
     headers,
@@ -21,7 +21,7 @@ export class HttpService {
     return this.#axios.get(endpoint, { headers, params: queryParameters });
   }
 
-  public post({
+  post({
     endpoint,
     body,
     headers,

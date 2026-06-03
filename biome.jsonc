@@ -34,6 +34,18 @@
           }
         }
       }
+    },
+    {
+      // The CLI is a CommonJS package, where __dirname is the correct API
+      // (import.meta is unavailable). Disable the global-dirname lint here.
+      "includes": ["packages/cli/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noGlobalDirnameFilename": "off"
+          }
+        }
+      }
     }
   ]
 }

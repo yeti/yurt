@@ -12,7 +12,7 @@ builder.queryField("user", (t) =>
     resolve: async (_query, _root, { userId }, { prisma }) => {
       getRequestLogger().info({ userId }, "Fetching user by ID");
 
-      return UserService.findById(userId, { prisma });
+      return await UserService.findById(userId, { prisma });
     },
   })
 );

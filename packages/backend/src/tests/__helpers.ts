@@ -22,9 +22,10 @@ async function createTestContext() {
 
   return {
     request,
-    stopServer: async () => {
-      httpServer.close();
-    },
+    stopServer: () =>
+      new Promise<void>((resolve) => {
+        httpServer.close(() => resolve());
+      }),
   };
 }
 

@@ -8,11 +8,7 @@ export interface Context {
   prisma: PrismaClient;
 }
 
-export async function createContext({
-  req,
-}: {
-  req: Request;
-}): Promise<Context> {
+export function createContext({ req }: { req: Request }): Context {
   return {
     headers: req.headers,
     prisma,
