@@ -1,6 +1,6 @@
 import { getRequestLogger } from "~/loggers";
 import { builder } from "~/schema";
-import UserService from "~/services/User/User.service";
+import UserService from "~/services/User/user.service";
 
 const UserInput = builder.inputType("UserInput", {
   fields: (t) => ({

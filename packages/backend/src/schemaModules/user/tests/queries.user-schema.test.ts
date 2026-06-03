@@ -1,5 +1,5 @@
 import { GRAPHQL_PATH } from "~/config";
-import prisma from "~/prismaClient";
+import prisma from "~/prisma-client";
 import { createTestContext, type TestContext } from "~/tests/__helpers";
 
 describe("user", () => {

@@ -11,7 +11,7 @@ import {
   defaultQueryScopes,
   getAuthScopes,
 } from "~/permissions";
-import prisma from "~/prismaClient";
+import prisma from "~/prisma-client";
 
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;

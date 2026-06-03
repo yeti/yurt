@@ -1,7 +1,7 @@
 import type { IncomingHttpHeaders } from "node:http";
 import type { Request } from "express";
 import type { PrismaClient } from "~/generated/prisma/client.js";
-import prisma from "~/prismaClient";
+import prisma from "~/prisma-client";
 
 export interface Context {
   headers: IncomingHttpHeaders;

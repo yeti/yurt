@@ -13,5 +13,27 @@
     // literally named "gen" (packages/react-yoga/src/graphql/gen), and Vite's
     // SSR build dir is dist-ssr.
     "includes": ["!!**/gen", "!!**/dist-ssr", "!!**/mockServiceWorker.js"]
-  }
+  },
+  "overrides": [
+    {
+      // React packages keep the React convention (PascalCase components,
+      // camelCase hooks/utils) instead of Ultracite's default kebab-case.
+      "includes": ["packages/react/**", "packages/react-yoga/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "requireAscii": true,
+                // PascalCase components, camelCase hooks/utils, and kebab-case
+                // for Vite-mandated files like vite-env.d.ts.
+                "filenameCases": ["camelCase", "PascalCase", "kebab-case"]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

@@ -1,7 +1,7 @@
 import http from "node:http";
 import { GRAPHQL_PATH, PORT } from "~/config";
 import { logger } from "~/loggers";
-import { createExpressApp, createYogaServer } from "./serverSetup";
+import { createExpressApp, createYogaServer } from "./server-setup";
 
 const app = createExpressApp();
 const yoga = await createYogaServer();

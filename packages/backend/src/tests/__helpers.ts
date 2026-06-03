@@ -1,7 +1,7 @@
 import http from "node:http";
 import supertest, { type Agent } from "supertest";
 import { GRAPHQL_PATH } from "~/config";
-import { createExpressApp, createYogaServer } from "~/serverSetup";
+import { createExpressApp, createYogaServer } from "~/server-setup";
 
 export interface TestContext {
   request: Agent;
