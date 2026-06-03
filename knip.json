@@ -1,31 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignore": ["**/gen/**", "**/generated/**"],
+  "ignoreDependencies": ["prisma-pothos-types"],
+  "ignoreBinaries": ["docker-compose"],
   "workspaces": {
     "packages/backend": {
-      "entry": ["src/server.ts", "prisma/seed.ts", "src/**/*.{test,spec}.ts"],
-      "project": ["src/**/*.ts"]
-    },
-    "packages/cli": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.ts"]
-    },
-    "packages/react": {
-      "entry": [
-        "src/index.tsx",
-        "src/tests/setup.ts",
-        "src/**/*.{test,spec}.{ts,tsx}"
-      ],
-      "project": ["src/**/*.{ts,tsx}"]
-    },
-    "packages/react-yoga": {
-      "entry": [
-        "src/index.tsx",
-        "src/tests/setup.ts",
-        "codegen.ts",
-        "src/**/*.{test,spec}.{ts,tsx}"
-      ],
-      "project": ["src/**/*.{ts,tsx}"]
+      "entry": ["src/server.ts"]
     }
   }
 }

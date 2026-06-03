@@ -2,7 +2,6 @@
   "name": "backend",
   "version": "0.1.0",
   "description": "",
-  "main": "server.ts",
   "type": "module",
   "engines": {
     "node": ">=24.7.0"
@@ -34,10 +33,8 @@
     "@sentry/node": "^8.55.0",
     "axios": "^1.11.0",
     "cors": "^2.8.5",
-    "date-fns": "^3.6.0",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
-    "express-oauth2-jwt-bearer": "^1.6.0",
     "graphql": "^16.11.0",
     "graphql-yoga": "^5.18.0",
     "helmet": "^8.1.0",
@@ -48,23 +45,20 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@swc/core": "^1.13.5",
-    "@swc/helpers": "^0.5.17",
     "@types/cors": "^2.8.13",
     "@types/express": "^5.0.0",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.11.10",
     "@types/supertest": "^6.0.2",
+    "@vitest/coverage-v8": "^4.1.8",
     "@vitest/ui": "^4.0.15",
     "nodemon": "^3.0.1",
     "prisma": "^7.2.0",
-    "regenerator-runtime": "^0.14.0",
     "resolve-tspaths": "^0.8.15",
     "supertest": "^7.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.9.2",
-    "vitest": "^4.0.15",
-    "vitest-mock-extended": "^3.1.0"
+    "vitest": "^4.0.15"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
