@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreDependencies": ["prisma-pothos-types"],
+  "ignoreBinaries": ["docker-compose"],
+  "workspaces": {
+    "packages/backend": {
+      "entry": ["src/server.ts"]
+    }
+  }
+}

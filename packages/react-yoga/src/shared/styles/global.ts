@@ -1,5 +1,5 @@
-import { css } from '@mui/material';
-import { theme } from '~/shared/styles/theme';
+import { css } from "@mui/material";
+import { theme } from "~/shared/styles/theme";
 
 export const globalStyles = css`
   body,

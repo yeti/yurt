@@ -1,17 +1,17 @@
-import SchemaBuilder from '@pothos/core';
-import PrismaPlugin from '@pothos/plugin-prisma';
-import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
-import type PrismaTypes from '~/generated/pothos-types';
-import { getDatamodel } from '~/generated/pothos-types';
-import { Context } from '~/context';
-import prisma from '~/prismaClient';
-import { Kind } from 'graphql';
+import SchemaBuilder from "@pothos/core";
+import PrismaPlugin from "@pothos/plugin-prisma";
+import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
+import { Kind } from "graphql";
+import type { Context } from "~/context";
+import type PrismaTypes from "~/generated/pothos-types";
+import { getDatamodel } from "~/generated/pothos-types";
 import {
-  getAuthScopes,
-  defaultQueryScopes,
+  type AuthScopes,
   defaultMutationScopes,
-  AuthScopes,
-} from '~/permissions';
+  defaultQueryScopes,
+  getAuthScopes,
+} from "~/permissions";
+import prisma from "~/prisma-client";
 
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
@@ -31,23 +31,23 @@ export const builder = new SchemaBuilder<{
   },
 });
 
-builder.scalarType('Date', {
-  description: 'Date custom scalar type',
+builder.scalarType("Date", {
+  description: "Date custom scalar type",
   serialize: (value: Date) => value.getTime(),
   parseValue: (value: unknown) => {
-    if (typeof value === 'number') {
+    if (typeof value === "number") {
       return new Date(value);
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return new Date(value);
     }
-    throw new Error('Invalid Date input');
+    throw new Error("Invalid Date input");
   },
   parseLiteral: (ast) => {
     if (ast.kind === Kind.INT) {
       return new Date(Number.parseInt(ast.value, 10));
     }
-    throw new Error('Invalid Date literal');
+    throw new Error("Invalid Date literal");
   },
 });
 

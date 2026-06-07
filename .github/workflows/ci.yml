@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    # prisma.config.ts resolves DATABASE_URL at load time; a dummy value is
+    # enough for `prisma generate` and knip (no DB connection is made).
+    env:
+      DATABASE_URL: postgresql://user:password@localhost:5432/db
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Generate the Prisma client + Pothos types so backend typecheck resolves
+      # ~/generated/* and knip doesn't report them as unresolved imports.
+      # Guarded so frontend-only apps scaffolded from this template still pass.
+      - name: Generate Prisma client
+        run: |
+          if [ -d packages/backend ]; then
+            pnpm --filter ./packages/backend generate
+          fi
+
+      - name: Lint & format (Biome)
+        run: pnpm exec biome check .
+
+      - name: Typecheck
+        run: pnpm -r run type
+
+      - name: Unused files/exports/deps (knip)
+        run: pnpm exec knip

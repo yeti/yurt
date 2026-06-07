@@ -1,18 +1,14 @@
-import type { IncomingHttpHeaders } from 'http';
-import prisma from '~/prismaClient';
-import type { PrismaClient } from '~/generated/prisma/client.js';
-import type { Request } from 'express';
+import type { IncomingHttpHeaders } from "node:http";
+import type { Request } from "express";
+import type { PrismaClient } from "~/generated/prisma/client.js";
+import prisma from "~/prisma-client";
 
 export interface Context {
   headers: IncomingHttpHeaders;
   prisma: PrismaClient;
 }
 
-export async function createContext({
-  req,
-}: {
-  req: Request;
-}): Promise<Context> {
+export function createContext({ req }: { req: Request }): Context {
   return {
     headers: req.headers,
     prisma,

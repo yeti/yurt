@@ -1,16 +1,15 @@
-import axios from 'axios';
-import { AxiosInstance } from 'axios';
+import axios, { type AxiosInstance } from "axios";
 
 // Need to export the class itself instead of the
 // instance to be able to mock axios correctly
 export class HttpService {
-  #axios: AxiosInstance;
+  readonly #axios: AxiosInstance;
 
-  public constructor() {
+  constructor() {
     this.#axios = axios.create();
   }
 
-  public get({
+  get({
     endpoint,
     queryParameters,
     headers,
@@ -22,7 +21,7 @@ export class HttpService {
     return this.#axios.get(endpoint, { headers, params: queryParameters });
   }
 
-  public post({
+  post({
     endpoint,
     body,
     headers,

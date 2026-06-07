@@ -1,8 +1,8 @@
-import { createTestContext, TestContext } from '~/tests/__helpers';
-import { GRAPHQL_PATH } from '~/config';
-import prisma from '~/prismaClient';
+import { GRAPHQL_PATH } from "~/config";
+import prisma from "~/prisma-client";
+import { createTestContext, type TestContext } from "~/tests/__helpers";
 
-describe('createUser', () => {
+describe("createUser", () => {
   let ctx: TestContext;
 
   beforeAll(async () => {
@@ -14,14 +14,14 @@ describe('createUser', () => {
     await ctx.stopServer();
   });
 
-  it('should correctly create a new user with the provided email and name', async () => {
+  it("should correctly create a new user with the provided email and name", async () => {
     const uniqueEmail = `john${Date.now()}@test.com`;
     const mutationData = {
       query: `
       mutation CreateUser($input: UserInput!) {
         createUser(input: $input) {
           email
-          firstName
+          name
           id
         }
       }
@@ -29,7 +29,7 @@ describe('createUser', () => {
       variables: {
         input: {
           email: uniqueEmail,
-          firstName: 'John',
+          name: "John",
         },
       },
     };
@@ -39,7 +39,7 @@ describe('createUser', () => {
     expect(response.status).toBe(200);
     expect(response.body.data.createUser).toBeDefined();
     expect(response.body.data.createUser.email).toBe(uniqueEmail);
-    expect(response.body.data.createUser.name).toBe('John');
+    expect(response.body.data.createUser.name).toBe("John");
 
     await prisma.user.delete({
       where: { id: response.body.data.createUser.id },
@@ -47,7 +47,7 @@ describe('createUser', () => {
     await prisma.$disconnect();
   });
 
-  it('should not create a user without an email', async () => {
+  it("should not create a user without an email", async () => {
     const mutationData = {
       query: `
       mutation CreateUser($input: UserInput!) {
@@ -60,7 +60,7 @@ describe('createUser', () => {
     `,
       variables: {
         input: {
-          name: 'Bob',
+          name: "Bob",
         },
       },
     };
@@ -70,7 +70,7 @@ describe('createUser', () => {
     expect(response.status).toBe(400);
     expect(response.body.errors).toBeDefined();
     expect(response.body.errors[0].message).toMatch(
-      'Variable "$input" got invalid value { name: "Bob" }; Field "email" of required type "String!" was not provided.',
+      'Variable "$input" got invalid value { name: "Bob" }; Field "email" of required type "String!" was not provided.'
     );
   });
 });

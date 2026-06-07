@@ -1,63 +1,63 @@
-import chalk from 'chalk';
-import path from 'path';
-import { execSync } from 'child_process';
-import { prompt } from 'enquirer';
-import fse from 'fs-extra';
-import untildify from './utils';
+import { execSync } from "node:child_process";
+import path from "node:path";
+import chalk from "chalk";
+import { prompt } from "enquirer";
+import fse from "fs-extra";
+import untildify from "./utils";
 
-const REACT = 'react';
-const REACT_YOGA = 'react-yoga';
-const BACKEND = 'backend';
+const REACT = "react";
+const REACT_YOGA = "react-yoga";
+const BACKEND = "backend";
 
 const TEMPLATES = {
-  [BACKEND]: 'backend',
-  [REACT]: 'react',
-  [REACT_YOGA]: 'react-yoga',
+  [BACKEND]: "backend",
+  [REACT]: "react",
+  [REACT_YOGA]: "react-yoga",
 };
 
 const prompts = [
   {
-    type: 'input',
-    name: 'repoName',
-    message: 'What should the repo be called?',
+    type: "input",
+    name: "repoName",
+    message: "What should the repo be called?",
     required: true,
   },
   {
-    type: 'input',
-    name: 'readmeTitle',
-    message: 'What should the readme title be? (i.e. project name)',
-    initial: 'README',
+    type: "input",
+    name: "readmeTitle",
+    message: "What should the readme title be? (i.e. project name)",
+    initial: "README",
     required: true,
   },
   {
-    type: 'input',
-    name: 'repoLocation',
-    message: 'Where should the repo be created? (absolute or relative path)',
-    initial: '~',
+    type: "input",
+    name: "repoLocation",
+    message: "Where should the repo be created? (absolute or relative path)",
+    initial: "~",
     required: true,
   },
   {
-    type: 'select',
-    name: 'appType',
-    message: 'What type of app is this?',
+    type: "select",
+    name: "appType",
+    message: "What type of app is this?",
     choices: [
-      { name: 'Standalone React/Vite App', value: REACT },
-      { name: 'React/Vite App + Yoga GraphQL server', value: REACT_YOGA },
+      { name: "Standalone React/Vite App", value: REACT },
+      { name: "React/Vite App + Yoga GraphQL server", value: REACT_YOGA },
     ],
     result(_value: string): string {
       // This makes it so that the choice value is returned for appType,
       // instead of the choice name which is the default behavior
-      //@ts-ignore
+      //@ts-expect-error
       return this.focused.value;
     },
   },
 ];
 
 interface PromptInputs {
-  repoName: string;
+  appType: "react" | "react-yoga";
   readmeTitle: string;
   repoLocation: string;
-  appType: 'react' | 'react-yoga';
+  repoName: string;
 }
 
 const main = async () => {
@@ -73,21 +73,21 @@ const main = async () => {
   await fse.mkdirp(repoLocationAbsolutePath);
 
   const excludedRootDirectories = [
-    'packages',
-    'node_modules',
-    'postgres',
-    'README.md',
+    "packages",
+    "node_modules",
+    "postgres",
+    "README.md",
   ];
 
   if (appType === REACT) {
-    excludedRootDirectories.push('docker-compose.yaml');
-    excludedRootDirectories.push('docker-compose.jest.yml');
-    excludedRootDirectories.push('pnpm-workspace.yaml');
+    excludedRootDirectories.push("docker-compose.yaml");
+    excludedRootDirectories.push("docker-compose.jest.yml");
+    excludedRootDirectories.push("pnpm-workspace.yaml");
   }
 
-  console.log(chalk.green('🍳 Creating repo 🍳'));
+  console.log(chalk.green("🍳 Creating repo 🍳"));
   // Copy monorepo root files
-  fse.cpSync(path.resolve(__dirname, '../../../'), repoAbsolutePath, {
+  fse.cpSync(path.resolve(__dirname, "../../../"), repoAbsolutePath, {
     filter: (src) => {
       if (excludedRootDirectories.some((item) => src.includes(item))) {
         return false;
@@ -101,7 +101,7 @@ const main = async () => {
 
   // Initialize git repo
   execSync(`cd ${repoAbsolutePath} && rm -rf .git && git init .`, {
-    stdio: 'pipe',
+    stdio: "pipe",
   });
 
   // Create root readme
@@ -144,7 +144,7 @@ Staging deploys are started automatically when a commit is merged into the \`dev
 
 ### Production Deploy
 
-Production deploys are started automatically when a commit is merged into the \`main\` branch. Merge with caution!`,
+Production deploys are started automatically when a commit is merged into the \`main\` branch. Merge with caution!`
   );
 
   // Create application packages
@@ -153,7 +153,7 @@ Production deploys are started automatically when a commit is merged into the \`
       createReactApp(repoAbsolutePath);
       fse.writeFileSync(
         `${repoAbsolutePath}/pnpm-workspace.yaml`,
-        `packages:\n  - packages/*\n`,
+        "packages:\n  - packages/*\n"
       );
       break;
     }
@@ -162,30 +162,33 @@ Production deploys are started automatically when a commit is merged into the \`
       createGraphQLServer(repoAbsolutePath);
       break;
     }
+    default: {
+      throw new Error(`Unknown app type: ${appType}`);
+    }
   }
 
   // Install dependencies after all packages are created
-  console.log(chalk.blue('📦 Installing dependencies 📦'));
+  console.log(chalk.blue("📦 Installing dependencies 📦"));
   installDependencies(repoAbsolutePath);
 
   // Generate Prisma and GraphQL schemas for backend if it exists
   if (appType === REACT_YOGA) {
     console.log(
       chalk.blue(
-        '🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨',
-      ),
+        "🔨 Generating Prisma schema, GraphQL schema, and GraphQL types 🔨"
+      )
     );
     execSync(`cd ${repoAbsolutePath}/packages/backend && pnpm generate`, {
-      stdio: 'inherit',
+      stdio: "inherit",
     });
     console.log(
       chalk.green(
-        '✅ Prisma schema, GraphQL schema, and GraphQL types generated ✅',
-      ),
+        "✅ Prisma schema, GraphQL schema, and GraphQL types generated ✅"
+      )
     );
   }
 
-  console.log(chalk.green('📝 Creating initial commit 📝'));
+  console.log(chalk.green("📝 Creating initial commit 📝"));
   execSync(
     `
     cd ${repoAbsolutePath} &&
@@ -193,7 +196,7 @@ Production deploys are started automatically when a commit is merged into the \`
     git commit --message "Initial commit" &&
     git branch -M main &&
     git branch develop`,
-    { stdio: 'pipe' },
+    { stdio: "pipe" }
   );
 
   const endTime = performance.now();
@@ -201,10 +204,9 @@ Production deploys are started automatically when a commit is merged into the \`
   console.log(
     chalk.green(
       `✨ Successfully created ${repoName} in ${(
-        (endTime - startTime) /
-        1000
-      ).toFixed(2)}s! ✨`,
-    ),
+        (endTime - startTime) / 1000
+      ).toFixed(2)}s! ✨`
+    )
   );
 
   process.exit(0);
@@ -217,10 +219,10 @@ main().catch((error) => {
 });
 
 const createReactYogaApp = (repoAbsolutePath: string) => {
-  const excludedFrontendDirectories = ['node_modules'];
+  const excludedFrontendDirectories = ["node_modules"];
 
   fse.copySync(
-    path.resolve(__dirname, '../../', TEMPLATES[REACT_YOGA]),
+    path.resolve(__dirname, "../../", TEMPLATES[REACT_YOGA]),
     `${repoAbsolutePath}/packages/frontend`,
     {
       filter: (src) => {
@@ -230,21 +232,21 @@ const createReactYogaApp = (repoAbsolutePath: string) => {
 
         return true;
       },
-    },
+    }
   );
 
   // Copy .env.example to .env
   fse.cpSync(
-    path.resolve(__dirname, '../../', `${TEMPLATES[REACT_YOGA]}/.env.example`),
-    `${repoAbsolutePath}/packages/frontend/.env`,
+    path.resolve(__dirname, "../../", `${TEMPLATES[REACT_YOGA]}/.env.example`),
+    `${repoAbsolutePath}/packages/frontend/.env`
   );
 };
 
 const createGraphQLServer = (repoAbsolutePath: string) => {
-  const excludedBackendDirectories = ['node_modules'];
+  const excludedBackendDirectories = ["node_modules"];
 
   fse.cpSync(
-    path.resolve(__dirname, '../../', TEMPLATES[BACKEND]),
+    path.resolve(__dirname, "../../", TEMPLATES[BACKEND]),
     `${repoAbsolutePath}/packages/backend`,
     {
       filter: (src) => {
@@ -256,21 +258,21 @@ const createGraphQLServer = (repoAbsolutePath: string) => {
       },
       dereference: true,
       recursive: true,
-    },
+    }
   );
 
   // Copy .env.example to .env
   fse.cpSync(
-    path.resolve(__dirname, '../../', `${TEMPLATES[BACKEND]}/.env.example`),
-    `${repoAbsolutePath}/packages/backend/.env`,
+    path.resolve(__dirname, "../../", `${TEMPLATES[BACKEND]}/.env.example`),
+    `${repoAbsolutePath}/packages/backend/.env`
   );
 };
 
 const createReactApp = (repoAbsolutePath: string) => {
-  const excludedFrontendDirectories = ['node_modules'];
+  const excludedFrontendDirectories = ["node_modules"];
 
   fse.cpSync(
-    path.resolve(__dirname, '../../', TEMPLATES[REACT]),
+    path.resolve(__dirname, "../../", TEMPLATES[REACT]),
     `${repoAbsolutePath}/packages/frontend`,
     {
       filter: (src) => {
@@ -282,19 +284,19 @@ const createReactApp = (repoAbsolutePath: string) => {
       },
       recursive: true,
       dereference: true,
-    },
+    }
   );
 
   // Copy .env.example to .env
   fse.cpSync(
-    path.resolve(__dirname, '../../', `${TEMPLATES[REACT]}/.env.example`),
-    `${repoAbsolutePath}/packages/frontend/.env`,
+    path.resolve(__dirname, "../../", `${TEMPLATES[REACT]}/.env.example`),
+    `${repoAbsolutePath}/packages/frontend/.env`
   );
 };
 
 const installDependencies = (repoAbsolutePath: string) => {
   execSync(`cd ${repoAbsolutePath} &&  pnpm install`, {
-    stdio: 'inherit',
+    stdio: "inherit",
   });
-  console.log(chalk.green('✅ Dependencies installed ✅'));
+  console.log(chalk.green("✅ Dependencies installed ✅"));
 };

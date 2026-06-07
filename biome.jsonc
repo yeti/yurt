@@ -1,0 +1,57 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/biome/core"],
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    // Ultracite core already force-ignores (!!) dist, generated, *.gen.*,
+    // codegen, __generated__, lockfiles, coverage, etc. Add the repo-specific
+    // generated/build dirs its list misses: the graphql-codegen output dir is
+    // literally named "gen" (packages/react-yoga/src/graphql/gen), and Vite's
+    // SSR build dir is dist-ssr.
+    "includes": ["!!**/gen", "!!**/dist-ssr", "!!**/mockServiceWorker.js"]
+  },
+  "overrides": [
+    {
+      // React packages keep the React convention (PascalCase components,
+      // camelCase hooks/utils) instead of Ultracite's default kebab-case.
+      // `packages/frontend` is the path the CLI scaffolds the React template
+      // into, so apps generated from this boilerplate inherit the override.
+      "includes": [
+        "packages/react/**",
+        "packages/react-yoga/**",
+        "packages/frontend/**"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": {
+              "level": "error",
+              "options": {
+                "requireAscii": true,
+                // PascalCase components, camelCase hooks/utils, and kebab-case
+                // for Vite-mandated files like vite-env.d.ts.
+                "filenameCases": ["camelCase", "PascalCase", "kebab-case"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      // The CLI is a CommonJS package, where __dirname is the correct API
+      // (import.meta is unavailable). Disable the global-dirname lint here.
+      "includes": ["packages/cli/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noGlobalDirnameFilename": "off"
+          }
+        }
+      }
+    }
+  ]
+}

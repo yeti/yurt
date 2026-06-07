@@ -1,6 +1,6 @@
-export type AuthScopes = {
+export interface AuthScopes {
   public: boolean;
-};
+}
 
 export function getAuthScopes(): AuthScopes {
   return {

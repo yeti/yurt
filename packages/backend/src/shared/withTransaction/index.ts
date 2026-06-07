@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from '~/generated/prisma/client.js';
+import type { Prisma, PrismaClient } from "~/generated/prisma/client.js";
 
 export type PrismaContext = Readonly<{
   prisma: PrismaClient;
@@ -13,7 +13,7 @@ export async function withTransaction<T>({
   fn: (tx: Prisma.TransactionClient) => Promise<T> | T;
 }): Promise<T> {
   if (tx) {
-    return fn(tx);
+    return await fn(tx);
   }
-  return prisma.$transaction(async (newTx) => fn(newTx));
+  return await prisma.$transaction(async (newTx) => fn(newTx));
 }

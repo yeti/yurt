@@ -1,7 +1,7 @@
-import { useQuery } from '@apollo/client';
-import { Box, Typography } from '@mui/material';
-import { Link, useParams } from 'react-router-dom';
-import { GET_USER } from '~/shared/queries';
+import { useQuery } from "@apollo/client";
+import { Box, Typography } from "@mui/material";
+import { Link, useParams } from "react-router-dom";
+import { GET_USER } from "~/shared/queries";
 
 const Profile = () => {
   const params = useParams();
@@ -23,7 +23,7 @@ const Profile = () => {
       <Typography>
         Profile for user {params.userId}: {data.user.email}
       </Typography>
-      <Link to={'/home'}>Back to home</Link>
+      <Link to={"/home"}>Back to home</Link>
     </Box>
   );
 };

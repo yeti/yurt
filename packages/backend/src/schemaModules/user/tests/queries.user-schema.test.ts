@@ -1,8 +1,8 @@
-import { createTestContext, TestContext } from '~/tests/__helpers';
-import { GRAPHQL_PATH } from '~/config';
-import prisma from '~/prismaClient';
+import { GRAPHQL_PATH } from "~/config";
+import prisma from "~/prisma-client";
+import { createTestContext, type TestContext } from "~/tests/__helpers";
 
-describe('user', () => {
+describe("user", () => {
   let ctx: TestContext;
 
   beforeAll(async () => {
@@ -19,7 +19,7 @@ describe('user', () => {
     const user = await prisma.user.create({
       data: {
         email: uniqueEmail,
-        firstName: 'Alice',
+        firstName: "Alice",
       },
     });
 
@@ -43,7 +43,7 @@ describe('user', () => {
     await prisma.$disconnect();
   });
 
-  it('should handle non-existing userId gracefully', async () => {
+  it("should handle non-existing userId gracefully", async () => {
     const queryData = {
       query: `
       query User($userId: Int!) {

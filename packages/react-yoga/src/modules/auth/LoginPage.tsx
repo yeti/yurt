@@ -1,21 +1,21 @@
-import { Button, Stack, Typography } from '@mui/material';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Button, Stack, Typography } from "@mui/material";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const LoginPage = () => {
   const [count, setCount] = useState(0);
 
   return (
-    <Stack direction="column" component="main" height="100vh">
-      <Stack direction="row" alignContent="center">
-        <Stack direction="column" justifyContent="center" gap="10px">
-          <Typography variant="h3" fontSize="30px">
+    <Stack component="main" direction="column" height="100vh">
+      <Stack alignContent="center" direction="row">
+        <Stack direction="column" gap="10px" justifyContent="center">
+          <Typography fontSize="30px" variant="h3">
             Login Page
           </Typography>
-          <Typography variant="h3" fontSize="30px">
+          <Typography fontSize="30px" variant="h3">
             {count}
           </Typography>
-          <Button variant="contained" onClick={() => setCount(count + 1)}>
+          <Button onClick={() => setCount(count + 1)} variant="contained">
             Click
           </Button>
           <Link to="/home">

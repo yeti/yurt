@@ -1,4 +1,4 @@
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   export interface Theme {}
 
   export interface ThemeOptions {}
@@ -13,9 +13,9 @@ declare module '@mui/material/styles' {
   }
 
   interface SimplePaletteColorOptions {
+    dark?: string;
     light?: string;
     main: string;
-    dark?: string;
   }
 
   export interface TypeBackground {}
@@ -25,15 +25,15 @@ declare module '@mui/material/styles' {
   interface TypographyVariantsOptions {}
 
   interface ZIndex {
-    min: number;
     default: number;
+    min: number;
   }
 }
 
-declare module '@mui/material/Button' {
+declare module "@mui/material/Button" {
   export interface ButtonPropsVariantOverrides {}
 }
 
-declare module '@mui/material/Typography' {
+declare module "@mui/material/Typography" {
   export interface TypographyPropsVariantOverrides {}
 }

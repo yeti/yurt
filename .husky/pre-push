@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# knip needs the whole module graph, so it runs here (pre-push) rather than in
+# the per-file lint-staged pre-commit hook. DATABASE_URL is only needed so
+# backend/prisma.config.ts loads; no DB connection is made. Assumes the Prisma
+# client has been generated locally (CI generates it explicitly); run
+# `pnpm --filter ./packages/backend generate` if knip reports ~/generated/*.
+DATABASE_URL="${DATABASE_URL:-postgresql://user:password@localhost:5432/db}" pnpm exec knip

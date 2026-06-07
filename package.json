@@ -1,21 +1,25 @@
 {
-  "name": "yurt",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "prepare": "husky install"
-  },
-  "keywords": [],
-  "author": "",
   "devDependencies": {
+    "@biomejs/biome": "2.4.15",
     "husky": "^8.0.3",
-    "prettier": "^3.1.0",
-    "typescript": "^5.9.2"
+    "knip": "^6.15.0",
+    "lint-staged": "^17.0.7",
+    "typescript": "^5.9.2",
+    "ultracite": "7.8.1"
   },
   "lint-staged": {
-    "*.{ts,js,tsx,jsx,css,md}": "prettier --write"
+    "*.{ts,tsx,js,jsx,json,jsonc,css,md}": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
   },
+  "name": "yurt",
+  "scripts": {
+    "prepare": "husky install",
+    "check": "ultracite check",
+    "fix": "ultracite fix"
+  },
+  "version": "0.1.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@prisma/engines",

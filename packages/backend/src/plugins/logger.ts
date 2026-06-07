@@ -1,5 +1,5 @@
-import { getRequestLogger } from '~/loggers';
-import type { YogaLogger } from 'graphql-yoga';
+import type { YogaLogger } from "graphql-yoga";
+import { getRequestLogger } from "~/loggers";
 
 const pinoLogger: YogaLogger = {
   error: (message, ...args) => getRequestLogger().error({ message, args }),

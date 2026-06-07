@@ -1,4 +1,4 @@
-import { MuiButton } from './button';
+import { MuiButton } from "./button";
 
 export const components = {
   MuiButton,

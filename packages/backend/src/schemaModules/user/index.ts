@@ -1,3 +1,3 @@
-import './objectTypes.userSchema';
-import './queries.userSchema';
-import './mutations.userSchema';
+import "./object-types.user-schema";
+import "./queries.user-schema";
+import "./mutations.user-schema";
