@@ -1,14 +1,17 @@
 services:
   db:
-    image: postgres:17.6
+    image: postgres:18
     restart: always
     environment:
       POSTGRES_DB: db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+      # postgres:18 defaults PGDATA to /var/lib/postgresql/18/docker. Pin it so
+      # the data directory does not move when the image's major version changes.
+      PGDATA: /var/lib/postgresql/data
     ports:
       - 5432:5432
     volumes:
-      - ./postgres:/var/lib/postgresql
+      - ./postgres:/var/lib/postgresql/data
 volumes:
   postgres:

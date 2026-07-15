@@ -14,7 +14,7 @@ datasource db {
 
 model User {
   id        Int     @id @default(autoincrement())
-  email     String  @unique
+  email     String  @unique @db.Citext
   firstName String? @map("first_name")
 
   @@map("user")
