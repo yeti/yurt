@@ -30,7 +30,7 @@
     "@vitejs/plugin-react-swc": "^3.11.0",
     "jsdom": "^22.1.0",
     "typescript": "^5.9.2",
-    "vite": "^5.4.19",
+    "vite": "^6.4.3",
     "vitest": "^4.0.15"
   }
 }
