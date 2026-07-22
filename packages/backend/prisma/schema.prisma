@@ -13,9 +13,11 @@ datasource db {
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
-  email     String  @unique @db.Citext
-  firstName String? @map("first_name")
+  id        Int      @id @default(autoincrement())
+  email     String   @unique @db.Citext
+  firstName String?  @map("first_name")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@map("user")
 }
