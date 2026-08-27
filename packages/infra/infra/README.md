@@ -12,6 +12,12 @@ State and locking are managed in **HCP Terraform** (org `__YURT_HCP_ORG__`).
 Workspaces run in **Local execution** mode, so Terraform runs in GitHub Actions
 (or locally via direnv), and HCP holds state only.
 
+> **Alternate state backend:** AWS S3 (with S3-native lockfile locking) works
+> too — each root module's `backend.tf` is the swap seam: replace its `cloud`
+> block with an S3 `backend` block. Note the extra bootstrap S3 requires (a
+> hand-created state bucket, plus IAM/OIDC roles for CI) that HCP avoids;
+> cleardraft's `infra/` is the in-house reference for that pattern.
+
 | Root module | HCP workspace |
 | --- | --- |
 | `auth0/environments/staging` | `__YURT_PROJECT_SLUG__-auth0-staging` |
