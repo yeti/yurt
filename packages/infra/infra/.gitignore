@@ -1,0 +1,12 @@
+# direnv — local secret injection (never commit; pulls from 1Password at load)
+.envrc
+
+# Terraform working dirs / plans (state lives in HCP Terraform)
+.terraform/
+*.tfplan
+tfplan
+plan_output.txt
+
+# Crash logs
+crash.log
+crash.*.log

@@ -1,0 +1,203 @@
+name: Auth0 Terraform
+run-name: "Auth0 Terraform — ${{ github.event_name == 'workflow_dispatch' && format('{0} · {1}', inputs.action, inputs.environment) || format('plan on PR #{0}', github.event.pull_request.number) }}"
+
+on:
+  pull_request:
+    paths:
+      - 'infra/auth0/**'
+      - '.github/workflows/auth0-terraform.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      action:
+        description: 'Terraform action'
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+
+# State + locking live in HCP Terraform (Local execution), reached with a
+# TF_API_TOKEN. The Auth0 provider uses its own credentials (env vars below).
+permissions:
+  contents: read
+
+env:
+  # Keep in sync with infra/.terraform-version.
+  TF_VERSION: '1.15.8'
+
+jobs:
+  # Plan on PR for all environments
+  plan-on-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: auth0-plan-${{ github.ref }}-${{ matrix.environment }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [staging, production]
+    environment: auth0-${{ matrix.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        working-directory: infra/auth0/environments/${{ matrix.environment }}
+        run: terraform init -input=false
+
+      - name: Terraform Format Check
+        working-directory: infra/auth0
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        working-directory: infra/auth0/environments/${{ matrix.environment }}
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: infra/auth0/environments/${{ matrix.environment }}
+        run: terraform plan -input=false -no-color 2>&1 | tee plan_output.txt
+        env:
+          AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          AUTH0_CLIENT_ID: ${{ secrets.TF_AUTH0_CLIENT_ID }}
+          AUTH0_CLIENT_SECRET: ${{ secrets.TF_AUTH0_CLIENT_SECRET }}
+
+      - name: Comment Plan on PR
+        # Post even when the plan fails so the error is visible on the PR.
+        if: success() || failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const planPath = 'infra/auth0/environments/${{ matrix.environment }}/plan_output.txt';
+            const plan = fs.existsSync(planPath)
+              ? fs.readFileSync(planPath, 'utf8')
+              : 'terraform plan produced no output (init, fmt, or validate failed - see the job log).';
+
+            const marker = `<!-- terraform-plan:auth0-${{ matrix.environment }} -->`;
+            const body = `${marker}\n### Terraform Plan: \`auth0/${{ matrix.environment }}\`\n\`\`\`\n${plan.substring(0, 60000)}\n\`\`\``;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            }
+
+  # Manual apply for a specific environment
+  apply:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    concurrency:
+      group: auth0-apply-${{ github.event.inputs.environment }}
+      cancel-in-progress: false
+    environment: auth0-${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        working-directory: infra/auth0/environments/${{ github.event.inputs.environment }}
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        working-directory: infra/auth0/environments/${{ github.event.inputs.environment }}
+        run: terraform plan -input=false -out=tfplan
+        env:
+          AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          AUTH0_CLIENT_ID: ${{ secrets.TF_AUTH0_CLIENT_ID }}
+          AUTH0_CLIENT_SECRET: ${{ secrets.TF_AUTH0_CLIENT_SECRET }}
+
+      - name: Terraform Apply
+        working-directory: infra/auth0/environments/${{ github.event.inputs.environment }}
+        run: terraform apply -input=false tfplan
+        env:
+          AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          AUTH0_CLIENT_ID: ${{ secrets.TF_AUTH0_CLIENT_ID }}
+          AUTH0_CLIENT_SECRET: ${{ secrets.TF_AUTH0_CLIENT_SECRET }}
+
+  # Manual plan for a specific environment
+  plan:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    concurrency:
+      group: auth0-plan-${{ github.event.inputs.environment }}
+      cancel-in-progress: true
+    environment: auth0-${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        working-directory: infra/auth0/environments/${{ github.event.inputs.environment }}
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        working-directory: infra/auth0/environments/${{ github.event.inputs.environment }}
+        run: terraform plan -input=false
+        env:
+          AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          AUTH0_CLIENT_ID: ${{ secrets.TF_AUTH0_CLIENT_ID }}
+          AUTH0_CLIENT_SECRET: ${{ secrets.TF_AUTH0_CLIENT_SECRET }}

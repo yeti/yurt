@@ -12,7 +12,19 @@
     // generated/build dirs its list misses: the graphql-codegen output dir is
     // literally named "gen" (packages/react-yoga/src/graphql/gen), and Vite's
     // SSR build dir is dist-ssr.
-    "includes": ["!!**/gen", "!!**/dist-ssr", "!!**/mockServiceWorker.js"]
+    // packages/infra is the Terraform infra template copied verbatim into
+    // generated repos (its .js is an Auth0 Action body carrying substitution
+    // tokens) — keep Biome's hands off it. This config is itself copied into
+    // generated repos, where the template lands at infra/ instead, so both
+    // paths are excluded (each is inert in the repo where it doesn't match;
+    // knip.json mirrors the same pair).
+    "includes": [
+      "!!**/gen",
+      "!!**/dist-ssr",
+      "!!**/mockServiceWorker.js",
+      "!!packages/infra",
+      "!!infra"
+    ]
   },
   "overrides": [
     {
