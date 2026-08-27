@@ -3,14 +3,22 @@ import path from "node:path";
 import chalk from "chalk";
 import { prompt } from "enquirer";
 import fse from "fs-extra";
+import {
+  buildSubstitutions,
+  substituteInTree,
+  type TerraformSubstitutionInputs,
+  validateTerraformInputs,
+} from "./substitute";
 import untildify from "./utils";
 
 const REACT = "react";
 const REACT_YOGA = "react-yoga";
 const BACKEND = "backend";
+const INFRA = "infra";
 
 const TEMPLATES = {
   [BACKEND]: "backend",
+  [INFRA]: "infra",
   [REACT]: "react",
   [REACT_YOGA]: "react-yoga",
 };
@@ -60,12 +68,57 @@ interface PromptInputs {
   repoName: string;
 }
 
+type TerraformInputs = Pick<
+  TerraformSubstitutionInputs,
+  "githubOwner" | "hcpOrgName"
+>;
+
+const promptForTerraform = async (): Promise<TerraformInputs | undefined> => {
+  const { includeTerraform } = await prompt<{ includeTerraform: boolean }>({
+    type: "confirm",
+    name: "includeTerraform",
+    message:
+      "Include Terraform infra for Render + Auth0? (HCP Terraform state backend)",
+    initial: false,
+  });
+
+  if (!includeTerraform) {
+    return;
+  }
+
+  return await prompt<TerraformInputs>([
+    {
+      type: "input",
+      name: "hcpOrgName",
+      message: "HCP Terraform organization name?",
+      initial: "yeti-co",
+      required: true,
+    },
+    {
+      type: "input",
+      name: "githubOwner",
+      message: "GitHub owner/org for this repo?",
+      initial: "yeti",
+      required: true,
+    },
+  ]);
+};
+
 const main = async () => {
   const response: PromptInputs = await prompt(prompts);
 
-  const startTime = performance.now();
-
   const { repoName, readmeTitle, repoLocation, appType } = response;
+
+  const terraform =
+    appType === REACT_YOGA ? await promptForTerraform() : undefined;
+
+  // Fail on values that would break the generated Terraform/envrc files
+  // before anything is written to disk.
+  if (terraform) {
+    validateTerraformInputs({ ...terraform, readmeTitle, repoName });
+  }
+
+  const startTime = performance.now();
 
   const repoLocationAbsolutePath = untildify(repoLocation);
   const repoAbsolutePath = `${repoLocationAbsolutePath}/${repoName}`;
@@ -104,6 +157,10 @@ const main = async () => {
     stdio: "pipe",
   });
 
+  const deploymentsIntro = terraform
+    ? "We use Render to handle deployments, provisioned via Terraform (HCP Terraform state backend). See [`infra/README.md`](infra/README.md) for the full runbook — start with Phase 1 (accounts and bootstrap) before anything can deploy."
+    : "We use Render to handle deployments.";
+
   // Create root readme
   await fse.appendFile(
     `${repoAbsolutePath}/README.md`,
@@ -136,7 +193,7 @@ pnpm install
 
 ## Deployments
 
-We use Render to handle deployments.
+${deploymentsIntro}
 
 ### Staging Deploy
 
@@ -160,6 +217,13 @@ Production deploys are started automatically when a commit is merged into the \`
     case REACT_YOGA: {
       createReactYogaApp(repoAbsolutePath);
       createGraphQLServer(repoAbsolutePath);
+      if (terraform) {
+        console.log(chalk.blue("🏗️  Adding Terraform infra (Render + Auth0) 🏗️"));
+        createInfra(
+          repoAbsolutePath,
+          buildSubstitutions({ ...terraform, readmeTitle, repoName })
+        );
+      }
       break;
     }
     default: {
@@ -209,6 +273,19 @@ Production deploys are started automatically when a commit is merged into the \`
     )
   );
 
+  if (terraform) {
+    console.log(
+      chalk.cyan(`
+Next steps (Terraform infra):
+  1. Read ${repoName}/infra/README.md — Phase 1 bootstrap: Render account +
+     API key, HCP Terraform org "${terraform.hcpOrgName}" + 5 workspaces,
+     two Auth0 tenants + "Terraform IaC" M2M apps, GitHub Environments + secrets.
+  2. Push this repo to https://github.com/${terraform.githubOwner}/${repoName}
+     so Render and CI can see it.
+  3. Follow Phase 3 in the runbook to apply (render/project first).`)
+    );
+  }
+
   process.exit(0);
 };
 
@@ -217,6 +294,56 @@ main().catch((error) => {
 
   process.exit(1);
 });
+
+// Local-only artifacts a yurt maintainer may have created while testing the
+// template (all gitignored there, but still on disk) — never ship them.
+const excludedInfraFiles = [
+  ".terraform",
+  ".terraform.tfstate.lock.info",
+  ".envrc",
+  "terraform.tfstate",
+  "terraform.tfstate.backup",
+  "plan_output.txt",
+  ".DS_Store",
+];
+
+const infraCopyFilter = (src: string): boolean => {
+  const basename = path.basename(src);
+  // Exact-match basenames so .envrc is excluded but .envrc.example survives,
+  // and .terraform/ is excluded but .terraform-version and lock files survive.
+  return !(
+    excludedInfraFiles.includes(basename) || basename.endsWith(".tfplan")
+  );
+};
+
+const createInfra = (
+  repoAbsolutePath: string,
+  tokens: ReturnType<typeof buildSubstitutions>
+) => {
+  const templateRoot = path.resolve(__dirname, "../../", TEMPLATES[INFRA]);
+
+  // The template root nests an infra/ dir (hence packages/infra/infra) so its
+  // contents mirror their destination path in the generated repo, while
+  // workflows/ can sit alongside it for its own destination below.
+  fse.cpSync(path.join(templateRoot, "infra"), `${repoAbsolutePath}/infra`, {
+    dereference: true,
+    filter: infraCopyFilter,
+    recursive: true,
+  });
+
+  // The workflows live outside a .github/ path in the template so they never
+  // run in the yurt repo itself; the generated repo gets them in place.
+  fse.cpSync(
+    path.join(templateRoot, "workflows"),
+    `${repoAbsolutePath}/.github/workflows`,
+    { dereference: true, filter: infraCopyFilter, recursive: true }
+  );
+
+  // Covers everything this function wrote: .github/workflows includes ci.yml
+  // from the root copy, which is token-free and left untouched.
+  substituteInTree(`${repoAbsolutePath}/infra`, tokens);
+  substituteInTree(`${repoAbsolutePath}/.github/workflows`, tokens);
+};
 
 const createReactYogaApp = (repoAbsolutePath: string) => {
   const excludedFrontendDirectories = ["node_modules"];
