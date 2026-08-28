@@ -77,6 +77,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: infra/auth0/environments/${{ matrix.environment }}
+        shell: bash
         run: terraform plan -input=false -no-color 2>&1 | tee plan_output.txt
         env:
           AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}

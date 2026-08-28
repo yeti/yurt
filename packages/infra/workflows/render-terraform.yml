@@ -84,6 +84,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: ${{ matrix.dir }}
+        shell: bash
         run: terraform plan -input=false -no-color 2>&1 | tee plan_output.txt
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
