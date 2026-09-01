@@ -18,3 +18,9 @@ The following application types are currently supported:
 ### React/Vite App
 
 ### React/Vite App + Node Yoga GraphQL Server
+
+For this app type, the CLI also offers optional **Terraform infrastructure for
+Render + Auth0** (state in HCP Terraform). Answering yes adds an `infra/`
+directory (from the `packages/infra` template, with project-specific values
+substituted), two Terraform GitHub Actions workflows, and a first-time-setup
+runbook at `infra/README.md` in the generated repo.

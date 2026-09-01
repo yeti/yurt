@@ -1,0 +1,15 @@
+# Copy to .envrc and run `direnv allow` from the infra/ directory.
+# direnv loads this whenever you cd into any infra/ subdirectory.
+# Secrets are pulled from 1Password at shell load time — nothing is written to disk.
+# Requires: `op signin` first.
+
+# Render provider credentials — account-level, shared across all Render environments.
+export RENDER_API_KEY="$(op read 'op://__YURT_PROJECT_NAME__/Render Terraform API Key/credential')"
+export RENDER_OWNER_ID="$(op read 'op://__YURT_PROJECT_NAME__/Render Terraform Owner ID/credential')"
+
+# HCP Terraform (state backend) auth comes from `terraform login`, which writes
+# ~/.terraform.d/credentials.tfrc.json — NOT from this file. No AWS keys needed:
+# state lives in HCP Terraform, not S3.
+#
+# Auth0 provider credentials are per-tenant and live in each Auth0 environment
+# directory's own .envrc — see infra/auth0/environments/<env>/.envrc.example.

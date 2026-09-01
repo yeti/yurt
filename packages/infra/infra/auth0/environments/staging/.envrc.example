@@ -1,0 +1,10 @@
+# Auth0 Terraform IaC credentials for the staging tenant.
+# Loaded by direnv on `cd`; secrets are pulled from 1Password at shell load and
+# never written to disk. Mirrors infra/.envrc — see infra/README.md for the
+# one-time direnv + 1Password CLI setup. Run `direnv allow` here once.
+# Copy to .envrc (which is gitignored).
+
+export AUTH0_DOMAIN="__YURT_PROJECT_SLUG__-staging.us.auth0.com"
+# 1Password "API Credential" item: username = client_id, credential = client_secret.
+export AUTH0_CLIENT_ID="$(op read 'op://__YURT_PROJECT_NAME__/Auth0 Terraform IaC staging/username')"
+export AUTH0_CLIENT_SECRET="$(op read 'op://__YURT_PROJECT_NAME__/Auth0 Terraform IaC staging/credential')"
