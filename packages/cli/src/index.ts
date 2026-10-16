@@ -166,7 +166,7 @@ const main = async () => {
     `${repoAbsolutePath}/README.md`,
     `# ${readmeTitle}
 
-> A monorepo managed through [lerna](https://github.com/lerna/lerna) that houses packages related to the ${readmeTitle} project.
+> A monorepo managed through [pnpm workspaces](https://pnpm.io/workspaces) that houses packages related to the ${readmeTitle} project.
 
 ## Getting Started
 
